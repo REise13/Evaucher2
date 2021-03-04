@@ -871,7 +871,7 @@ def get_data_for_report():
     diagnos = cursor.fetchall()
     cursor.execute('SELECT id, title as city FROM city')
     cities = cursor.fetchall()
-    cursor.execute('SELECT id, ingridient FROM drug')
+    cursor.execute('SELECT id, drug FROM drug')
     drugs = cursor.fetchall()
     cursor.execute('SELECT id, title as status from recipe_status')
     rec_status = cursor.fetchall()
