@@ -1,0 +1,35 @@
+/* Стили для страницы авторизации login.html */
+
+:root{
+    --main-color: #60a6e7;
+    --active-color:  #3f99ec;
+    --input-padding-x: 1.5rem;
+    --input-padding-y: 0.75rem;
+}
+
+.login,
+.image {
+  min-height: 100vh;
+}
+
+.bg-image {
+  /* background-image: linear-gradient(30deg, var(--main-color), var(--active-color)); */
+  background: url("../images/DBzffv2je-U.jpg");
+  background-repeat: no-repeat, repeat;
+  background-color: #90bed8;
+
+}
+
+
+@media all and (-ms-high-contrast: none),
+(-ms-high-contrast: active) {
+  .form-group>label {
+    display: none;
+  }
+  .form-group input:-ms-input-placeholder {
+    color: rgb(94, 93, 93);
+  }
+}
+
+
+

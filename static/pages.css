@@ -1,0 +1,143 @@
+/*стили для сайдбара меню приложения templt_for_pages.html*/
+
+:root{
+    --main-color: #79b1e6;
+    --active-color:  #3f98ecd3;
+    --table-color: #26a9f5e7;
+}
+
+.vertical-nav {
+    min-width: 17rem;
+    width: 17rem;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s;
+  }
+
+  /*.page-content {*/
+  /*  width: calc(100% - 17rem);*/
+  /*  margin-left: 17rem;*/
+  /*  transition: all 0.4s;*/
+  /*}*/
+
+  body {
+    background: #7cb5e4;
+    background: -webkit-linear-gradient(to right, var(--main-color), var(--active-color));
+    background: linear-gradient(to right,  var(--main-color), var(--active-color));
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .separator {
+    margin: 3rem 0;
+    border-bottom: 1px dashed #fff;
+  }
+
+  .text-uppercase {
+    letter-spacing: 0.1em;
+  }
+
+  .text-gray {
+    color: #aaa;
+  }
+
+  /* .registr-form{
+
+  } */
+
+  button.btn-settings {
+    margin: 25px;
+    padding: 20px 30px;
+    font-size: 1.2em;
+    background-color: var(--active-color);
+    color: white;
+  }
+  button.btn-settings:active {
+    color: var(--active-color);
+  }
+  .modal {
+      overflow: hidden;
+  }
+  .modal-dialog {
+      margin-right: 0;
+      margin-left: 0;
+  }
+  .modal-header {
+    height:30px;
+    padding: 20px;
+    background-color: var(--active-color);
+    color:white;
+  }
+  .modal-title {
+    margin-top:-10px;
+    font-size:16px;
+  }
+  .modal-header .close {
+    margin-top:-10px;
+    color:#fff;
+  }
+  .modal-body {
+    color:#888;
+    padding: 5px 35px 20px;
+  }
+  .modal-body h3 {
+    text-align: center;
+  }
+  .modal-body p {
+    padding-top:10px;
+    font-size: 1.1em;
+  }
+
+
+  .search-form .form-control:focus {
+    box-shadow: none;
+  }
+
+  .search-form .form-control-underlined {
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-radius: 0;
+    padding-left: 0;
+  }
+
+  .search-form .form-control::placeholder {
+    font-size: 0.95rem;
+    color: #aaa;
+    font-style: italic;
+  }
+
+  .table thead th{
+    background-color:var(--table-color);
+  }
+
+  .table-row{
+      cursor: pointer;
+  }
+
+  .rec-row{
+      cursor: pointer;
+  }
+
+  .table-row:hover{
+    background-color: var(--active-color);
+  }
+
+  .table-wrapper-scroll-y{
+    display: block;
+  }
+
+  .table-scrollbar{
+    position: relative;
+    height: 200px;
+    overflow: auto;
+  }
+
+  .checkboxes{
+      border:2px solid #ccc;
+      width:300px;
+      height: 100px;
+      overflow-y: scroll;
+  }
