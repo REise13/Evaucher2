@@ -67,17 +67,37 @@
                                         <td>{{ record['fio'] }} </td>
                                         <td>{{ record['gender'] }}</td>
                                         <td>{{ record['datebirth'] }}</td>
-                                        <td>{{ record['inn'] }}</td>
-                                        <td>{{ record['parentinn'] }}</td>
+                                        {% if record['inn'] == None %}
+                                            <td>―</td>
+                                        {% else %}
+                                            <td>{{ record['inn'] }}</td>
+                                        {% endif %}
+                                        {% if record['parentinn'] == None %}
+                                            <td>―</td>
+                                        {% else %}
+                                            <td>{{ record['parentinn'] }}</td>
+                                        {% endif %}
                                         <td>{{ record['age'] }}</td>
                                         <td>{{ record['rec_cat'] }}</td>
                                         <td>{{ record['diagnos'] }}</td>
-                                        {% if record['price'] == 5240 %}
-                                        <td>Набор: нормальные роды</td>
+                                        {% if record['category_id'] == 3 %}
+                                            <td>Набор: Нормальные роды</td>
+                                        {% elif record['category_id'] == 4 %}
+                                            <td>Набор: Кесарево сечение</td>
+                                        {% elif record['category_id'] == 5 %}
+                                            <td>Набор: Взрослый хирургический</td>
+                                        {% elif record['category_id'] == 7 %}
+                                            <td>Набор: Детский хирургический</td>
+                                        {% elif record['category_id'] == 10 %}
+                                            <td>Набор: Малый хирургический</td>
                                         {% else %}
-                                        <td>{{ record['list_drugs'] }}</td>
+                                            <td>{{ record['list_drugs'] }}</td>
                                         {% endif %}
-                                        <td>{{ record['endDate'] }}</td>
+                                        {% if record['endDate'] == None %}
+                                            <td>―</td>
+                                        {% else %}
+                                            <td>{{ record['endDate'] }}</td>
+                                        {% endif %}
                                         <td>{{ record['city'] }}</td>
                                         <td>{{ record['price'] }}</td>
                                         <td>{{ record['visit'] }}</td>
