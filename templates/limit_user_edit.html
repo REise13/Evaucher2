@@ -1,0 +1,74 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Изменить лимит {% endblock %}
+{% block header %} {% endblock %}
+
+{% block content %}
+
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Изменить лимит</h2>
+    <div class="separator"></div>
+    <div class="row">
+        <div class="col-lg-7 mx-auto">
+            <div class="bg-white rounded-lg shadow-sm p-5">
+                <form role="form" action="{{ url_for('edit_limit', limitID=limituser['id']) }}" method="POST">
+                    <!--flash-message-->
+                        {% for message in get_flashed_messages(with_categories=True) %}
+                            <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                <p>{{ message[1] }}</p>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+						{% endfor %}
+					<!--end-->
+					<div class="form-group">
+					    <dl class="row">
+                            <dt class="col-sm-3">Категория рецепта: </dt>
+                            <dd class="col-sm-9">{{ limituser['rec_category'] }} </dd>
+                            <hr>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">ФИО врача: </dt>
+                            <dd class="col-sm-9">{{ limituser['sName'] }} {{ limituser['fName'] }} {{ limituser['patr'] }}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Должность:</dt>
+                            <dd class="col-sm-9">{{ limituser['user_post'] }}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Всего выписано: </dt>
+                            <dd class="col-sm-9">{{ limituser['indicator_sum'] }}</dd>
+                            <hr>
+                        </dl><hr>
+					</div>
+					<div class="form-group">
+                        <label for="indicator_limit">Лимит</label>
+                        <input type="text" name="indicator_limit" id="indicator_limit"
+                            value="{{ request.form['indicator_limit'] or limituser['indicator_limit'] }}" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <dl class="row">
+                            <dt class="col-sm-3">Выписано: </dt>
+                            <dd class="col-sm-9">{{ limituser['indicator_used'] }}</dd>
+                            <hr>
+                        </dl>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Обновить индикатор" class="btn btn-primary">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

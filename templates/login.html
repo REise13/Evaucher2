@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Е-ВАУЧЕР</title>
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		<!-- JS scripts -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.js"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row no-gutter">
+				<!-- Изображение на форме -->
+				<div class="bg-image col-md-6 d-none d-md-flex "></div>
+				<!-- Логин форма-->
+				<div class="col-md-6 bg-light">
+					<div class="login d-flex align-items-center py-5">
+						<div class="container">
+							<div class="row">
+								<div class="col-lg-10 col-xl-7 mx-auto">
+									<h3 class="display-4">Е-ВАУЧЕР</h3>
+									<p class="text-muted mb-4">Для авторизации введите свой логин и пароль.</p>
+									<!--flash-message-->
+                                        {% for message in get_flashed_messages(with_categories=True) %}
+                                            <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                                <p>{{ message[1] }}</p>
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+            							{% endfor %}
+        						    <!--end-->
+									<form action="{{ url_for('login') }}" method="POST">
+										<div class="form-group mb-3">
+											<input name="login" id="login" type="text" placeholder="Логин" required  class="form-control rounded-pill
+											border-0 shadow-sm px-4">
+										</div>
+										<div class="form-group mb-3">
+											<input name="password" id="password" type="password" placeholder="Пароль" required class="form-control rounded-pill
+											border-0 shadow-sm px-4 text-primary">
+										</div>
+										<div class="custom-control custom-checkbox mb-3">
+											<input id="customCheck1" type="checkbox" checked class="custom-control-input">
+											<label for="customCheck1" class="custom-control-label">Запомнить пароль</label>
+										</div>
+										<button type="submit" class="btn btn-primary btn-block text-uppercase
+										mb-2 rounded-pill shadow-sm">Войти</button>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+
+
+</html>

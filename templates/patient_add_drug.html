@@ -1,0 +1,76 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Препарат {% endblock %}
+
+{% block content %}
+
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Добавить препарат</h2>
+    <div class="separator"></div>
+    <div class="drug-form">
+        <div class="row">
+            <div class="container w-50">
+                <div class="registr-form bg-white p-5 rounded shadow-sm">
+                    <form role="form" action="{{ url_for('add_drug') }}" method="POST">
+                        <!-- flash сообщения -->
+                        {% for message in get_flashed_messages(with_categories=True) %}
+                            <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                <p>{{ message[1] }}</p>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+						{% endfor %}
+                        <!-- end -->
+                        <div class="form-group">
+                            <label for="ingridient">Ингредиент</label>
+                            <input type="text" name="ingridient" id="ingridient" placeholder="" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="drug_title">Название</label>
+                            <input type="text" name="drug_title" id="drug_title" placeholder="" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Страна</label>
+                            <input type="text" name="drug_country" id="drug_country" placeholder="" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="manufacturer">Производитель</label>
+                            <input type="text" id="manufacturer" name="manufacturer" placeholder="" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="drugCat">Категория</label>
+                            <div class="data_select">
+                                <select  name="drugCat" id="drugCat" placeholder="Не выбрано" required class="selectpicker">
+                                    {% for cat in drugCat %}
+                                        <option value="{{ cat['id'] }}">{{ cat['drcategory'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Цена</label>
+                            <input type="text" name="price" id="price" placeholder="" required class="form-control">
+                        </div>
+                        <input type="submit" value="Добавить">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        $(document).ready(function() {
+            $('.selectpicker').selectpicker();
+        });
+    </script>
+
+{% endblock %}

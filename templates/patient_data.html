@@ -1,0 +1,162 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Пациент {% endblock %}
+{% block header %} Данные о пациенте {% endblock %}
+
+{% block content %}
+<style>
+    .rec-row{
+        cursor: pointer;
+    }
+
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<!-- Форма Карточка пациента -->
+    <div class="page-content p-5" id="content">
+        <h2 class="display-4 text-white">О пациенте</h2>
+        <div class="separator"></div>
+        <div class="row">
+            <div class="container w-100">
+                <div class="bg-white rounded-lg shadow-sm p-5">
+                    <!-- Информация -->
+                    <form role="form" action="{{ url_for('patient_data', pat_id=patient['id']) }}" method="POST">
+                        <!--flash-message-->
+                            {% for message in get_flashed_messages(with_categories=True) %}
+                                <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                    <p>{{ message[1] }}</p>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+							{% endfor %}
+						<!--end-->
+                        <h6 class="text-info font-weight-bolder">Данные о пациенте</h6> <hr>
+                        <dl class="row">
+                            <dt class="col-sm-3">ФИО: </dt>
+                            <dd class="col-sm-9">{{ patient['sName'] }} {{ patient['fName'] }} {{ patient['patr'] }}</dd>
+                            <hr>
+                        </dl>
+                        {% if patient['age'] != None %}
+                            <dl class="row">
+                                <dt class="col-sm-3">Возраст: </dt>
+                                <dd class="col-sm-9">{{ patient['age'] }}</dd>
+                            </dl>
+                        {% else %}
+                            <dl class="row">
+                                <dt class="col-sm-3">Возраст: </dt>
+                                <dd class="col-sm-9">Не указан.</dd>
+                            </dl>
+                        {% endif %}
+
+                        <dl class="row">
+                            <dt class="col-sm-3">Дата рождения:</dt>
+                            <dd class="col-sm-9">{{ patient['datebirth'] }}</dd>
+                        </dl>
+                        <hr>
+                        <dl class="row">
+                            <dt class="col-sm-3">Номер телефона:</dt>
+                            <dd class="col-sm-9">{{ patient['phone'] }}</dd>
+                        </dl>
+                        <dl class="row">
+                            {% if patient['passport'] == None and patient['inn'] == None and patient['parentinn'] == None %}
+                                <dt class="col-sm-3">Идентификационные данные отсутствуют. </dt>
+                                <dd class="col-sm-9"><a href="{{ url_for('add_identific_data', pat_id=patient['id']) }}" class="btn btn-outline-primary shadow-sm">Добавить идентификационные данные</a></dd>
+                                {% else %}
+                                    {% if patient['PlaceActualResidence'] != None %}
+                                        <dt class="col-sm-3">Адрес: </dt>
+                                        <dd class="col-sm-9">{{ patient['PlaceActualResidence'] }}</dd>
+                                    {% else %}
+                                        <dt class="col-sm-3">Адрес: </dt>
+                                        <dd class="col-sm-9"> Адресные данные не указаны.</dd>
+                                    {% endif %}
+
+                                    {% if patient['inn'] !=  None %}
+                                        <dt class="col-sm-3">ИНН: </dt>
+                                        <dd class="col-sm-9">{{ patient['inn'] }}</dd>
+                                    {% else %}
+                                        <dt class="col-sm-3">ИНН: </dt>
+                                        <dd class="col-sm-9"> Данные ИНН отсутствуют. </dd>
+                                    {% endif %}
+
+                                    {% if patient['passport'] != None %}
+                                        <dt class="col-sm-3">Паспорт: </dt>
+                                        <dd class="col-sm-9">{{ patient['passport'] }}</dd>
+                                    {% else %}
+                                        <dt class="col-sm-3">Паспорт: </dt>
+                                        <dd class="col-sm-9">Данные паспорта отсутствуют.</dt>
+                                    {% endif %}
+
+                                    {% if patient['parentinn'] != None %}
+                                        <dt class="col-sm-3">ИНН родителя: </dt>
+                                        <dd class="col-sm-9">{{ patient['parentinn'] }}</dd>
+                                    {% endif %}
+                            {% endif %}
+                        </dl> <hr>
+                        <p class="text-info h5 font-weight-bold">Выписанные рецепты: </p>
+                        <div class="">
+                            <table class="table table-bordered table-hover h-75">
+                                <thead class="thead text-white text-center text-uppercase">
+
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Код рецепта</th>
+                                        <th>Категория</th>
+                                        <th>Диагноз</th>
+                                        <th>Дата выписки</th>
+                                        <th>Стоимость</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                {% for recipe in recipes %}
+                                    <tbody>
+                                        <tr class="rec-row" data-href="{{ url_for('recipe_info', recID = recipe['id']) }}"></tr>
+                                            <td><a href="{{ url_for('recipe_info', recID=recipe['id']) }}" class="btn btn-outline-primary shadow-sm">Подробнее</a></td>
+                                            <td>{{ recipe['id'] }}</td>
+                                            <td>{{ recipe['rec_category'] }}</td>
+                                            <td>{{ recipe['diagnos'] }}</td>
+                                            <td>{{ recipe['createDate'] }}</td>
+                                            <td>{{ recipe['rec_price'] }}</td>
+                                            <td>{{ recipe['rec_status'] }}</td>
+                                        </tr>
+                                    </tbody>
+                                {% endfor %}
+                            </table>
+
+                        </div> <br>
+
+                        <div class="form-group">
+                            {% if userroleid == 3 or userroleid == 1 or userroleid == 7 or userroleid == 2  or userroleid == 5 %}
+                            <a href="{{ url_for('patdata_edit', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Изменить данные</a>
+                            {% endif %}
+                            {% if userroleid == 1 or userroleid == 7 or userroleid == 3 %}
+                                <a href="{{ url_for('add', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Выписать рецепт</a>
+                            {% endif %}
+                            {% if userroleid == 777 %}
+                                <a href="{{ url_for('add', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Тест</a>
+                            {% endif %}
+                        </div>
+                        <script>
+                            $(document).ready(function($){
+                                $(".rec-row").click(function(){
+                                    window.document.location = $(this).data("href");
+                                });
+                            });
+                        </script>
+                    </form>
+                <!-- end -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--JS скрипт для ссылок в таблице -->
+
+<!--end-->
+
+
+{% endblock %}

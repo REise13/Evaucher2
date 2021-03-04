@@ -1,0 +1,84 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Поиск {% endblock %}
+{% block header %} Поиск рецепта {% endblock %}
+
+{% block content %}
+
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<!-- Форма поиска -->
+    <div class="page-content p-5" id="content">
+        <h2 class="display-4 text-white">Поиск по коду рецепта</h2>
+        <div class="separator"></div>
+        <div class="search-form bg-white p-5 rounded my-5 shadow-sm">
+            <form role="form" action="{{ url_for('search_recipe') }}" method="POST">
+                <div class="row mb-3">
+                    <div class="container">
+                        <input type="text" class="form-control mb-4" id="rec" name="rec"
+                          placeholder="Введите код рецепта для поиска"><hr>
+                          {% for message in get_flashed_messages(with_categories=True) %}
+                          <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                              <p>{{ message[1] }}</p>
+                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </div>
+                      {% endfor %}
+
+                        <div class="table-wrapper-scroll-y table-scrollbar">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Код рецепта</th>
+                                        <th>Имя пациента</th>
+                                        <th>Фамилия пациента</th>
+                                        <th>Отчество пациента</th>
+
+                                    </tr>
+                                </thead>
+                            <!-- Отображение данных на странице из patientreg() -->
+                                {% for recipe in recipes %}
+                                    <tbody id="tableSearch">
+                                        <tr class="table-row" data-href="{{ url_for( 'recipe_info', recID=recipe['id']) }}">
+                                            <td>{{ recipe['id'] }}</td>
+                                            <td>{{ recipe['sName'] }}</td>
+                                            <td>{{ recipe['fName'] }}</td>
+                                            <td>{{ recipe['patr'] }}</td>
+                                        </tr>
+                                    </tbody>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            $(document).ready(function(){
+
+                $("#rec").on("keyup", function() {
+                    var value = $(this).val().toLowerCase();
+                    $("#tableSearch tr").filter(function() {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
+        </script>
+
+        <!-- JS скрипт для ссылок в таблице -->
+        <script>
+            $(document).ready(function($){
+                $(".table-row").click(function(){
+                    window.document.location = $(this).data("href");
+                });
+            });
+        </script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Индикаторы {% endblock %}
+{% block header %} Индикаторы {% endblock %}
+
+{% block content %}
+
+<style>
+    .table-scrollbar{
+        position: relative;
+        height: 550px;
+        overflow: auto;
+    }
+
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+
+</style>
+
+<!-- Форма поиска -->
+    <div class="page-content p-5" id="content">
+        <h2 class="display-4 text-white">Индикаторы</h2>
+        <div class="separator"></div>
+        <div class="bg-white p-5 rounded my-5 shadow-sm">
+            <form role="form" action="{{ url_for('limits') }}" method="POST">
+                <!--flash-message-->
+                    {% for message in get_flashed_messages(with_categories=True) %}
+                        <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                            <p>{{ message[1] }}</p>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+					{% endfor %}
+				<!--end-->
+                <div class="row mb-3">
+                    <div class="container">
+                        <div class="table-scrollbar">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Категория</th>
+                                        <th>Имя</th>
+                                        <th>Фамилия</th>
+                                        <th>Отчество</th>
+                                        <th>Должность</th>
+                                        <th>Номер телефона</th>
+                                        <th>Лимит</th>
+                                        <th>Использовано</th>
+                                        <th>Всего выписано</th>
+                                    </tr>
+                                </thead>
+                                    <tbody>
+                                        {% for limituser in limits %}
+                                        {% if limituser['indicator_used'] == limituser['indicator_limit'] %}
+                                            <tr class="table-row" bgcolor="#F55F7C" color="white" data-href="{{ url_for('edit_limit', limitID = limituser['id']) }}">
+                                                <td>{{ limituser['rec_category'] }}</td>
+                                                <td>{{ limituser['sName'] }}</td>
+                                                <td>{{ limituser['fName'] }}</td>
+                                                <td>{{ limituser['patr'] }}</td>
+                                                <td>{{ limituser['user_post'] }}</td>
+                                                <td>{{ limituser['phone'] }}</td>
+                                                <td>{{ limituser['indicator_limit'] }}</td>
+                                                <td>{{ limituser['indicator_used'] }}</td>
+                                                <td>{{ limituser['indicator_sum'] }}</td>
+                                            </tr>
+                                        {% else %}
+                                            <tr class="table-row" data-href="{{ url_for('edit_limit', limitID = limituser['id']) }}">
+                                                <td>{{ limituser['rec_category'] }}</td>
+                                                <td>{{ limituser['sName'] }}</td>
+                                                <td>{{ limituser['fName'] }}</td>
+                                                <td>{{ limituser['patr'] }}</td>
+                                                <td>{{ limituser['user_post'] }}</td>
+                                                <td>{{ limituser['phone'] }}</td>
+                                                <td>{{ limituser['indicator_limit'] }}</td>
+                                                <td>{{ limituser['indicator_used'] }}</td>
+                                                <td>{{ limituser['indicator_sum'] }}</td>
+                                            </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- JS скрипт для ссылок в таблице -->
+        <script>
+            $(document).ready(function($){
+                $(".table-row").click(function(){
+                    window.document.location = $(this).data("href");
+                });
+            });
+        </script>
+        <!-- end -->
+
+{% endblock %}

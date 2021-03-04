@@ -1,0 +1,133 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Рецепты {% endblock %}
+{% block content %}
+
+<style>
+    .table-scrollbar{
+    position: relative;
+    height: 550px;
+    overflow: auto;
+  }
+
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Информация по рецептам</h2>
+    <div class="separator"></div>
+    <div class="search-form bg-white p-5 rounded my-5 shadow-sm">
+        <!-- Форма данных  о препаратах -->
+        <form role="form" action="{{ url_for('get_data_report') }}" method="POST">
+            <!-- flash сообщения -->
+                {% for message in get_flashed_messages(with_categories=True) %}
+                    <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                        <p>{{ message[1] }}</p>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+				{% endfor %}
+            <!-- end -->
+            <div class="row mb-3">
+                <div class="container-fluid">
+                    <div class="col">
+                        <button class="btn btn-primary shadow-sm" onclick="exportTableToExcel('tblData')">Экспорт в Excel</button>
+                        <div class="table-scrollbar">
+                            <table id="tblData" class="table table-bordered table-hover table-fixed">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Код</th>
+                                        <th>Дата выписки</th>
+                                        <th>Пациент</th>
+                                        <th>Пол</th>
+                                        <th>Дата рождения</th>
+                                        <th>ИНН</th>
+                                        <th>ИНН родителя</th>
+                                        <th>Возраст</th>
+                                        <th>Код рецепта</th>
+                                        <th>Диагноз</th>
+                                        <th>Список препаратов</th>
+                                        <th>Дата выдачи<th>
+                                        <th>Город</th>
+                                        <th>Сумма</th>
+                                        <th>Посещение</th>
+                                    </tr>
+                                </thead>
+                                {% for record in records %}
+                                <tbody>
+
+                                    <tr>
+                                        <td>{{ record['rec_id'] }}</td>
+                                        <td>{{ record['createDate'] }}</td>
+                                        <td>{{ record['fio'] }} </td>
+                                        <td>{{ record['gender'] }}</td>
+                                        <td>{{ record['datebirth'] }}</td>
+                                        <td>{{ record['inn'] }}</td>
+                                        <td>{{ record['parentinn'] }}</td>
+                                        <td>{{ record['age'] }}</td>
+                                        <td>{{ record['rec_cat'] }}</td>
+                                        <td>{{ record['diagnos'] }}</td>
+                                        {% if record['price'] == 5240 %}
+                                        <td>Набор: нормальные роды</td>
+                                        {% else %}
+                                        <td>{{ record['list_drugs'] }}</td>
+                                        {% endif %}
+                                        <td>{{ record['endDate'] }}</td>
+                                        <td>{{ record['city'] }}</td>
+                                        <td>{{ record['price'] }}</td>
+                                        <td>{{ record['visit'] }}</td>
+                                        <td>{{ record['rec_stat'] }}</td>
+                                    </tr>
+
+                                </tbody>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- end -->
+
+<script>
+function exportTableToExcel(tableID, filename = ''){
+    var downloadLink;
+    var dataType = 'application/vnd.ms-excel';
+    var tableSelect = document.getElementById(tableID);
+    var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+    // Specify file name
+    filename = filename?filename+'.xls':'excel_data.xls';
+
+    // Create download link element
+    downloadLink = document.createElement("a");
+
+    document.body.appendChild(downloadLink);
+
+    if(navigator.msSaveOrOpenBlob){
+        var blob = new Blob(['\ufeff', tableHTML], {
+            type: dataType
+        });
+        navigator.msSaveOrOpenBlob( blob, filename);
+    }
+    else{
+        // Create a link to the file
+        downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+
+        // Setting the file name
+        downloadLink.download = filename;
+
+        //triggering the function
+        downloadLink.click();
+    }
+}
+</script>
+
+{% endblock %}

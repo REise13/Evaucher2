@@ -1,0 +1,126 @@
+<!-- Структура шаблона html + шаблон Jinja2 для работы с python
+    (выражения в фигурных скобках) -->
+<!-- Страница поиска данных  о пациенте -->
+
+<!-- Bootstrap-->
+
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Поиск {% endblock %}
+{% block header %} Поиск пациента {% endblock %}
+
+{% block content %}
+
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+
+    .table-scrollbar{
+        position: relative;
+        height: 550px;
+        overflow: auto;
+    }
+</style>
+
+<!-- Форма поиска -->
+    <div class="page-content p-5" id="content">
+        <h2 class="display-4 text-white">Поиск пациента</h2>
+        <div class="separator"></div>
+        <div class="search-form bg-white p-5 rounded my-5 shadow-sm">
+            <form role="form" action="{{ url_for('search_patient') }}" method="POST">
+                <div class="row mb-3">
+                    <div class="container">
+                        <input type="text" class="form-control mb-4" id="sname" name="sname"
+                          placeholder="Введите фамилию пациента для поиска"><hr>
+                          {% for message in get_flashed_messages(with_categories=True) %}
+                          <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                              <p>{{ message[1] }}</p>
+                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                              <a role="button" data-href="{{ url_for('patientreg') }}" class="btn-redirect btn btn-outline-primary
+								mb-2 rounded-pill shadow-sm">Зарегистрировать пациента</button>
+							    </a>
+                          </div>
+                      {% endfor %}
+
+                        <div class="table-scrollbar">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Имя</th>
+                                        <th>Фамилия</th>
+                                        <th>Отчество</th>
+                                        <th>Номер телефона</th>
+                                        <th>Паспорт</th>
+                                        <th>ИНН</th>
+                                        <th>ИНН родителя</th>
+                                    </tr>
+                                </thead>
+                            <!-- Отображение данных на странице из patientreg() -->
+                                {% for patient in patients %}
+                                    <tbody id="tableSearch">
+                                        <tr class="table-row" data-href="{{ url_for('patient_data', pat_id = patient['id']) }}">
+                                            <td>{{ patient['sName'] }}</td>
+                                            <td>{{ patient['fName'] }}</td>
+                                            <td>{{ patient['patr'] }}</td>
+                                            <td>{{ patient['phone'] }}</td>
+                                            {% if patient['passport'] != None %}
+                                                <td>{{ patient['passport'] }}</td>
+                                                {% else %}
+                                                    <td> — </td>
+                                            {% endif %}
+                                            {% if patient['inn'] != None %}
+                                                <td>{{ patient['inn'] }}</td>
+                                                {% else %}
+                                                    <td> — </td>
+                                            {% endif %}
+                                            {% if patient['parentinn'] != None %}
+                                                <td>{{ patient['parentinn'] }}</td>
+                                                {% else %}
+                                                    <td> — </td>
+                                            {% endif %}
+                                        </tr>
+                                    </tbody>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            $(document).ready(function(){
+
+                $("#sname").on("keyup", function() {
+                    var value = $(this).val().toLowerCase();
+                    $("#tableSearch tr").filter(function() {
+                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                    });
+                });
+            });
+        </script>
+
+        <!-- JS скрипт для ссылок в таблице -->
+        <script>
+            $(document).ready(function($){
+                $(".table-row").click(function(){
+                    window.document.location = $(this).data("href");
+                });
+            });
+        </script>
+
+        <script>
+            $(document).ready(function($){
+                $(".btn-redirect").click(function(){
+                    window.document.location = $(this).data("href");
+                });
+            });
+        </script>
+        <!-- end -->
+
+{% endblock %}

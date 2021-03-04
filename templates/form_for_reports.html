@@ -1,0 +1,177 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Отчет по рецептам {% endblock %}
+
+{% block content %}
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Отчет по рецептам</h2>
+    <div class="separator"></div>
+    <div class="reg-form">
+        <!-- Форма регистрации пациента -->
+            <div class="row">
+                <div class="container w-100">
+                    <div class="registr-form bg-white p-5 rounded shadow-sm">
+                        <form role="form" action="{{ url_for('get_report') }}" method="POST">
+                            <!-- flash сообщения -->
+                            {% for message in get_flashed_messages(with_categories=True) %}
+                                <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                    <p>{{ message[1] }}</p>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+							{% endfor %}
+                            <!-- end -->
+                            <div class="form-group">
+                                <label for="datewrite" class="text-uppercase font-weight-bold">Дата выдачи</label>
+                                <div class="row">
+                                	<div class="col-sm-6">
+                                		<div class="form-group">
+                                			<label for="startWD">От</label>
+                                			<input type="datetime-local" value="2021-02-01T00:00:00" step="1"
+                                			    id="startWD" class="form-control" name="startWD">
+                                		</div>
+                                	</div>
+                                	<div class="col-sm-6">
+                                		<div class="form-group">
+                                			<label for="endWD">До</label>
+                                			<input type="datetime-local" value="2021-02-28T23:59:59" step="1"
+                                			    id="endWD" class="form-control" name="endWD">
+                                		</div>
+                                	</div>
+                                </div> <hr>
+                            </div>
+                            <div class="form-group">
+                            <label for="pacient" class="text-uppercase font-weight-bold">Пациент</label>
+                            <div class="form-group">
+                                <label for="gender">Пол</label>
+                                <div class="data_select">
+                                    <select name="gender" id="gender" placeholder="" class="selectpicker form-control">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        {% for g in gender %}
+                                            <option value="{{ g['id'] }}">{{ g['gender'] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                               <label for="age">Возраст</label>
+                                <div class="row">
+                                	<div class="col-sm-6">
+                                		<div class="form-group">
+                                			<label for="age1">От</label>
+                                			<input type="text" name="age1" id="age1" class="form-control">
+                                		</div>
+                                	</div>
+                                	<div class="col-sm-6">
+                                		<div class="form-group">
+                                			<label for="age2">До</label>
+                                			<input type="text" class="form-control" name="age2" id="age2">
+                                		</div>
+                                	</div>
+                                </div> <hr>
+                            </div>
+                            <div class="form-group">
+                                <label for="rec_cat" class="text-uppercase font-weight-bold">Код рецепта</label>
+                                <div class="data_select">
+                                    <select name="rec_cat" id="rec_cat" class="selectpicker form-control">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        {% for cat in rec_cat %}
+                                            <option value="{{ cat['id'] }}">{{ cat['recCat'] }}</option>
+                                        {% endfor %}
+                                    </select> <hr>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="diagnos" class="text-uppercase font-weight-bold">Диагноз</label>
+                                <div class="data_select">
+                                    <select name="diagnos" id="diagnos" class="selectpicker form-control">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        {% for diag in diagnos %}
+                                            <option value="{{ diag['id'] }}">{{ diag['diagnos'] }}</option>
+                                        {% endfor %}
+                                    </select> <hr>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="drugs" class="text-uppercase font-weight-bold">Препарат</label>
+                                <div class="data_select">
+                                    <select name="drugs" id="drugs" placeholder="" class="selectpicker form-control" data-live-search="true">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        {% for drug in drugs %}
+                                            <option value="{{ drug['id'] }}">{{ drug['ingridient'] }}</option>
+                                        {% endfor %}
+                                    </select> <hr>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cities" class="text-uppercase font-weight-bold">Город</label>
+                                <div class="data_select">
+                                    <select name="cities" id="cities" placeholder="" class="selectpicker form-control">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        {% for city in cities %}
+                                            <option value="{{ city['id'] }}">{{ city['city'] }}</option>
+                                        {% endfor %}
+                                    </select><hr>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="rec_status" class="text-uppercase font-weight-bold">Статус рецепта</label>
+                                <div class="data_select">
+                                    <select  name="rec_status" id="rec_status" placeholder="" class="selectpicker">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        {% for stat in rec_status %}
+                                            <option value="{{ stat['id'] }}">{{ stat['status'] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="visit" class="text-uppercase font-weight-bold">Посещение</label>
+                                <div class="data_select">
+                                    <select  name="visit" id="visit" placeholder="" class="selectpicker">
+                                        <option>Выберите</option>
+                                        <option value="0">Все</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="submit" class="btn btn-primary" value="Сформировать отчет">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script>
+        $(document).ready(function() {
+            $('.datetimepicker').datetimepicker({
+                clearButton: true,
+                format: 'yyyy-mm-dd hh:mm:ss'
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Рецепт {% endblock %}
+{% block header %} Данные о рецепте {% endblock %}
+
+{% block content %}
+
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Данные о рецепте</h2>
+    <div class="separator"></div>
+    <div class="row">
+        <div class="col-lg-7 mx-auto">
+            <div class="bg-white rounded-lg shadow-sm p-5">
+                <form role="form" action="{{ url_for('recipe_info', recID = recipeinfo['id']) }}" method="POST">
+                    <!--flash-message-->
+                            {% for message in get_flashed_messages(with_categories=True) %}
+                                <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                    <p>{{ message[1] }}</p>
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+							{% endfor %}
+						<!--end-->
+                   <h6 class="text-info font-weight-bolder">Данные о выписанном рецепте</h6> <hr>
+                        <dl class="row">
+                            <dt class="col-sm-3">ФИО пациента: </dt>
+                            <dd class="col-sm-9">{{recipeinfo['pat_sname']}} {{recipeinfo['pat_fname']}} {{recipeinfo['pat_patr']}}</dd>
+                            <hr>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Диагноз</dt>
+                            <dd class="col-sm-9">{{recipeinfo['diagnos']}}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Категория</dt>
+                            <dd class="col-sm-9">{{recipeinfo['rec_category']}}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Дата рождения:</dt>
+                            <dd class="col-sm-9">{{recipeinfo['pat_datebirth']}}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Номер телефона:</dt>
+                            <dd class="col-sm-9">{{recipeinfo['pat_phone']}}</dd>
+                        </dl>
+                        <dl class="row">
+                            {% if recipeinfo['passport'] == None and recipeinfo['inn'] == None  and recipeinfo['parentinn'] == None %}
+                                <dt class="col-sm-3">Идентификационные данные отсутствуют. </dt
+                                <dd class="col-sm-9"><a href="{{ url_for('add_identific_data', pat_id=recipeinfo['pacient_id']) }}" class="btn btn-outline-primary shadow-sm">Добавить идентификационные данные</a></dd>
+                                {% else %}
+                                    {% if recipeinfo['PlaceActualResidence'] != None %}
+                                        <dt class="col-sm-3">Адрес: </dt>
+                                        <dd class="col-sm-9">{{ recipeinfo['PlaceActualResidence'] }}</dd>
+                                    {% else %}
+                                        <dt class="col-sm-3">Адрес: </dt>
+                                        <dd class="col-sm-9"> Адресные данные не указаны.</dd>
+                                    {% endif %}
+
+                                    {% if recipeinfo['inn'] !=  None %}
+                                        <dt class="col-sm-3">ИНН: </dt>
+                                        <dd class="col-sm-9">{{ recipeinfo['inn'] }}</dd>
+                                    {% else %}
+                                        <dt class="col-sm-3">ИНН: </dt>
+                                        <dd class="col-sm-9"> Данные ИНН отсутствуют. </dd>
+                                    {% endif %}
+
+                                    {% if recipeinfo['passport'] != None %}
+                                        <dt class="col-sm-3">Паспорт: </dt>
+                                        <dd class="col-sm-9">{{ recipeinfo['passport'] }}</dd>
+                                    {% else %}
+                                        <dt class="col-sm-3">Паспорт: </dt>
+                                        <dd class="col-sm-9">Данные паспорта отсутствуют.</dt>
+                                    {% endif %}
+
+                                    {% if recipeinfo['parentinn'] != None %}
+                                        <dt class="col-sm-3">ИНН родителя: </dt>
+                                        <dd class="col-sm-9">{{ recipeinfo['parentinn'] }}</dd>
+                                    {% endif %}
+                            {% endif %}
+                        </dl> <hr>
+                        <dl class="row">
+                            <dt class="col-sm-3">Врач: </dt>
+                            <dd class="col-sm-9">{{ recipeinfo['doctor_sname'] }} {{ recipeinfo['doctor_fname'] }} {{ recipeinfo['doctor_patr'] }}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Должность врача: </dt>
+                            <dd class="col-sm-9">{{ recipeinfo['doctor_post']}}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Город: </dt>
+                            <dd class="col-sm-9">{{ recipeinfo['city'] }}</dd>
+                        </dl>
+                        <hr>
+                        {% if pharminfo['status_id'] == 2 %}
+                        <dl class="row">
+                            <dt class="col-sm-3">Дата выдачи рецепта: </dt>
+                            <dd class="col-sm-9">{{ pharminfo['endDate'] }}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Фармацевт: </dt>
+                            <dd class="col-sm-9">{{ pharminfo['sName'] }} {{ pharminfo['fName'] }} {{ pharminfo['patr'] }}</dd>
+                        </dl>
+                        <dl class="row">
+                            <dt class="col-sm-3">Город: </dt>
+                            <dd class="col-sm-9">{{ pharminfo['city'] }}</dd>
+                        </dl> <hr>
+                        {% else %}
+                        <dl class="row">
+                            <dt class="col-sm-3">Фармацевт: </dt>
+                            <dd class="col-sm-9">Рецепт ещё не выдан фармацевтом.</dd>
+                        </dl> <hr>
+                        {% endif %}
+
+                        <h6 class="text-info font-weight-bolder">Назначенные препараты</h6>
+                            <label for="recdrugs">Препараты: </dt>
+                            <ul>
+                                {% for drug in recDrugs %}
+                                    {% if  drug['drug_id'] == 80 or drug['drug_id'] == 78 or drug['drug_id'] == 77 %}
+                                    <li> Набор: Нормальные роды 5240 руб.</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                            <ul>
+                                {% for drug in recDrugs %}
+                                    {% if drug['drug_id'] == 315 %}
+                                        <li>Набор кесарево сечение 8860 руб.</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                            <ul>
+                                {% for drug in recDrugs %}
+                                    {% if drug['drug_id'] == 285 %}
+                                        <li>Набор взрослый хирургический 11000 руб.</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                            <ul>
+                                {% for drug in recDrugs %}
+                                    {% if drug['drug_id'] == 359 %}
+                                        <li>Набор малый хирургический 3500 руб.</li>
+                                    {% endif %}
+                                 {% endfor %}
+                            </ul>
+                            <ul>
+                                {% for drug in recDrugs %}
+                                    {% if drug['drug_id'] == 250 %}
+                                        <li>Набор детский хирургический 11000 руб.</li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                            <ul>
+                                {% for drug in recDrugs %}
+                                {% if drug['drug_id'] != 78 and drug['drug_id'] != 77 and drug['drug_id'] != 80 and drug['drug_id'] != 285 and drug['drug_id'] != 315 and drug['drug_id'] != 359 and drug['drug_id'] != 250 %}
+                                    <li>
+                                        {{drug['drug_name']}}<br>{{ drug['ingridient']}}<br> {{ drug['country'] }}<br> {{ drug['manufacturer'] }}<br> {{ drug['drug_price'] }} руб. <br>
+                                        {% if drug['count'] != None %}
+                                        Назначено: {{drug['count']}} шт.
+                                        {% endif %}
+                                        <br><br>
+                                    </li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+
+                            <hr>
+                            <dl class="row">
+                                <dt class="col-sm-3">Сумма: </dt>
+                                <dd class="col-sm-9">{{ recipeinfo['rec_price'] }} руб.</dd>
+                            </dl>
+                            <dl class="row">
+                                <dt class="col-sm-3">Статус рецепта: </dt>
+                                <dd class="col-sm-9">{{ recipeinfo['rec_status'] }}</dd>
+                            </dl>
+                    <div class="form-group">
+                        {% if userroleid == 2 or userroleid == 5 or userroleid == 3 and recipeinfo['status_id'] == 1 %}
+                        <input type="submit" class="btn btn-primary" value="Отпустить рецепт">
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Препарат {% endblock %}
+{% block header %} {% endblock %}
+
+{% block content %}
+
+<style>
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+</style>
+
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Удалить препарат</h2>
+    <div class="separator"></div>
+    <div class="row">
+        <div class="col-lg-7 mx-auto">
+            <div class="bg-white rounded-lg shadow-sm p-5">
+                <form role="form" action="{{ url_for('delete_drug', drugID=druginfo['id']) }}" method="POST">
+                    <!--flash-message-->
+                        {% for message in get_flashed_messages(with_categories=True) %}
+                            <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                <p>{{ message[1] }}</p>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+						{% endfor %}
+					<!--end-->
+                    <div class="form-group">
+                        <label for="ingridient">Ингредиент</label>
+                        <input type="text" name="ingridient" id="ingridient"
+                            value="{{ request.form['ingridient'] or druginfo['ingridient'] }}" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="drug_title">Название препарата</label>
+                        <input type="text" name="drug_title" id="drug_title"
+                            value="{{ request.form['drug_title'] or druginfo['title'] }}" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Страна</label>
+                        <input type="text" name="drug_country" id="drug_country"
+                            value="{{ request.form['country'] or druginfo['country'] }}" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="manufacturer">Производитель</label>
+                        <input type="text" name="manufacturer" id="manufacturer"
+                            value="{{ request.form['manufacturer'] or druginfo['manufacturer'] }}" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Цена</label>
+                        <input type="text" name="price" id="price"
+                            value="{{ request.form['price'] or druginfo['price'] }}" required class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Удалить" class="btn btn-danger">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

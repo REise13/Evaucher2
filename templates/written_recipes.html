@@ -1,0 +1,84 @@
+{% extends 'templt_for_pages.html' %}
+
+{% block title %} Выданные рецепты {% endblock %}
+
+{% block content %}
+
+<style>
+    .table-scrollbar{
+    position: relative;
+    height: 550px;
+    overflow: auto;
+  }
+
+    .page-content {
+        width: calc(100% - 17rem);
+        margin-left: 17rem;
+        transition: all 0.4s;
+    }
+
+</style>
+
+<!-- Форма поиска -->
+    <div class="page-content p-5" id="content">
+        <h2 class="display-4 text-white">Выданные рецепты</h2>
+        <div class="separator"></div>
+        <div class="bg-white p-5 shadow-sm">
+            <form role="form" action="{{ url_for('written_recipes') }}" method="POST">
+                <!--flash-message-->
+                    {% for message in get_flashed_messages(with_categories=True) %}
+                        <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                            <p>{{ message[1] }}</p>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+					{% endfor %}
+				<!--end-->
+                <div class="row mb-3">
+                    <div class="container-fluid">
+                        <div class="table-scrollbar">
+                            <table class="table table-bordered table-hover" id="tblData">
+                                <thead class="thead text-white text-center text-uppercase">
+
+                                    <tr>
+                                        <th>Код</th>
+                                        <th>Город</th>
+                                        <th>Категория</th>
+                                        <th>Пациент</th>
+                                        <th>Врач</th>
+                                        <th>Дата</th>
+                                        <th>Сумма</th>
+                                        <th>Статус</th>
+                                    </tr>
+                                </thead>
+                                {% for recipe in wrtRecipes %}
+                                    <tbody>
+                                        <tr class="table-row" data-href="{{ url_for('recipe_info', recID = recipe['id']) }}">
+                                            <td>{{ recipe['id'] }}</td>
+                                            <td>{{ recipe['city'] }}</td>
+                                            <td>{{ recipe['rec_cat'] }}</td>
+                                            <td>{{ recipe['pat_sname'] }} {{ recipe['pat_fname'] }} {{ recipe['pat_patr'] }}</td>
+                                            <td>{{ recipe['doctor_sname'] }} {{ recipe['doctor_fname'] }} {{ recipe['doctor_patr'] }}</td>
+                                            <td>{{ recipe['createDate'] }}</td>
+                                            <td>{{ recipe['price'] }}</td>
+                                            <td>{{ recipe['rec_stat'] }}</td>
+                                        </tr>
+                                    </tbody>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- JS скрипт для ссылок в таблице -->
+        <script>
+            $(document).ready(function($){
+                $(".table-row").click(function(){
+                    window.document.location = $(this).data("href");
+                });
+            });
+        </script>
+        <!-- end -->
+{% endblock %}

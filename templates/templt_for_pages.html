@@ -1,0 +1,106 @@
+<!--Шаблон для страниц приложения -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>{% block title %}{% endblock %}</title>
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="{{ url_for('static', filename='pages.css') }}">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+		<!-- Jquery scripts -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.js"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+		<!-- Bootstrap datepicker plugin -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+
+		<!-- Bootstrap-select plugin -->
+		<link rel="stylesheet" href= "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
+    	<script src= "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"> </script>
+
+        <!-- JQuery-confirm plugin -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+
+        <!-- Bootstrap DateTimePicker -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-html5-1.6.5/datatables.min.css"/>
+        <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-html5-1.6.5/datatables.min.js"></script>
+
+
+	</head>
+
+	<body class="loggedin">
+		<!-- Меню приложения -->
+		<div class="vertical-nav bg-white" id="sidebar">
+			<div class="py-4 px-3 mb-4 bg-light">
+			  <div class="media d-flex align-items-center">
+				<div class="media-body">
+				  <h5 class="m-0"> Должность: {{userrole}}</h5>
+				  <p class="font-weight-light text-muted mb-0">ФИО: {{ userfio }}</p>
+				</div>
+			  </div>
+			</div>
+			<p class="text-gray font-weight-bold text-uppercase px-3 small pb-4 mb-0">Е-ВАУЧЕР</p>
+			<ul class="nav flex-column bg-white mb-0">
+			  <li class="nav-item">
+				<a href="{{ url_for('patientreg') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-user-plus mr-3 text-primary fa-fw"></i>
+						  Регистрация пациента
+				</a>
+			  </li>
+			  {% if userroleid == 3 %}
+			  <li class="nav-item">
+				<a href="{{ url_for('rel_recipes') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-cubes mr-3 text-primary fa-fw"></i>
+						  Выданные рецепты
+				</a>
+			  </li>
+			  {% endif %}
+               {% if userroleid == 3 %}
+			  <li class="nav-item">
+				<a href="{{ url_for('drugs') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-cubes mr-3 text-primary fa-fw"></i>
+						  Препараты
+				</a>
+			  </li>
+			  {% endif %}
+			  {% if userroleid == 3 %}
+			  <li class="nav-item">
+				<a href="{{ url_for('limits') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-cubes mr-3 text-primary fa-fw"></i>
+						  Индикаторы
+				</a>
+			  </li>
+			  {% endif %}
+			  <li class="nav-item">
+				<a href="{{ url_for('search_patient') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-search-plus mr-3 text-primary fa-fw"></i>
+						  Поиск пациента
+				</a>
+			  </li>
+			  <li class="nav-item">
+				<a href="{{ url_for('search_recipe') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-search-plus mr-3 text-primary fa-fw"></i>
+						  Поиск по коду рецепта
+				</a>
+			  </li>
+			  <li class="nav-item">
+				<a href="{{ url_for('logout') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-sign-out mr-3 text-primary fa-fw"></i>
+						  Выйти
+				</a>
+			  </li>
+			</ul>
+		</div>
+
+		  <!-- Контент на странице -->
+		  {% block content %}{% endblock %}
+	</body>
+</html>
