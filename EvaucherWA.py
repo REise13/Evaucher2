@@ -1004,6 +1004,56 @@ def get_report():
                 and (pacient.age between %s and %s) and recipe.status_id=%s
                 and user.city_id=%s
             group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, rec_status, cities))
+
+        elif gender == 0 and diagnos == 0 and drugs == 0 and cities == 0 and visit == 0:
+             cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
+            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
+            pacient.patr) as fio, pacient.datebirth, pacient.age,
+            pacient.inn, pacient.parentinn, gender.title as gender,
+            recipe_category.title as rec_cat, diagnos.title as diagnos,
+            group_concat(drug.title, ':', crosstrecdrug.count separator ',') as list_drugs,
+            recipe.endDate, city.title as city,
+            recipe.price, recipe.visit,
+            recipe_status.title as rec_stat
+            FROM recipe
+            JOIN pacient ON recipe.pacient_id=pacient.id
+            JOIN user ON recipe.doctor_id=user.id
+            JOIN gender ON pacient.gender_id=gender.id
+            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
+            JOIN recipe_category ON recipe.category_id=recipe_category.id
+            JOIN recipe_status ON recipe.status_id=recipe_status.id
+            JOIN diagnos on recipe.diag_id=diagnos.id
+            JOIN drug on drug.id=crosstrecdrug.drug_id
+            JOIN city ON user.city_id=city.id
+            where (recipe.createDate >= %s and recipe.createDate <=%s)
+                and (pacient.age between %s and %s) and recipe.category_id=%s
+            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, rec_cat))
+
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0:
+            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
+            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
+            pacient.patr) as fio, pacient.datebirth, pacient.age,
+            pacient.inn, pacient.parentinn, gender.title as gender,
+            recipe_category.title as rec_cat, diagnos.title as diagnos,
+            group_concat(drug.title, ':', crosstrecdrug.count separator ',') as list_drugs,
+            recipe.endDate, city.title as city,
+            recipe.price, recipe.visit,
+            recipe_status.title as rec_stat
+            FROM recipe
+            JOIN pacient ON recipe.pacient_id=pacient.id
+            JOIN user ON recipe.doctor_id=user.id
+            JOIN gender ON pacient.gender_id=gender.id
+            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
+            JOIN recipe_category ON recipe.category_id=recipe_category.id
+            JOIN recipe_status ON recipe.status_id=recipe_status.id
+            JOIN diagnos on recipe.diag_id=diagnos.id
+            JOIN drug on drug.id=crosstrecdrug.drug_id
+            JOIN city ON user.city_id=city.id
+            where (recipe.createDate >= %s and recipe.createDate <=%s)
+                and (pacient.age between %s and %s) and recipe.visit=%s
+                and recipe.status_id=%s
+            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, rec_status, visit))
+
         else:
             cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
                 recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
@@ -1033,8 +1083,10 @@ def get_report():
                 group by crosstrecdrug.rec_id """, (date1, date2, gender, rec_cat,
                                              cities, rec_status, visit, age1, age2, diagnos,drugs))
         records = cursor.fetchall()
-        return render_template('test2.html', records=records)
-    return render_template('form_for_reports.html', records=records)
+        return render_template('test2.html', records=records, userrole=session['user_post'],
+            userroleid=session['user_role_id'], userfio=session['user_fio'])
+    return render_template('form_for_reports.html', records=records, userrole=session['user_post'],
+            userroleid=session['user_role_id'], userfio=session['user_fio'])
 
 
 
