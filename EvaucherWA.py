@@ -14,13 +14,13 @@ import time
 app = Flask(__name__)
 
 #секретный ключ
-app.secret_key = 'YpUVMwmR8SkqwM'
+app.secret_key = secret_key
 
 #соединение с БД
-app.config['MYSQL_HOST'] = 'grafvadim.mysql.pythonanywhere-services.com'
-app.config['MYSQL_USER'] = 'grafvadim'
-app.config['MYSQL_PASSWORD'] = '2qiwH7MLrTHPijF'
-app.config['MYSQL_DB'] = 'grafvadim$test'
+app.config['MYSQL_HOST'] = flask-host
+app.config['MYSQL_USER'] = username
+app.config['MYSQL_PASSWORD'] = password
+app.config['MYSQL_DB'] = db_project
 
 #инициализация mysql
 mysql = MySQL(app)
