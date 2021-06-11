@@ -34,11 +34,26 @@
                         <dl class="row">
                             <dt class="col-sm-3">ФИО пациента: </dt>
                             <dd class="col-sm-9">{{recipeinfo['pat_sname']}} {{recipeinfo['pat_fname']}} {{recipeinfo['pat_patr']}}</dd>
-                            <hr>
                         </dl>
                         <dl class="row">
+                            <dt class="col-sm-3">Посещение: </dt>
+                            <dd class="col-sm-9">{{ recipeinfo['visit'] }}</dd>
+                        </dl>
+                        {% if recipeinfo['rec_cat_id'] == 1 or recipeinfo['rec_cat_id'] == 2 %}
+                            <dl class="row">
+                                <dt class="col-sm-3">Баланс пациента: </dt>
+                                <dd class="col-sm-9">{{ recipeinfo['balance'] }} руб.</dd>
+                            </dl>
+                        {% endif %}
+                        {% if recipeinfo['rec_cat_id'] == 6 %}
+                            <dl class="row">
+                                <dt class="col-sm-3">Баланс пациента: </dt>
+                                <dd class="col-sm-9">{{ recipeinfo['balance'] }} руб.</dd>
+                            </dl>
+                        {% endif %}
+                        <dl class="row">
                             <dt class="col-sm-3">Диагноз</dt>
-                            <dd class="col-sm-9">{{recipeinfo['diagnos']}}</dd>
+                            <dd class="col-sm-9">{{ recipeinfo['diagnos'] }}</dd>
                         </dl>
                         <dl class="row">
                             <dt class="col-sm-3">Категория</dt>
@@ -56,6 +71,8 @@
                             {% if recipeinfo['passport'] == None and recipeinfo['inn'] == None  and recipeinfo['parentinn'] == None %}
                                 <dt class="col-sm-3">Идентификационные данные отсутствуют. </dt
                                 <dd class="col-sm-9"><a href="{{ url_for('add_identific_data', pat_id=recipeinfo['pacient_id']) }}" class="btn btn-outline-primary shadow-sm">Добавить идентификационные данные</a></dd>
+                                {% elif recipeinfo['passport'] == '' and recipeinfo['inn'] == ''  and recipeinfo['parentinn'] == '' %}
+                                    <dd class="col-sm-9"><a href="{{ url_for('add_identific_data', pat_id=recipeinfo['pacient_id']) }}" class="btn btn-outline-primary shadow-sm form-control">Добавить идентификационные данные</a></dd>
                                 {% else %}
                                     {% if recipeinfo['PlaceActualResidence'] != None %}
                                         <dt class="col-sm-3">Адрес: </dt>
@@ -65,25 +82,21 @@
                                         <dd class="col-sm-9"> Адресные данные не указаны.</dd>
                                     {% endif %}
 
-                                    {% if recipeinfo['inn'] !=  None %}
+                                    {% if recipeinfo['inn'] != None %}
                                         <dt class="col-sm-3">ИНН: </dt>
                                         <dd class="col-sm-9">{{ recipeinfo['inn'] }}</dd>
-                                    {% else %}
-                                        <dt class="col-sm-3">ИНН: </dt>
-                                        <dd class="col-sm-9"> Данные ИНН отсутствуют. </dd>
                                     {% endif %}
 
                                     {% if recipeinfo['passport'] != None %}
                                         <dt class="col-sm-3">Паспорт: </dt>
                                         <dd class="col-sm-9">{{ recipeinfo['passport'] }}</dd>
-                                    {% else %}
-                                        <dt class="col-sm-3">Паспорт: </dt>
-                                        <dd class="col-sm-9">Данные паспорта отсутствуют.</dt>
                                     {% endif %}
 
-                                    {% if recipeinfo['parentinn'] != None %}
+                                    {% if recipeinfo['parentinn'] != None  %}
                                         <dt class="col-sm-3">ИНН родителя: </dt>
                                         <dd class="col-sm-9">{{ recipeinfo['parentinn'] }}</dd>
+                                    {% else %}
+                                        <br>
                                     {% endif %}
                             {% endif %}
                         </dl> <hr>
