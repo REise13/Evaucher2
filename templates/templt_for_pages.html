@@ -30,8 +30,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-html5-1.6.5/datatables.min.css"/>
-        <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.23/b-1.6.5/b-html5-1.6.5/datatables.min.js"></script>
+        <script src="https://cdn.rawgit.com/rainabba/jquery-table2excel/1.1.0/dist/jquery.table2excel.min.js"></script>
 
 
 	</head>
@@ -49,13 +48,35 @@
 			</div>
 			<p class="text-gray font-weight-bold text-uppercase px-3 small pb-4 mb-0">Е-ВАУЧЕР</p>
 			<ul class="nav flex-column bg-white mb-0">
+			  {% if userroleid != 9 %}
 			  <li class="nav-item">
 				<a href="{{ url_for('patientreg') }}" class="nav-link text-dark font-italic">
 						  <i class="fa fa-user-plus mr-3 text-primary fa-fw"></i>
 						  Регистрация пациента
 				</a>
 			  </li>
-			  {% if userroleid == 3 %}
+                {% endif %}
+			  <li class="nav-item">
+				<a href="{{ url_for('search_patient') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-search-plus mr-3 text-primary fa-fw"></i>
+						  Поиск пациента
+				</a>
+			  </li>
+			  <li class="nav-item">
+				<a href="{{ url_for('search_recipe') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-search-plus mr-3 text-primary fa-fw"></i>
+						  Поиск по коду рецепта
+				</a>
+			  </li>
+			  {% if userroleid == 3 or userroleid == 9 %}
+			  <li class="nav-item">
+				<a href="{{ url_for('written_recipes') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-cubes mr-3 text-primary fa-fw"></i>
+						  Выписанные рецепты
+				</a>
+			  </li>
+			  {% endif %}
+			  {% if userroleid == 3 or userroleid == 9 %}
 			  <li class="nav-item">
 				<a href="{{ url_for('rel_recipes') }}" class="nav-link text-dark font-italic">
 						  <i class="fa fa-cubes mr-3 text-primary fa-fw"></i>
@@ -79,18 +100,14 @@
 				</a>
 			  </li>
 			  {% endif %}
+			  {% if userroleid == 3 or userroleid == 9 %}
 			  <li class="nav-item">
-				<a href="{{ url_for('search_patient') }}" class="nav-link text-dark font-italic">
-						  <i class="fa fa-search-plus mr-3 text-primary fa-fw"></i>
-						  Поиск пациента
+				<a href="{{ url_for('get_report') }}" class="nav-link text-dark font-italic">
+						  <i class="fa fa-cubes mr-3 text-primary fa-fw"></i>
+						 Отчет по рецептам
 				</a>
 			  </li>
-			  <li class="nav-item">
-				<a href="{{ url_for('search_recipe') }}" class="nav-link text-dark font-italic">
-						  <i class="fa fa-search-plus mr-3 text-primary fa-fw"></i>
-						  Поиск по коду рецепта
-				</a>
-			  </li>
+			  {% endif %}
 			  <li class="nav-item">
 				<a href="{{ url_for('logout') }}" class="nav-link text-dark font-italic">
 						  <i class="fa fa-sign-out mr-3 text-primary fa-fw"></i>
