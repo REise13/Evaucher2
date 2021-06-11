@@ -76,7 +76,7 @@
                             <div class="data-select"></div>
                             <select name="diagnoslist" id="diagnos"
                             class="form-control" data-width="auto form-control">
-                                <option selected disabled>Выберите</option>
+                                <option value="">Выберите</option>
                                 {% for diagnos in diagnosList %}
                                     <option value="{{ diagnos['id'] }}">{{ diagnos['diagnos'] }}</option>
                                 {% endfor %}
@@ -87,7 +87,7 @@
                             <div class="data-select">
                                 <select name="recCatlist" id="recCat" onChange="Selected(this)"
                                     class="form-control" data-width="auto">
-                                    <option selected disabled>Выберите</option>
+                                    <option value="">Выберите</option>
                                     {% for cat in recCat %}
                                         <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
                                     {% endfor %}
@@ -99,7 +99,7 @@
                             <div class="data-select">
                                 <select name="drugCat" id="drugCat" onChange="Selected2(this)"
                                     class="form-control" data-width="auto">
-                                    <option selected disabled>Выберите</option>
+                                    <option value="">Выберите</option>
                                     {% for cat in drugCat %}
                                         <option value="{{ cat['id'] }}">{{ cat['drug_cat'] }}</option>
                                     {% endfor %}
