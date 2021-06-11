@@ -56,6 +56,16 @@
                             value="{{ request.form['price'] or druginfo['price'] }}" required class="form-control">
                     </div>
                     <div class="form-group">
+                            <label for="drug_status">Статус</label>
+                            <div class="data_select">
+                                <select name="drug_status" id="drug_status" placeholder="Не выбрано" required class="selectpicker">
+                                    <option value="">Выберите</option>
+                                    <option value="1">В наличии</option>
+                                    <option value="2">Нет в наличии</option>
+                                </select>
+                            </div>
+                        </div>
+                    <div class="form-group">
                         <input type="submit" value="Изменить" class="btn btn-primary">
                     </div>
                 </form>
