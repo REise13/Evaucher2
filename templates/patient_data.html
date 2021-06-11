@@ -33,8 +33,8 @@
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-							{% endfor %}
-						<!--end-->
+			    {% endfor %}
+			<!--end-->
                         <h6 class="text-info font-weight-bolder">Данные о пациенте</h6> <hr>
                         <dl class="row">
                             <dt class="col-sm-3">ФИО: </dt>
@@ -65,36 +65,37 @@
                         <dl class="row">
                             {% if patient['passport'] == None and patient['inn'] == None and patient['parentinn'] == None %}
                                 <dt class="col-sm-3">Идентификационные данные отсутствуют. </dt>
-                                <dd class="col-sm-9"><a href="{{ url_for('add_identific_data', pat_id=patient['id']) }}" class="btn btn-outline-primary shadow-sm">Добавить идентификационные данные</a></dd>
+                            {% elif patient['passport'] == '' and patient['inn'] == '' and patient['parentinn'] == '' %}
+                                <dt class="col-sm-3">Идентификационные данные отсутствуют. </dt>
+                            {% else %}
+                                {% if patient['PlaceActualResidence'] != None %}
+                                    <dt class="col-sm-3">Адрес: </dt>
+                                    <dd class="col-sm-9">{{ patient['PlaceActualResidence'] }}</dd>
                                 {% else %}
-                                    {% if patient['PlaceActualResidence'] != None %}
-                                        <dt class="col-sm-3">Адрес: </dt>
-                                        <dd class="col-sm-9">{{ patient['PlaceActualResidence'] }}</dd>
-                                    {% else %}
-                                        <dt class="col-sm-3">Адрес: </dt>
-                                        <dd class="col-sm-9"> Адресные данные не указаны.</dd>
-                                    {% endif %}
+                                    <dt class="col-sm-3">Адрес: </dt>
+                                    <dd class="col-sm-9">Не указан.</dd>
+                                {% endif %}
 
-                                    {% if patient['inn'] !=  None %}
-                                        <dt class="col-sm-3">ИНН: </dt>
-                                        <dd class="col-sm-9">{{ patient['inn'] }}</dd>
-                                    {% else %}
-                                        <dt class="col-sm-3">ИНН: </dt>
-                                        <dd class="col-sm-9"> Данные ИНН отсутствуют. </dd>
-                                    {% endif %}
+                                {% if patient['inn'] != None %}
+                                    <dt class="col-sm-3">ИНН: </dt>
+                                    <dd class="col-sm-9">{{ patient['inn'] }}</dd>
+                                {% else %}
+                                    <br>
+                                {% endif %}
 
-                                    {% if patient['passport'] != None %}
-                                        <dt class="col-sm-3">Паспорт: </dt>
-                                        <dd class="col-sm-9">{{ patient['passport'] }}</dd>
-                                    {% else %}
-                                        <dt class="col-sm-3">Паспорт: </dt>
-                                        <dd class="col-sm-9">Данные паспорта отсутствуют.</dt>
-                                    {% endif %}
+                                {% if patient['passport'] != None %}
+                                    <dt class="col-sm-3">Паспорт: </dt>
+                                    <dd class="col-sm-9">{{ patient['passport'] }}</dd>
+                                {% else %}
+                                    <br>
+                                {% endif %}
 
-                                    {% if patient['parentinn'] != None %}
-                                        <dt class="col-sm-3">ИНН родителя: </dt>
-                                        <dd class="col-sm-9">{{ patient['parentinn'] }}</dd>
-                                    {% endif %}
+                                {% if patient['parentinn'] != None %}
+                                    <dt class="col-sm-3">ИНН родителя: </dt>
+                                    <dd class="col-sm-9">{{ patient['parentinn'] }}</dd>
+                                {% else %}
+                                    <br>
+                                {% endif %}
                             {% endif %}
                         </dl> <hr>
                         <p class="text-info h5 font-weight-bold">Выписанные рецепты: </p>
@@ -136,9 +137,6 @@
                             {% if userroleid == 1 or userroleid == 7 or userroleid == 3 %}
                                 <a href="{{ url_for('add', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Выписать рецепт</a>
                             {% endif %}
-                            {% if userroleid == 777 %}
-                                <a href="{{ url_for('add', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Тест</a>
-                            {% endif %}
                         </div>
                         <script>
                             $(document).ready(function($){
@@ -154,9 +152,7 @@
     </div>
 </div>
 
-<!--JS скрипт для ссылок в таблице -->
 
-<!--end-->
 
 
 {% endblock %}
