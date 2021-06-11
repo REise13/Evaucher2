@@ -60,6 +60,16 @@
                             <label for="address">Цена</label>
                             <input type="text" name="price" id="price" placeholder="" required class="form-control">
                         </div>
+                        <div class="form-group">
+                            <label for="drug_status">Статус</label>
+                            <div class="data_select">
+                                <select  name="drug_status" id="drug_status" placeholder="Не выбрано" required class="selectpicker">
+                                    <option value="">Выберите</option>
+                                    <option value="1">В наличии</option>
+                                    <option value="2">Нет в наличии</option>
+                                </select>
+                            </div>
+                        </div>
                         <input type="submit" value="Добавить">
                     </form>
                 </div>
