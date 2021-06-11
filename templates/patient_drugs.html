@@ -42,13 +42,13 @@
                                 <thead class="thead text-white text-uppercase">
                                     <tr>
                                         <th></th>
-                                        <th>№</th>
                                         <th>Ингредиент</th>
                                         <th>Название</th>
                                         <th>Страна</th>
                                         <th>Производитель</th>
                                         <th>Категория</th>
                                         <th>Цена</th>
+                                        <th>Статус</th>
                                     </tr>
                                 </thead>
 
@@ -60,13 +60,17 @@
                                                 <br><br>
                                             <a href="{{ url_for('delete_drug', drugID = druginfo['id']) }}" class="btn btn-outline-danger shadow-sm">Удалить</a>
                                         </td>
-                                        <td>{{ druginfo['id'] }}</td>
                                         <td>{{ druginfo['ingridient'] }}</td>
                                         <td>{{ druginfo['drug_title'] }}</td>
                                         <td>{{ druginfo['country'] }}</td>
                                         <td>{{ druginfo['manufacturer'] }}</td>
                                         <td>{{ druginfo['Drug_category'] }}</td>
                                         <td>{{ druginfo['price'] }}</td>
+                                        {% if druginfo['status_id'] == 1 %}
+                                            <td>В наличии</td>
+                                        {% else %}
+                                            <td>Нет в наличии</td>
+                                        {% endif %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
