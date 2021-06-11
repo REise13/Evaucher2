@@ -15,6 +15,7 @@
         margin-left: 17rem;
         transition: all 0.4s;
     }
+
 </style>
 
 <div class="page-content p-5" id="content">
@@ -22,7 +23,7 @@
     <div class="separator"></div>
     <div class="search-form bg-white p-5 rounded my-5 shadow-sm">
         <!-- Форма данных  о препаратах -->
-        <form role="form" action="{{url_for('get_data_report')}}" method="POST">
+        <form role="form" action="{{url_for('get_report')}}" method="POST">
             <!-- flash сообщения -->
                 {% for message in get_flashed_messages(with_categories=True) %}
                     <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
@@ -35,44 +36,51 @@
             <!-- end -->
             <div class="row mb-3">
                 <div class="container-fluid">
-                    <div class="col">
-                        <button class="btn btn-primary shadow-sm" onclick="exportTableToExcel('tblData')">Экспорт в Excel</button>
+                        <button id="btn" class="btn btn-primary shadow-sm">Экспорт в Excel</button>
                         <div class="table-scrollbar">
                             <table id="tblData" class="table table-bordered table-hover table-fixed">
-                                <thead class="thead text-white text-uppercase">
+                                <thead class="thead text-white text-center text-uppercase">
+
                                     <tr>
-                                        <th>Код</th>
-                                        <th>Дата выписки</th>
-                                        <th>Пациент</th>
-                                        <th>Пол</th>
-                                        <th>Дата рождения</th>
-                                        <th>ИНН</th>
-                                        <th>ИНН родителя</th>
-                                        <th>Возраст</th>
-                                        <th>Код рецепта</th>
-                                        <th>Диагноз</th>
-                                        <th>Препараты</th>
-                                        <th>Дата выдачи<th>
-                                        <th>Город</th>
-                                        <th>Сумма</th>
-                                        <th>Посещение</th>
+                                        <th><strong>Код</strong></th>
+                                        <th><strong>Дата выписки</strong></th>
+                                        <th><strong>Пациент</strong></th>
+                                        <th><strong>Номер телефона</strong></th>
+                                        <th><strong>Пол</strong></th>
+                                        <th><strong>Дата рождения</strong></th>
+                                        <th><strong>ИНН</strong></th>
+                                        <th><strong>ИНН родителя</strong></th>
+                                        <th><strong>Возраст</strong></th>
+                                        <th><strong>Код рецепта</strong></th>
+                                        <th><strong>Диагноз</strong></th>
+                                        <th><strong>Препараты</strong></th>
+                                        <th><strong>Дата выдачи</strong></th>
+                                        <th><strong>Город</strong></th>
+                                        <th><strong>Сумма</strong></th>
+                                        <th><strong>Посещение</strong></th>
+                                        <th><strong>Статус</strong></th>
                                     </tr>
                                 </thead>
-                                {% for record in records %}
+                            {% for record in records %}
                                 <tbody>
 
                                     <tr>
                                         <td>{{ record['rec_id'] }}</td>
                                         <td>{{ record['createDate'] }}</td>
                                         <td>{{ record['fio'] }} </td>
+                                        {% if record['phone'] == None or record['phone'] == '' %}
+                                            <td>―</td>
+                                        {% else %}
+                                            <td> {{ record['phone'] }}</td>
+                                        {% endif %}
                                         <td>{{ record['gender'] }}</td>
                                         <td>{{ record['datebirth'] }}</td>
-                                        {% if record['inn'] == None %}
+                                        {% if record['inn'] == None or record['inn'] == '' %}
                                             <td>―</td>
                                         {% else %}
                                             <td>{{ record['inn'] }}</td>
                                         {% endif %}
-                                        {% if record['parentinn'] == None %}
+                                        {% if record['parentinn'] == None or record['parentinn'] == '' %}
                                             <td>―</td>
                                         {% else %}
                                             <td>{{ record['parentinn'] }}</td>
@@ -105,49 +113,22 @@
                                     </tr>
 
                                 </tbody>
-                                {% endfor %}
+                             {% endfor %}
                             </table>
                         </div>
-                    </div>
                 </div>
             </div>
         </form>
     </div>
-</div>
 <!-- end -->
 
 <script>
-function exportTableToExcel(tableID, filename = ''){
-    var downloadLink;
-    var dataType = 'application/vnd.ms-excel';
-    var tableSelect = document.getElementById(tableID);
-    var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
-
-    // Specify file name
-    filename = filename?filename+'.xls':'excel_data.xls';
-
-    // Create download link element
-    downloadLink = document.createElement("a");
-
-    document.body.appendChild(downloadLink);
-
-    if(navigator.msSaveOrOpenBlob){
-        var blob = new Blob(['\ufeff', tableHTML], {
-            type: dataType
+   $('#btn').click(function () {
+        $("#tblData").table2excel({
+            filename: "Otchet_recepti.xls"
         });
-        navigator.msSaveOrOpenBlob( blob, filename);
-    }
-    else{
-        // Create a link to the file
-        downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
-
-        // Setting the file name
-        downloadLink.download = filename;
-
-        //triggering the function
-        downloadLink.click();
-    }
-}
+    });
 </script>
+
 
 {% endblock %}
