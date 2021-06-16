@@ -5,7 +5,7 @@ import MySQLdb.cursors
 import re
 import datetime
 import os
-import time
+# import time
 
 # from dotenv import load_dotenv
 
@@ -26,8 +26,8 @@ app.config['MYSQL_DB'] = ''
 mysql = MySQL(app)
 
 # временная зона для приложения
-os.environ["TZ"] = "Europe/Moscow"
-time.tzset()
+# os.environ["TZ"] = "Europe/Moscow"
+# time.tzset()
 
 @app.route('/', methods = ['GET', 'POST'])
 def login():
