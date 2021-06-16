@@ -17,10 +17,10 @@ app = Flask(__name__)
 app.secret_key = 'YpUVMwmR8SkqwM'
 
 #соединение с БД
-app.config['MYSQL_HOST'] = ''
-app.config['MYSQL_USER'] = ''
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = ''
+app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'YpUVMwmR8)'
+app.config['MYSQL_DB'] = 'vaucher2'
 
 #инициализация mysql
 mysql = MySQL(app)
@@ -61,7 +61,7 @@ def login():
             session['city_id'] = account[10]
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             cursor.execute('insert into logs(user_id, time, ip_address, action) values(%s, %s, %s, "Вход в приложение")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], ))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', ))
             mysql.connection.commit()
             return redirect(url_for('main'))
     return render_template('login.html')
@@ -132,7 +132,7 @@ def register():
             cursor.execute('SELECT last_insert_id() as newuser')
             user = cursor.fetchone()
             cursor.execute('insert into logs(user_id, time, ip_address, action) values(%s, %s, %s, "Зарегистрировал пользователя id(%s)")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], user['newuser'], ))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', user['newuser'], ))
             mysql.connection.commit()
     # если не заполнены все поля формы
     elif request.method == 'POST':
@@ -228,7 +228,7 @@ def patientreg():
             flash('Регистрация прошла успешно.', 'success')
             mysql.connection.commit()
             cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, action) values(%s, now(), %s, %s, "Зарегистрировал пациента")',
-                            (session['id'], request.headers['X-Real-IP'], pat['patID'] ))
+                            (session['id'], '127.0.0.1', pat['patID'] ))
             mysql.connection.commit()
             return redirect(url_for('patient_data', pat_id=pat['patID']))
     elif request.method == "POST":
@@ -297,7 +297,7 @@ def patdata_edit(pat_id):
         (sname, fname, patr, phone, pat_id))
         flash('Данные пациента изменены.', 'success')
         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, action) values(%s, %s, %s, %s, "Изменил данные пациента")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], pat_id, ))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, ))
         mysql.connection.commit()
         return redirect(url_for('patient_data', pat_id=patient['id'], ))
     return render_template('patient_data_edit.html', patient=patient, userroleid=session['user_role_id'])
@@ -401,7 +401,7 @@ def add(pat_id):
                 for drug, i in drugList:
                     cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s,%s)',(recipe_id['recipeID'], drug,i))
                 cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
-                    (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], pat_id, recipe_id['recipeID'],))
+                    (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
                 mysql.connection.commit()
                 flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                 return redirect(url_for('patient_data', pat_id=patient['id'],))
@@ -430,7 +430,7 @@ def add(pat_id):
                         for drug, i in drugList:
                             cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s,%s)',(recipe_id['recipeID'], drug,i))
                         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
-                            (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], pat_id, recipe_id['recipeID'],))
+                            (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
@@ -460,7 +460,7 @@ def add(pat_id):
                             else:
                                 cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s, %s)',(recipe_id['recipeID'], drug, i))
                         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
-                            (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], pat_id, recipe_id['recipeID'],))
+                            (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
@@ -485,7 +485,7 @@ def add(pat_id):
                         else:
                             cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s, %s)',(recipe_id['recipeID'], drug, i))
                     cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], pat_id, recipe_id['recipeID'],))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
                     mysql.connection.commit()
                     flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                     return redirect(url_for('patient_data', pat_id=patient['id'],))
@@ -545,7 +545,7 @@ def recipe_info(recID):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s, pharm_city=%s WHERE id=%s', (pharm_id, endDate, status, pharm_city, recID,))
         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Отпустил рецепт")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], recipeinfo['pacient_id'], recID,))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', recipeinfo['pacient_id'], recID,))
         mysql.connection.commit()
         flash('Рецепт отпущен. Код рецепта: ' + str(recID), 'success')
     return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs,
@@ -565,7 +565,7 @@ def add_identific_data(pat_id):
                             set passport=%s, inn=%s, parentinn=%s, PlaceActualResidence=%s
                             where id = %s""", (passport, inn, parentinn, address, pat_id,))
         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, action) values(%s, %s, %s, %s, "Добавил идентиф.данные пациента")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], pat_id,))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id,))
         mysql.connection.commit()
         flash('Идентификационные данные успешно добавлены.', 'success')
         return redirect(url_for('patient_data', pat_id=patient['id']))
@@ -679,7 +679,7 @@ def add_drug():
         cursor.execute('SELECT last_insert_id() as newdrug')
         drug = cursor.fetchone()
         cursor.execute('insert into logs(user_id, time, ip_address, drug_id, action) values(%s, %s, %s, %s, "Добавил препарат")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], drug['newdrug']))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', drug['newdrug']))
         mysql.connection.commit()
         flash('Препарат добавлен.', 'success')
         return redirect(url_for('drugs'))
@@ -703,7 +703,7 @@ def edit_drug(drugID):
                             manufacturer=%s, price=%s, status_id=%s  where id=%s""", (ingridient, drug_title,
                                 country, manufacturer, price, status, drugID))
         cursor.execute('insert into logs(user_id, time, ip_address, drug_id, action) values(%s, %s, %s, %s, "Изменил данные о препарате")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], drugID,))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', drugID,))
         mysql.connection.commit()
         flash('Информация о препарате успешно изменена', 'success')
         return redirect(url_for('drugs'))
@@ -718,7 +718,7 @@ def delete_drug(drugID):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute('DELETE FROM drug WHERE id=%s', (drugID,))
         cursor.execute('insert into logs(user_id, time, ip_address, drug_id, action) values(%s, %s, %s, %s, "Удалил препарат")',
-                        (session['id'], datetime.datetime.today(), request.headers['X-Real-IP'], drugID,))
+                        (session['id'], datetime.datetime.today(), '127.0.0.1', drugID,))
         mysql.connection.commit()
         flash('Препарат удален.', 'success')
         return redirect(url_for('drugs'))
