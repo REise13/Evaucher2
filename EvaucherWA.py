@@ -160,12 +160,16 @@ def search_patient():
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
             sname = request.form['sname'] #фамилия, полученная из поля формы на странице
+            if session['user_role_id'] == 1:
+                flagReg = 0
+            if session['user_role_id'] == 7:
+                flagReg = 1   
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             # поиск пациента по имени или фамилии
             cursor.execute("""SELECT pacient.id, pacient.sName, pacient.fName,
                                 pacient.patr, pacient.passport, pacient.parentinn,
                                 pacient.inn, pacient.phone
-                                FROM pacient WHERE sName=%s""", (sname,))
+                                FROM pacient WHERE sName=%s and flagReg=%s""", (sname, flagReg, ))
             mysql.connection.commit()
             patients = cursor.fetchall() # сохранить полученные данные в переменной patients
             if len(patients) == 0:
@@ -216,13 +220,17 @@ def patientreg():
         phone = reg['phone']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM pacient where sName=%s and fName=%s and patr=%s", (sname, fname, patr,))
+        if session['user_role_id'] == 1:
+            flagReg = 0
+        if session['user_role_id'] == 7:
+            flagReg = 1    
         patient = cursor.fetchall()
         if patient:
             flash('Пациент с таким ФИО уже существует. Воспользуйтесь вкладкой "Поиск пациента".', 'warning')
             return render_template('patient_register.html', gender=gender)
         else:
-            cursor.execute(""" INSERT INTO pacient(sName, fName, patr, datebirth, age, datereg, gender_id, phone, Visits)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 0)""", (sname, fname, patr, datebirth, age, datereg, gender, phone,))
+            cursor.execute(""" INSERT INTO pacient(sName, fName, patr, datebirth, age, datereg, gender_id, phone, flagReg, Visits)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0)""", (sname, fname, patr, datebirth, age, datereg, gender, phone, flagReg,))
             cursor.execute('SELECT last_insert_id() as patID')
             pat = cursor.fetchone()
             flash('Регистрация прошла успешно.', 'success')
@@ -1149,5 +1157,5 @@ def get_report():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
