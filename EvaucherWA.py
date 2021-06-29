@@ -93,7 +93,7 @@ def get_data_for_reg_user():
     cursor.execute('SELECT id, title as role FROM user_role')
     roles = cursor.fetchall()
     return render_template('add_user.html', cities=cities, posts=posts, roles=roles)
-
+   
 
 #страница регистрации пользователя
 @app.route('/register-user', methods = ['GET', 'POST'])
@@ -151,7 +151,6 @@ def main():
         return render_template('patient_search.html', userrole=session['user_post'], userfio=session['user_fio'],  userroleid=session['user_role_id'])
     #если не залогинился, перенаправить на страницу логин формы
     return redirect(url_for('login'))
-
 
 
 #страница Поиск
@@ -314,10 +313,14 @@ def patdata_edit(pat_id):
 @app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
 def add(pat_id):
     patient = get_pat_ID(pat_id)
+    if session['user_role_id'] == 1:
+        flag = 0
+    if session['user_role_id'] == 7:
+        flag = 1    
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT id, title as diagnos FROM diagnos')
+    cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE flagDiag=%s', (flag,))
     diagnosList = cursor.fetchall()
-    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category')
+    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s', (flag,))
     recCat = cursor.fetchall()
     cursor.execute(""" SELECT id, title as drug_cat
                         from drug_category
