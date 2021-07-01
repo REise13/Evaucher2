@@ -31,7 +31,8 @@ mysql = MySQL(app)
 
 @app.route('/', methods = ['GET', 'POST'])
 def login():
-    if request.method == 'POST' and 'login' in request.form and 'password' in request.form:
+    """ Функция входа в приложение """
+    if request.method == 'POST' and request.form:
         auth = request.form
         login = auth.get('login')
         password=auth.get('password')
@@ -64,6 +65,8 @@ def login():
                         (session['id'], datetime.datetime.today(), '127.0.0.1', ))
             mysql.connection.commit()
             return redirect(url_for('main'))
+        else:
+            flash('Введены неправильный логин и/или пароль.', 'danger')    
     return render_template('login.html')
 
 
@@ -71,6 +74,7 @@ def login():
 #выйти из приложения, редирект на Вход
 @app.route('/logout')
 def logout():
+    """ Функция для выхода из приложения, очистить сессию пользователя """
     session.pop('loggedin', None)
     session.pop('id', None)
     session.pop('login', None)
@@ -85,6 +89,7 @@ def logout():
 
 @app.route('/register-user')
 def get_data_for_reg_user():
+    """ Возвращает данные для выпадающих списков на форму регистрации пользователя """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('SELECT id, title as city FROM city')
     cities = cursor.fetchall()
@@ -98,6 +103,7 @@ def get_data_for_reg_user():
 #страница регистрации пользователя
 @app.route('/register-user', methods = ['GET', 'POST'])
 def register():
+    """ Функция регистрации пользователя """
     register = request.form
     # если введены все данные
     # в поля формы регистрации пользователя
@@ -145,6 +151,7 @@ def register():
 # после авторизации
 @app.route('/main')
 def main():
+    """ Редирект на страницу поиск пациента после успешного прохождения авторизации в приложении """
     #проверить залогинился ли пользователь
     if 'loggedin' in session:
         #если залогинился, перейти на страницу поиска
@@ -156,21 +163,24 @@ def main():
 #страница Поиск
 @app.route('/search', methods = ['GET', 'POST'])
 def search_patient():
+    """ Возвращает основные данные о пациенте по фамилии из поля поиска на странице """
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
             sname = request.form['sname'] #фамилия, полученная из поля формы на странице
-            if session['user_role_id'] == 1:
-                flagReg = 0
-            if session['user_role_id'] == 7:
-                flagReg = 1   
+            if session['user_role_id'] in [1,3,8]: # Врач, Оператор_P, д1
+                # идентификатор для пациента Врача
+                num = 0
+            if session['user_role_id'] in [7,4,9]: # Доктор, Оператор_U, д2
+                # идентификатор для пациента Доктора
+                num = 1   
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            # поиск пациента по имени или фамилии
+            # поиск пациента по фамилии
             cursor.execute("""SELECT pacient.id, pacient.sName, pacient.fName,
                                 pacient.patr, pacient.passport, pacient.parentinn,
                                 pacient.inn, pacient.phone
-                                FROM pacient WHERE sName=%s and flagReg=%s""", (sname, flagReg, ))
+                                FROM pacient WHERE sName=%s and flagReg=%s""", (sname, num,))
             mysql.connection.commit()
-            patients = cursor.fetchall() # сохранить полученные данные в переменной patients
+            patients = cursor.fetchall() # сохраняем полученные данные в переменной patients
             if len(patients) == 0:
                 flash('По вашему запросу: "'+str(sname)+ '" ничего не найдено','info')
             return render_template('patient_search.html', patients=patients,  userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы поиска
@@ -179,6 +189,7 @@ def search_patient():
 
 @app.route('/search-recipe', methods = ['GET', 'POST'])
 def search_recipe():
+    """ Возвращает основные данные о рецепте по коду рецепта из поля поиска на странице """
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
             rec = request.form['rec'] #фамилия, полученная из поля формы на странице
@@ -200,6 +211,7 @@ def search_recipe():
 # patient_register.html
 @app.route('/register-patient', methods=['GET', 'POST'])
 def patientreg():
+    """ Функция регистрации пациента """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     #запрос данных о пол
     cursor.execute('SELECT id, title as gendr FROM gender')
@@ -219,17 +231,19 @@ def patientreg():
         phone = reg['phone']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM pacient where sName=%s and fName=%s and patr=%s", (sname, fname, patr,))
-        if session['user_role_id'] == 1:
-            flagReg = 0
-        if session['user_role_id'] == 7:
-            flagReg = 1    
+        if session['user_role_id'] in [1,3,8]: # Врач, Оператор_P, д1
+            # идентификатор для регистрируемого пациента Врачом
+            num = 0
+        if session['user_role_id'] in [7,4,9]: # Доктор, Оператор_U, д2
+            # идентификатор для  регистрируемого пациента Доктором
+            num = 1     
         patient = cursor.fetchall()
         if patient:
             flash('Пациент с таким ФИО уже существует. Воспользуйтесь вкладкой "Поиск пациента".', 'warning')
             return render_template('patient_register.html', gender=gender)
         else:
             cursor.execute(""" INSERT INTO pacient(sName, fName, patr, datebirth, age, datereg, gender_id, phone, flagReg, Visits)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0)""", (sname, fname, patr, datebirth, age, datereg, gender, phone, flagReg,))
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 0)""", (sname, fname, patr, datebirth, age, datereg, gender, phone, num,))
             cursor.execute('SELECT last_insert_id() as patID')
             pat = cursor.fetchone()
             flash('Регистрация прошла успешно.', 'success')
@@ -244,6 +258,7 @@ def patientreg():
 
 
 def get_pat_ID(pat_id):
+    """ Возвращает данные о пациенте по его айди """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(""" SELECT *,
                         group_concat(sName, concat(left(fName,1),'.'),
@@ -257,6 +272,7 @@ def get_pat_ID(pat_id):
 
 
 def get_recipe_ID(recID):
+    """ Возвращает данные о рецепте по его айди """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("""SELECT * FROM recipe
                     WHERE id = %s
@@ -268,6 +284,7 @@ def get_recipe_ID(recID):
 # patient_data.html
 @app.route('/data/<int:pat_id>', methods=['GET', 'POST'])
 def patient_data(pat_id):
+    """ Возвращает основные данные о пациенте и данные о выписанных рецептах пациенту по айди """
     # данные о пациенте по его айди
     patient = get_pat_ID(pat_id)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -283,7 +300,7 @@ def patient_data(pat_id):
                         JOIN recipe_status ON recipe.status_id = recipe_status.id
                     WHERE recipe.pacient_id = %s
                     ORDER BY recipe.id """, (pat_id,))
-    mysql.connection.commit()
+    mysql.connection.commit() 
     recipes = cursor.fetchall()
     return render_template('patient_data.html',
             patient=patient, recipes=recipes, userroleid=session['user_role_id'])
@@ -292,6 +309,7 @@ def patient_data(pat_id):
 #patient_data_edit.html
 @app.route('/data/<int:pat_id>/edit', methods=['GET', 'POST'])
 def patdata_edit(pat_id):
+    """ Выполняет апдейт данных пациента """
     patient = get_pat_ID(pat_id)
     if request.method == 'POST':
         sname = request.form['sname']
@@ -312,11 +330,14 @@ def patdata_edit(pat_id):
 
 @app.route('/<int:pat_id>/add')
 def getdata(pat_id):
+    """ Возвращает данные для выпадающих списков на форме выписки рецепта """
     patient = get_pat_ID(pat_id)
-    if session['user_role_id'] == 1:
-        flag = 0
-    if session['user_role_id'] == 7:
-        flag = 1    
+    if session['user_role_id'] in [1,3,8]: # Врач, Оператор_P, д1
+        # идентификатор для пациента Врача
+        num = 0
+    if session['user_role_id'] in [7,4,9]: # Доктор, Оператор_U, д2
+        # идентификатор для пациента Доктора
+        num = 1      
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE flagDiag=%s', (flag,))
     diagnosList = cursor.fetchall()
@@ -348,8 +369,10 @@ def getdata(pat_id):
 
 @app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
 def add(pat_id):
+    """ Функция выписки рецепта """
     patient = get_pat_ID(pat_id)
     if request.method == 'POST' and request.form:
+        # получаем введенные данные из полей формы
         doctor_id = session['id']
         city = session['city_id']
         createDate = datetime.datetime.today()
@@ -360,6 +383,9 @@ def add(pat_id):
         status = 1
         drugs = request.form.getlist('chck')
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # создаем запрос к базе для получения данных 
+        # о выписанныхт раннее рецептах пациенту 
+        # в выбранной категории рецепта
         cursor.execute(""" select *, count(recipe.pacient_id) as count,
                             sum(recipe.price) as sumprice
                         from recipe
@@ -369,34 +395,58 @@ def add(pat_id):
                         group by recipe.pacient_id
                          """, (pat_id, category,))
         totalrecipes = cursor.fetchall()
+        # запрос к базе данных для получения данных 
+        # о количестве выписанных рецептов в данной категории пользователем
         cursor.execute("""SELECT id, doctor_id, category_id, indicator_limit, indicator_used, indicator_sum
                 FROM limits where doctor_id=%s and category_id=%s""",(doctor_id, category))
         limit = cursor.fetchall()
+        # запрос к базе для получения данных о выданном наборе пациенту
         cursor.execute('SELECT * FROM recipe WHERE pacient_id=%s AND (category_id=3 OR category_id=4 OR category_id=5 OR category_id=7 OR category_id=10)', (pat_id,))
         nabor = cursor.fetchall()
+        # создаем переменную и передаем 
+        # туда сумму только что выписываемого рецепта
         pat_balance = price
         if category == 1 or category ==2:
+            # если выбрана категория 092 или 093, 
+            # то начальный баланс равен
             pat_balance = 1850
         if category == 6:
+            # а если категория 097, 
+            # то начальный баланс пациента равен
             pat_balance = 1500
+        # создаем переменную посещения пациентом данного врача
+        # по умолчанию оно равно 1 (первое посещение) 
         visit = 1
         res = []
+        # проходимся циклом по выбранным препаратам 
+        # и количеству каждого выбранного препарата 
+        # и записываем его в список drugList
         for count in count_drug:
             if count != '0':
                 res.append(count)
         drugList = zip(drugs, res)
         if len(totalrecipes) == 0:
+            # если в данной категории у пациента первое посещение, 
+            # то обновляем данные в базе
             cursor.execute('update pacient set Visits=1 where id=%s', (pat_id,))
         if len(limit)==0:
+            # если пользователь первый раз выписывает рецепт в выбранной категории, 
+            # то добавляем соответствую запись в лимиты базы;
+            # где количество доступных выписок в данной категории равно 10
             cursor.execute("""INSERT INTO limits(doctor_id, category_id, indicator_limit, indicator_used, indicator_sum)
-                        VALUES (%s, %s,10,0,0) """, (doctor_id, category,))
+                        VALUES (%s, %s,10,0,0) """, (doctor_id, category,))            
         if len(limit) !=0 and limit[0]['indicator_used'] == limit[0]['indicator_limit']:
+            # если лимит выписанных рецептов в выбранной категории достигнут, 
+            # то выводим предупреждение и выписка рецепта невозможна
             flash('Превышен лимит выписки рецепта в данной категории. Обратитесь к администратору.', 'danger')
-
         else:
+            # иначе обновляем индикатор выписки рецептов в данной категории к +1
             cursor.execute(""" UPDATE limits SET indicator_used=indicator_used+1, indicator_sum=indicator_sum+1
             WHERE doctor_id=%s and category_id=%s """, (doctor_id, category))
             if len(totalrecipes) == 0:
+                # проверяем выдавался ли ранее набор пациенту и в других категориях,
+                # если да, то выводим предупреждение 
+                # и выписка рецепта невозможна
                 if len(nabor) !=0 and category == 3:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
@@ -412,6 +462,7 @@ def add(pat_id):
                 if len(nabor) !=0 and category == 10:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                # иначе вносим данные в базу 
                 cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
                                     diag_id, status_id, price, balance, visit, city_id)
@@ -420,24 +471,37 @@ def add(pat_id):
                 mysql.connection.commit()
                 cursor.execute('SELECT last_insert_id() as recipeID')
                 recipe_id = cursor.fetchone()
+                # проходимся циклом из словаря препаратов и их количества
+                # и вносим полученные данные в базу 
                 for drug, i in drugList:
                     cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s,%s)',(recipe_id['recipeID'], drug,i))
                 cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
                     (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
                 mysql.connection.commit()
+                # выводим сообщение на страницу с информацией 
+                # об успешной выпиской и кодом данного рецепта
                 flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                 return redirect(url_for('patient_data', pat_id=patient['id'],))
             else:
+                # если пациенту раннее уже был выписан рецепт(-ы) в данной категории, 
+                # то проверяем ряд условий
                 sumprice = int(totalrecipes[0]['sumprice'])
                 reccat = int(totalrecipes[0]['category_id'])
                 if reccat == 1 or reccat == 2:
+                    # не выходит ли сумма выписываемого рецепта 
+                    # за баланс пользователя в категории 092 или 093
                     balance = 1850 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
+                    # если превышает баланс, то выписка невозможна 
+                    # и сообщение с предупреждением
                     if balance < price:
                         flash('Это посещение: ' +str(vis) +'.' + '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
                         return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                     else:
+                        # иначе вносим данные в базу
+                        # обновленный баланс пациента
                         b2 = balance
+                        # посещение пациента
                         vv = int(totalrecipes[0]['count']) + 1
                         cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
                         cursor.execute(""" INSERT INTO
@@ -456,12 +520,16 @@ def add(pat_id):
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
                 elif reccat == 6:
+                    # если катеория 097
+                    # проверяем баланс также, как при предудущих категориях
                     balance = 1500 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
                       return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                     else:
+                        # если сумма данного рецепта не превышает баланса, 
+                        # то вносим данные в базу
                         b2 = balance
                         vv = int(totalrecipes[0]['count']) + 1
                         cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
@@ -485,9 +553,11 @@ def add(pat_id):
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
                 elif reccat == 3 or reccat==4 or reccat==5 or reccat==7 or reccat == 10:
+                    # если выбранная категория совпадает с категорией выбанного набора 
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 else:
+                    # иначе вносим данные в базу
                     vv = int(totalrecipes[0]['count']) + 1
                     cursor.execute(""" INSERT INTO
                                         recipe(pacient_id, doctor_id, createDate, category_id,
@@ -513,8 +583,10 @@ def add(pat_id):
 
 @app.route('/recipeinfo/<int:recID>', methods=['GET', 'POST'])
 def recipe_info(recID):
+    """ Возвращает информацию о выписанном рецепте пациенту на страницу """
     recipes = get_recipe_ID(recID)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    # запрос о получении данных о выписанном рецепте пациенту
     cursor.execute("""SELECT recipe.id, recipe.pacient_id, recipe.createDate,
                         recipe.category_id AS rec_cat_id, recipe.price AS rec_price,
                         recipe_category.title AS rec_category,
@@ -541,6 +613,7 @@ def recipe_info(recID):
                     WHERE recipe.id = %s
                     ORDER BY recipe.id""",(recID,))
     recipeinfo = cursor.fetchone()
+    # запрос о получении информации о фармацевте, который отпустил данный рецепт
     cursor.execute(""" select recipe.endDate, user.sName, user.fName, user.patr,
                         recipe.status_id, city.title as city
                         from recipe join user on recipe.pharm_id = user.id
@@ -549,6 +622,7 @@ def recipe_info(recID):
     mysql.connection.commit()
     pharminfo = cursor.fetchone()
     recID = recipeinfo['id']
+    # запрос получения данных о препаратах, назначенных пациенту по коду рецепта
     cursor.execute(""" SELECT drug.title as drug_name, drug.ingridient, drug.country,
                 drug.manufacturer, drug.price as drug_price,
                 crosstrecdrug.drug_id, crosstrecdrug.count
@@ -561,6 +635,8 @@ def recipe_info(recID):
         endDate = datetime.datetime.today()
         status = 2
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # если рецепт не отпущен фармацевтом, 
+        # то вносим изменения в базу  по айди выбранныго рецепта
         cursor.execute('UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s, pharm_city=%s WHERE id=%s', (pharm_id, endDate, status, pharm_city, recID,))
         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Отпустил рецепт")',
                         (session['id'], datetime.datetime.today(), '127.0.0.1', recipeinfo['pacient_id'], recID,))
