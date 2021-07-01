@@ -310,8 +310,8 @@ def patdata_edit(pat_id):
     return render_template('patient_data_edit.html', patient=patient, userroleid=session['user_role_id'])
 
 
-@app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
-def add(pat_id):
+@app.route('/<int:pat_id>/add')
+def getdata(pat_id):
     patient = get_pat_ID(pat_id)
     if session['user_role_id'] == 1:
         flag = 0
@@ -326,14 +326,29 @@ def add(pat_id):
                         from drug_category
                         where drug_category.title not like '%набор%' """)
     drugCat = cursor.fetchall()
-    cursor.execute(""" SELECT drug.id as drug_id, drug.ingridient, drug.title as drugname, drug.country,
-            drug.manufacturer, drug_category.id as drCatid, drug_category.title as Drug_category, drug.price
-            FROM drug JOIN drug_category
-            ON drug.category_id=drug_category.id
-            WHERE drug.status_id=1
-            ORDER by drug.id""")
+    if session['user_role_id'] == 1:
+        cursor.execute(""" SELECT drug.id as drug_id, drug.ingridient, drug.title as drugname, drug.country,
+                drug.manufacturer, drug_category.id as drCatid, drug_category.title as Drug_category, drug.price
+                FROM drug JOIN drug_category
+                ON drug.category_id=drug_category.id
+                WHERE drug.status_id=1 and (drug.flagDrug=0)
+                ORDER by drug.id""")
+    if session['user_role_id'] == 7:
+       cursor.execute(""" SELECT drug.id as drug_id, drug.ingridient, drug.title as drugname, drug.country,
+                drug.manufacturer, drug_category.id as drCatid, drug_category.title as Drug_category, drug.price
+                FROM drug JOIN drug_category
+                ON drug.category_id=drug_category.id
+                WHERE drug.status_id=1 
+                ORDER by drug.id""")             
     selectDrugList = cursor.fetchall()
-    mysql.connection.commit()
+    return render_template('test.html', patient=patient,diagnosList=diagnosList,
+                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList)
+
+
+
+@app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
+def add(pat_id):
+    patient = get_pat_ID(pat_id)
     if request.method == 'POST' and request.form:
         doctor_id = session['id']
         city = session['city_id']
@@ -344,6 +359,7 @@ def add(pat_id):
         count_drug = request.form.getlist('qnty')
         status = 1
         drugs = request.form.getlist('chck')
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" select *, count(recipe.pacient_id) as count,
                             sum(recipe.price) as sumprice
                         from recipe
@@ -383,24 +399,19 @@ def add(pat_id):
             if len(totalrecipes) == 0:
                 if len(nabor) !=0 and category == 3:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 4:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 5:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 7:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 10:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
                                     diag_id, status_id, price, balance, visit, city_id)
@@ -424,8 +435,7 @@ def add(pat_id):
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                         flash('Это посещение: ' +str(vis) +'.' + '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
-                        return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                                recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                        return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                     else:
                         b2 = balance
                         vv = int(totalrecipes[0]['count']) + 1
@@ -450,8 +460,7 @@ def add(pat_id):
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
-                      return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                            recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                      return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                     else:
                         b2 = balance
                         vv = int(totalrecipes[0]['count']) + 1
@@ -477,8 +486,7 @@ def add(pat_id):
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
                 elif reccat == 3 or reccat==4 or reccat==5 or reccat==7 or reccat == 10:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
                 else:
                     vv = int(totalrecipes[0]['count']) + 1
                     cursor.execute(""" INSERT INTO
@@ -500,8 +508,7 @@ def add(pat_id):
                     mysql.connection.commit()
                     flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                     return redirect(url_for('patient_data', pat_id=patient['id'],))
-    return render_template('test.html', patient=patient,diagnosList=diagnosList,
-            recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, userroleid=session['user_role_id'])
+    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
 
 
 @app.route('/recipeinfo/<int:recID>', methods=['GET', 'POST'])
