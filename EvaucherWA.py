@@ -766,6 +766,10 @@ def delete_drug(drugID):
 @app.route('/rel-recipes', methods=['GET','POST'])
 def rel_recipes():
     if 'loggedin' in session:
+        if session['user_role_id'] == 3:
+            flag = 0
+        if session['user_role_id'] == 4:
+            flag = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" SELECT recipe.id, recipe.pacient_id,
                             recipe.endDate, recipe.price,
@@ -782,7 +786,8 @@ def rel_recipes():
                             JOIN recipe_category ON recipe.category_id=recipe_category.id
                             JOIN recipe_status ON recipe.status_id=recipe_status.id
                             JOIN city ON recipe.pharm_city=city.id
-                            order by recipe.endDate ASC """)
+                            WHERE pacient.flagReg=%s    
+                            ORDER by recipe.endDate ASC """, (flag,))
         mysql.connection.commit()
         relRecipes = cursor.fetchall()
     return render_template('release_recipes.html', relRecipes=relRecipes, userrole=session['user_post'],
