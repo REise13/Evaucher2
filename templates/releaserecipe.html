@@ -172,7 +172,7 @@
                             </ul>
                             <ul>
                                 {% for drug in recDrugs %}
-                                {% if drug['drug_id'] != 78 and drug['drug_id'] != 77 and drug['drug_id'] != 80 and drug['drug_id'] != 285 and drug['drug_id'] != 315 and drug['drug_id'] != 359 and drug['drug_id'] != 250 %}
+                                {% if drug['drug_id'] not in  [78, 77, 80, 285, 250, 315, 359] %}
                                     <li>
                                         {{drug['drug_name']}}<br>{{ drug['ingridient']}}<br> {{ drug['country'] }}<br> {{ drug['manufacturer'] }}<br> {{ drug['drug_price'] }} руб. <br>
                                         {% if drug['count'] != None %}
@@ -194,7 +194,7 @@
                                 <dd class="col-sm-9">{{ recipeinfo['rec_status'] }}</dd>
                             </dl>
                     <div class="form-group">
-                        {% if userroleid == 2 or userroleid == 5 or userroleid == 3 and recipeinfo['status_id'] == 1 %}
+                        {% if userroleid in [2, 3, 5] and recipeinfo['status_id'] == 1 %}
                         <input type="submit" class="btn btn-primary" value="Отпустить рецепт">
                         {% endif %}
                     </div>
