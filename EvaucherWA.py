@@ -339,9 +339,9 @@ def getdata(pat_id):
         # идентификатор для пациента Доктора
         num = 1      
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE flagDiag=%s', (flag,))
+    cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE flagDiag=%s', (num,))
     diagnosList = cursor.fetchall()
-    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s', (flag,))
+    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s', (num,))
     recCat = cursor.fetchall()
     cursor.execute(""" SELECT id, title as drug_cat
                         from drug_category
