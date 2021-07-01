@@ -662,7 +662,17 @@ def drugs():
     """ Возвращает данные о всех имеющихся препаратах """
     if 'loggedin' in session:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
+        if session['user_role_id'] == 3:
+            cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
+                drug.manufacturer, drug_category.id as drCatid,
+                drug_category.title as Drug_category,
+                drug.price, drug.status_id
+                FROM drug JOIN drug_category
+                ON drug.category_id=drug_category.id
+                WHERE drug.flagDrug=0
+                order by drug.id""")
+        if session['user_role_id'] == 4:    
+            cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
                 drug.manufacturer, drug_category.id as drCatid,
                 drug_category.title as Drug_category,
                 drug.price, drug.status_id
@@ -694,11 +704,15 @@ def add_drug():
         drugCat = reg.get('drugCat')
         price = reg.get('price')
         status = reg.get('drug_status')
+        if session['user_role_id'] == 3:
+            flagDrug = 0
+        if session['user_role_id'] == 4:
+            flagDrug = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" INSERT INTO drug(ingridient, title, country,
-                                manufacturer, category_id, price, status_id)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s) """, (ingridient, drug_title,
-                            country, manufacturer, drugCat, price, status))
+                                manufacturer, category_id, flagDrug, price, status_id)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) """, (ingridient, drug_title,
+                            country, manufacturer, drugCat, flagDrug, price, status))
         cursor.execute('SELECT last_insert_id() as newdrug')
         drug = cursor.fetchone()
         cursor.execute('insert into logs(user_id, time, ip_address, drug_id, action) values(%s, %s, %s, %s, "Добавил препарат")',
