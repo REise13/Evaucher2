@@ -167,10 +167,10 @@ def search_patient():
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
             sname = request.form['sname'] #фамилия, полученная из поля формы на странице
-            if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
+            if session['user_role_id'] in [1,2,3,9]: # Врач, Оператор_P, д1
                 # идентификатор для пациента Врача
                 num = 0
-            if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
+            if session['user_role_id'] in [7,4,8,2]: # Доктор, Оператор_U, д2
                 # идентификатор для пациента Доктора
                 num = 1   
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
