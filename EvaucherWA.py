@@ -662,7 +662,8 @@ def drugs():
     """ Возвращает данные о всех имеющихся препаратах """
     if 'loggedin' in session:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        if session['user_role_id'] == 3:
+        if session['user_role_id'] == 3:    # Оператор_P
+            # вывести все препараты для врачей из базы
             cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
                 drug.manufacturer, drug_category.id as drCatid,
                 drug_category.title as Drug_category,
@@ -671,7 +672,8 @@ def drugs():
                 ON drug.category_id=drug_category.id
                 WHERE drug.flagDrug=0
                 order by drug.id""")
-        if session['user_role_id'] == 4:    
+        if session['user_role_id'] == 4:    # Оператор_U  
+            # вывести все препараты для докторов из базы 
             cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
                 drug.manufacturer, drug_category.id as drCatid,
                 drug_category.title as Drug_category,
@@ -680,6 +682,8 @@ def drugs():
                 ON drug.category_id=drug_category.id
                 order by drug.id""")
         mysql.connection.commit()
+        # передать полученный словарь словарей 
+        # в переменную и вернуть на страницу
         drugs=cursor.fetchall()
         return render_template('patient_drugs.html', drugs=drugs, userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы препаратов
 
@@ -704,9 +708,11 @@ def add_drug():
         drugCat = reg.get('drugCat')
         price = reg.get('price')
         status = reg.get('drug_status')
-        if session['user_role_id'] == 3:
+        if session['user_role_id'] == 3:    # Оператор_P
+            # индекс препарата для Врачей
             flagDrug = 0
-        if session['user_role_id'] == 4:
+        if session['user_role_id'] == 4:    # Оператор_P
+            # индекс препарата для Докторов
             flagDrug = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" INSERT INTO drug(ingridient, title, country,
@@ -727,6 +733,7 @@ def add_drug():
 
 @app.route('/drugs/<int:drugID>/edit', methods=['GET', 'POST'])
 def edit_drug(drugID):
+    """ Выполняет апдейт данных выбранного пользователем препарата """
     druginfo = get_drug_ID(drugID)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if request.method == 'POST':
@@ -749,6 +756,7 @@ def edit_drug(drugID):
 
 @app.route('/drugs/<int:drugID>/delete', methods=['GET', 'POST'])
 def delete_drug(drugID):
+    """ Удаляет выбранный пользователем препарат """
     druginfo = get_drug_ID(drugID)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if request.method == 'POST':
@@ -765,10 +773,13 @@ def delete_drug(drugID):
 # страница с информацией о выданных рецептах фармацевтами по городам
 @app.route('/rel-recipes', methods=['GET','POST'])
 def rel_recipes():
+    """ Возвращает данные о всех выданных рецептах """
     if 'loggedin' in session:
-        if session['user_role_id'] == 3:
+        if session['user_role_id'] in [3,8]: # Оператор_P, д1
+            # индекс пациента Врача
             flag = 0
-        if session['user_role_id'] == 4:
+        if session['user_role_id'] in [4,9]:# Оператор_U, д2
+            # индекс пациента Доктора
             flag = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" SELECT recipe.id, recipe.pacient_id,
