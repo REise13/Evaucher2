@@ -39,13 +39,7 @@
                             <dt class="col-sm-3">Посещение: </dt>
                             <dd class="col-sm-9">{{ recipeinfo['visit'] }}</dd>
                         </dl>
-                        {% if recipeinfo['rec_cat_id'] == 1 or recipeinfo['rec_cat_id'] == 2 %}
-                            <dl class="row">
-                                <dt class="col-sm-3">Баланс пациента: </dt>
-                                <dd class="col-sm-9">{{ recipeinfo['balance'] }} руб.</dd>
-                            </dl>
-                        {% endif %}
-                        {% if recipeinfo['rec_cat_id'] == 6 %}
+                        {% if recipeinfo['rec_cat_id'] in [1, 2, 6] %}
                             <dl class="row">
                                 <dt class="col-sm-3">Баланс пациента: </dt>
                                 <dd class="col-sm-9">{{ recipeinfo['balance'] }} руб.</dd>
@@ -137,7 +131,7 @@
                             <label for="recdrugs">Препараты: </dt>
                             <ul>
                                 {% for drug in recDrugs %}
-                                    {% if  drug['drug_id'] == 80 or drug['drug_id'] == 78 or drug['drug_id'] == 77 %}
+                                    {% if  drug['drug_id'] in [77, 78, 80] %}
                                     <li> Набор: Нормальные роды 5240 руб.</li>
                                     {% endif %}
                                 {% endfor %}
