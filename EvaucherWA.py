@@ -167,10 +167,10 @@ def search_patient():
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
             sname = request.form['sname'] #фамилия, полученная из поля формы на странице
-            if session['user_role_id'] in [1,3,8]: # Врач, Оператор_P, д1
+            if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
                 # идентификатор для пациента Врача
                 num = 0
-            if session['user_role_id'] in [7,4,9]: # Доктор, Оператор_U, д2
+            if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
                 # идентификатор для пациента Доктора
                 num = 1   
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -231,10 +231,10 @@ def patientreg():
         phone = reg['phone']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM pacient where sName=%s and fName=%s and patr=%s", (sname, fname, patr,))
-        if session['user_role_id'] in [1,3,8]: # Врач, Оператор_P, д1
+        if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
             # идентификатор для регистрируемого пациента Врачом
             num = 0
-        if session['user_role_id'] in [7,4,9]: # Доктор, Оператор_U, д2
+        if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
             # идентификатор для  регистрируемого пациента Доктором
             num = 1     
         patient = cursor.fetchall()
@@ -332,10 +332,10 @@ def patdata_edit(pat_id):
 def getdata(pat_id):
     """ Возвращает данные для выпадающих списков на форме выписки рецепта """
     patient = get_pat_ID(pat_id)
-    if session['user_role_id'] in [1,3,8]: # Врач, Оператор_P, д1
+    if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
         # идентификатор для пациента Врача
         num = 0
-    if session['user_role_id'] in [7,4,9]: # Доктор, Оператор_U, д2
+    if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
         # идентификатор для пациента Доктора
         num = 1      
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -764,15 +764,6 @@ def drugs():
         return render_template('patient_drugs.html', drugs=drugs, userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы препаратов
 
 
-@app.route('/add-drug')
-def select2():
-    """Возвращает данные для выпадающих списков на форме """
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT id, title AS drcategory FROM drug_category')
-    drugCat = cursor.fetchall()
-    return render_template('patient_add_drug.html', drugCat=drugCat)
-
-
 @app.route('/add-drug', methods=['GET', 'POST'])
 def add_drug():
     reg = request.form
@@ -851,10 +842,10 @@ def delete_drug(drugID):
 def rel_recipes():
     """ Возвращает данные о всех выданных рецептах """
     if 'loggedin' in session:
-        if session['user_role_id'] in [3,8]: # Оператор_P, д1
+        if session['user_role_id'] in [3,9]: # Оператор_P, д1
             # индекс пациента Врача
             flag = 0
-        if session['user_role_id'] in [4,9]:# Оператор_U, д2
+        if session['user_role_id'] in [4,8]:# Оператор_U, д2
             # индекс пациента Доктора
             flag = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -886,10 +877,10 @@ def rel_recipes():
 def written_recipes():
     """ Возвращает данные о всех выписанных рецептах """
     if 'loggedin' in session:
-        if session['user_role_id'] in [3,8]: # Оператор_P, д1
+        if session['user_role_id'] in [3,9]: # Оператор_P, д1
             # идентификатор  для пациента Врача
             num = 0
-        if session['user_role_id'] in [4,9]:# Оператор_U, д2
+        if session['user_role_id'] in [4,8]:# Оператор_U, д2
             # идентификатор для пациента Доктора
             num = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
