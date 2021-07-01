@@ -808,7 +808,14 @@ def rel_recipes():
 # страница с информацией о выписанных рецептах врачами
 @app.route('/written-recipes', methods=['GET','POST'])
 def written_recipes():
+    """ Возвращает данные о всех выписанных рецептах """
     if 'loggedin' in session:
+        if session['user_role_id'] in [3,8]: # Оператор_P, д1
+            # идентификатор  для пациента Врача
+            num = 0
+        if session['user_role_id'] in [4,9]:# Оператор_U, д2
+            # идентификатор для пациента Доктора
+            num = 1    
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" SELECT recipe.id, recipe.pacient_id, recipe.category_id, recipe.pharm_id,
                             recipe.createDate, recipe.price, recipe.status_id,
@@ -825,8 +832,8 @@ def written_recipes():
                             JOIN recipe_category ON recipe.category_id=recipe_category.id
                             JOIN recipe_status ON recipe.status_id=recipe_status.id
                             JOIN city ON recipe.city_id=city.id
-                            where recipe.price > 0
-                            order by recipe.createDate ASC """)
+                            WHERE recipe.price > 0 and pacient.flagReg=%s
+                            order by recipe.createDate ASC """, (num,))
         mysql.connection.commit()
         wrtRecipes = cursor.fetchall()
     return render_template('written_recipes.html', wrtRecipes=wrtRecipes, userrole=session['user_post'],
