@@ -671,6 +671,7 @@ def recipe_info(recID):
 
 @app.route('/<int:pat_id>/add-data', methods=['GET', 'POST'])
 def add_identific_data(pat_id):
+    """ Функция добавления идентификационных данных пациента """
     patient = get_pat_ID(pat_id)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if request.method=='POST' and request.form:
@@ -711,9 +712,11 @@ def get_user_limits(limitID):
 def limits():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if session['user_role_id'] == 3: # Оператор_P
-        flagRole = 1 # Врач
+        # идентификатор Врача
+        num = 1 
     if session['user_role_id'] == 4: # Оператор_U
-        flagRole = 7 # Доктор
+        # идентификатор Доктора
+        num = 7 
     cursor.execute(""" SELECT limits.id,
                         limits.indicator_limit, limits.indicator_used, limits.indicator_sum,
                         user.sName, user.fName, user.patr, user.phone_number as phone,
@@ -723,7 +726,7 @@ def limits():
                         JOIN user on limits.doctor_id=user.id
                         JOIN recipe_category on limits.category_id=recipe_category.id
                         JOIN user_post on user.post_id=user_post.id
-                        WHERE user.role_id=%s """, (flagRole,))
+                        WHERE user.role_id=%s """, (num,))
     limits = cursor.fetchall()
     return render_template('limits.html', limits=limits, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
@@ -731,6 +734,7 @@ def limits():
 
 @app.route('/limits/<int:limitID>/edit', methods = ['GET', 'POST'])
 def edit_limit(limitID):
+    """ Функция для изменения лимита в категории для выбранного пользователя """
     limituser =  get_user_limits(limitID)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(""" select limits.id, limits.indicator_limit, limits.indicator_used,
@@ -789,6 +793,7 @@ def drugs():
 
 @app.route('/add-drug', methods=['GET', 'POST'])
 def add_drug():
+    """ Добавить новый препарат в базу """
     reg = request.form
     if request.method == "POST":
         ingridient = reg.get('ingridient')
@@ -930,8 +935,9 @@ def written_recipes():
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
 
-@app.route('/get-report', methods=['GET', 'POST'])
-def get_report():
+@app.route('/get-report')
+def get_data_for_report_form():
+    """ Возвращает данные для выпадающих списков на форме составления отчета """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute('SELECT id, title as recCat FROM recipe_category')
     rec_cat = cursor.fetchall()
@@ -945,7 +951,12 @@ def get_report():
     drugs = cursor.fetchall()
     cursor.execute('SELECT id, title as status from recipe_status')
     rec_status = cursor.fetchall()
-    mysql.connection.commit()
+    return render_template('form_for_reports.html', rec_cat=rec_cat, diagnos=diagnos, gender=gender, cities=cities, drugs=drugs, rec_status=rec_status, userrole=session['user_post'],
+            userroleid=session['user_role_id'], userfio=session['user_fio'])
+
+
+@app.route('/get-report', methods=['GET', 'POST'])
+def get_report():
     if request.method == 'POST' and request.form:
         reg = request.form
         d1 = reg['startWD']
@@ -984,8 +995,8 @@ def get_report():
             JOIN diagnos on recipe.diag_id=diagnos.id
             JOIN drug on drug.id=crosstrecdrug.drug_id
             JOIN city ON recipe.city_id=city.id
-            where (recipe.createDate >= %s and recipe.createDate <=%s)
-             and pacient.age between %s and %s
+            where (createDate >= %s and createDate <=%s)
+             and age between %s and %s
             group by crosstrecdrug.rec_id """, (date1, date2, age1, age2,))
 
         elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 1:
@@ -1293,7 +1304,7 @@ def get_report():
         records = cursor.fetchall()
         return render_template('test2.html', records=records, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
-    return render_template('form_for_reports.html', rec_cat=rec_cat, diagnos=diagnos, gender=gender, cities=cities, drugs=drugs, rec_status=rec_status, userrole=session['user_post'],
+    return render_template('form_for_reports.html',userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
 
