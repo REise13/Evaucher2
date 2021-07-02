@@ -939,15 +939,24 @@ def written_recipes():
 def get_data_for_report_form():
     """ Возвращает данные для выпадающих списков на форме составления отчета """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT id, title as recCat FROM recipe_category')
+    if session['user_role_id'] in [3,9]:
+        num = 0
+    if session['user_role_id'] in [4, 8]:
+        num = 1    
+    cursor.execute("""SELECT id, title as recCat 
+        FROM recipe_category WHERE flagCat=%s""", (num,))
     rec_cat = cursor.fetchall()
     cursor.execute('SELECT id, title as gender FROM gender')
     gender = cursor.fetchall()
-    cursor.execute('SELECT id, title as diagnos FROM diagnos')
+    cursor.execute("""SELECT id, title as diagnos 
+        FROM diagnos WHERE flagDiag=%s""", (num,))
     diagnos = cursor.fetchall()
     cursor.execute('SELECT id, title as city FROM city')
     cities = cursor.fetchall()
-    cursor.execute('SELECT id, title as drug FROM drug')
+    if session['user_role_id'] in [4, 8]:
+        cursor.execute('SELECT id, title as drug FROM drug')
+    else:
+        cursor.execute('SELECT id, title as drug FROM drug WHERE flagDrug=%s', (num,))        
     drugs = cursor.fetchall()
     cursor.execute('SELECT id, title as status from recipe_status')
     rec_status = cursor.fetchall()
