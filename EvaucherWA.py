@@ -167,22 +167,29 @@ def search_patient():
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
             sname = request.form['sname'] #фамилия, полученная из поля формы на странице
-            if session['user_role_id'] in [1,2,3,9]: # Врач, Оператор_P, д1
-                # идентификатор для пациента Врача
-                num = 0
-            if session['user_role_id'] in [7,4,8,2]: # Доктор, Оператор_U, д2
-                # идентификатор для пациента Доктора
-                num = 1   
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            # поиск пациента по фамилии
-            cursor.execute("""SELECT pacient.id, pacient.sName, pacient.fName,
+            sql_doc = """SELECT pacient.id, pacient.sName, pacient.fName,
                                 pacient.patr, pacient.passport, pacient.parentinn,
                                 pacient.inn, pacient.phone
-                                FROM pacient WHERE sName=%s and flagReg=%s""", (sname, num,))
+                                FROM pacient WHERE sName=%s and flagReg=%s"""
+            sql_pharm =  """SELECT pacient.id, pacient.sName, pacient.fName,
+                                pacient.patr, pacient.passport, pacient.parentinn,
+                                pacient.inn, pacient.phone
+                                FROM pacient WHERE sName=%s """                   
+            if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
+                # идентификатор для пациента Врача
+                num = 0
+                cursor.execute(sql_doc, (sname, num,))
+            if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
+                # идентификатор для пациента Доктора
+                num = 1 
+                cursor.execute(sql_doc, (sname, num,))  
+            if session['user_role_id'] == 2:
+                cursor.execute(sql_pharm, (sname,))               
             mysql.connection.commit()
             patients = cursor.fetchall() # сохраняем полученные данные в переменной patients
             if len(patients) == 0:
-                flash('По вашему запросу: "'+str(sname)+ '" ничего не найдено','info')
+                flash('По вашему запросу: "'+str(sname)+ '" ничего не найдено','warning')
             return render_template('patient_search.html', patients=patients,  userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы поиска
     return render_template('patient_search.html', userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id'])
 
