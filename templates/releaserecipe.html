@@ -180,18 +180,52 @@
 
                             <hr>
                             <dl class="row">
-                                <dt class="col-sm-3">Сумма: </dt>
+                                <dt class="col-sm-3" >Сумма: </dt>
                                 <dd class="col-sm-9">{{ recipeinfo['rec_price'] }} руб.</dd>
+                                <input type="text" name="rec_sum" id="rec_sum"
+                                    value="{{ recipeinfo['rec_price'] }}" style="display: none;">
                             </dl>
                             <dl class="row">
                                 <dt class="col-sm-3">Статус рецепта: </dt>
                                 <dd class="col-sm-9">{{ recipeinfo['rec_status'] }}</dd>
                             </dl>
-                    <div class="form-group">
-                        {% if userroleid in [2, 3, 5] and recipeinfo['status_id'] == 1 %}
-                        <input type="submit" class="btn btn-primary" value="Отпустить рецепт">
-                        {% endif %}
+                    {% if userroleid in [2, 3, 5] and recipeinfo['status_id'] == 1 %}        
+                    <div class="form-group font-weight-bold">
+                        Выдан на сумму: <input type="text" name="price" id="price" required> руб.
                     </div>
+                    <div class="form-group">    
+                        <input type="submit" class="btn btn-primary" value="Отпустить рецепт">
+                    </div>
+                    {% endif %}
                 </form>
             </div>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function () {
+            $('input').on('keyup',function(){ 
+                var $this = $(this);
+                val = $this.val();
+                if(val > $('#rec_sum').val()) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышена сумма',
+                        content: 'Введенная сумма превышает сумму рецепта',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+            
+                        }
+                    });
+                }    
+            });
+        });
+
+        
+    </script>
 {% endblock %}
