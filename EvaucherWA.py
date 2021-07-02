@@ -983,7 +983,20 @@ def get_report():
             num = 0
         if session['user_role_id'] in [4, 8]: # Оператор_U, д2
             # идентификатор для категории, диагноза д2
-            num = 1 
+            num = 1
+        if rec_status == 2:
+            cursor.execute(""" SELECT drug_name, city_name, category, SUM(COUNT) AS total,
+                CASE drug_id
+                    WHEN 80 THEN 'Набор: Нормальные роды'
+                    WHEN 315 THEN 'Набор: Кесарево сечение'
+                    WHEN 285 THEN 'Набор: Взрослый хирургический'
+                    WHEN 359 THEN 'Набор: Малый хирургический'
+                    WHEN 250 THEN 'Набор: детский хирургический'    
+                END AS Nabor
+                FROM drugs_for_report
+                WHERE (endDate >=%s and endDate <='2021-03-31') and flagCat=%s
+                GROUP BY drug_name, city_name, category """, (date1, date2, num,))
+        releasing_drugs = cursor.fetchall()
         if gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 0 and visit == 0:
             cursor.execute(""" SELECT * FROM report_data 
                 WHERE (createDate >= %s and createDate <=%s)
@@ -1080,7 +1093,7 @@ def get_report():
         mysql.connection.commit()
         records = cursor.fetchall()
         return render_template('test2.html', records=records, userrole=session['user_post'],
-            userroleid=session['user_role_id'], userfio=session['user_fio'])
+           releasing_drugs=releasing_drugs, userroleid=session['user_role_id'], userfio=session['user_fio'])
     return render_template('form_for_reports.html',userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
