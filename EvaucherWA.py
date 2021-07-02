@@ -183,8 +183,8 @@ def search_patient():
             if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
                 # идентификатор для пациента Доктора
                 num = 1 
-                cursor.execute(sql_doc, (sname, num,))  
-            if session['user_role_id'] == 2:
+                cursor.execute(sql_doc, (sname, num,))   
+            if session['user_role_id'] == 2: # фармацевты 
                 cursor.execute(sql_pharm, (sname,))               
             mysql.connection.commit()
             patients = cursor.fetchall() # сохраняем полученные данные в переменной patients
@@ -199,18 +199,34 @@ def search_recipe():
     """ Возвращает основные данные о рецепте по коду рецепта из поля поиска на странице """
     if 'loggedin' in session:
         if request.method == "POST" and request.form:
-            rec = request.form['rec'] #фамилия, полученная из поля формы на странице
+            rec = request.form['rec'] # код рецепта, полученная из поля формы на странице
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-            # поиск пациента по имени или фамилии
-            cursor.execute("""SELECT pacient.id as pacient_id, pacient.sName, pacient.fName, pacient.patr,
-            recipe.id
+            # поиск по коду рецепта
+            sql_doc = """SELECT pacient.id as pacient_id, pacient.sName, 
+            pacient.fName, pacient.patr, recipe.id
             FROM recipe JOIN pacient
             on recipe.pacient_id=pacient.id
-            WHERE recipe.id=%s""", (rec,))
+            WHERE recipe.id=%s and pacient.flagReg=%s"""
+            sql_pharm = """SELECT pacient.id as pacient_id, pacient.sName, 
+            pacient.fName, pacient.patr, recipe.id
+            FROM recipe JOIN pacient
+            on recipe.pacient_id=pacient.id
+            WHERE recipe.id=%s"""
+
+            if session['user_role_id'] in [1,9]: # Врач, д1
+                # идентификатор для пациента Врача
+                num = 0
+                cursor.execute(sql_doc, (rec, num,))
+            if session['user_role_id'] in [7,8]: # Доктор, д2
+                # идентификатор для пациента Доктора
+                num = 1 
+                cursor.execute(sql_doc, (rec, num,))   
+            if session['user_role_id'] in [2, 3, 4]: # фармацевты, Оператор_P, Оператор_U 
+                cursor.execute(sql_pharm, (rec,))
             mysql.connection.commit()
             recipes = cursor.fetchall() # сохранить полученные данные в переменной
             if len(recipes) == 0:
-                flash('По вашему запросу ничего не найдено','info')
+                flash('По вашему запросу: "'+str(rec)+ '" ничего не найдено','warning')
             return render_template('recipe_search.html', recipes=recipes,  userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы поиска
     return render_template('recipe_search.html', userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id'])
 
