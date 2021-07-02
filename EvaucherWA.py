@@ -953,11 +953,6 @@ def get_data_for_report_form():
     diagnos = cursor.fetchall()
     cursor.execute('SELECT id, title as city FROM city')
     cities = cursor.fetchall()
-    if session['user_role_id'] in [4, 8]:
-        cursor.execute('SELECT id, title as drug FROM drug')
-    else:
-        cursor.execute('SELECT id, title as drug FROM drug WHERE flagDrug=%s', (num,))        
-    drugs = cursor.fetchall()
     cursor.execute('SELECT id, title as status from recipe_status')
     rec_status = cursor.fetchall()
     return render_template('form_for_reports.html', rec_cat=rec_cat, diagnos=diagnos, gender=gender, cities=cities, drugs=drugs, rec_status=rec_status, userrole=session['user_post'],
@@ -979,336 +974,109 @@ def get_report():
         age2 = int(reg.get('age2'))
         rec_cat = int(reg.get('rec_cat'))
         diagnos = int(reg.get('diagnos'))
-        drugs = int(reg.get('drugs'))
         cities = int(reg.get('cities'))
         rec_status = int(reg.get('rec_status'))
         visit = int(reg.get('visit'))
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        if gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0 and rec_status == 0 and visit == 0:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.doctor_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.city_id=city.id
+        if session['user_role_id'] in [3, 9]: # Оператор_P, д1
+            # идентификатор для категории, диагноза д1
+            num = 0
+        if session['user_role_id'] in [4, 8]: # Оператор_U, д2
+            # идентификатор для категории, диагноза д2
+            num = 1 
+        if gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 0 and visit == 0:
+            cursor.execute(""" SELECT * FROM report_data 
+                WHERE (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) 
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
+
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
+            cursor.execute(""" SELECT * FROM report_data
             where (createDate >= %s and createDate <=%s)
-             and age between %s and %s
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2,))
+                and (age between %s and %s) and rec_stat='Назначен врачом'
+                and flagCat=%s and flagDiag=%s""", (date1, date2, age1, age2, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.doctor_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.city_id=city.id
-            where (recipe.createDate >= %s and recipe.createDate <=%s)
-                and (pacient.age between %s and %s) and recipe.status_id=1
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2,))
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
+            cursor.execute(""" SELECT * FROM report_data
+            where (endDate >= %s and endDate <=%s)
+                and (age between %s and %s) 
+                and rec_stat='Выдан фармацевтом'
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.pharm_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.pharm_city=city.id
-            where (recipe.endDate >= %s and recipe.endDate <=%s)
-                and (pacient.age between %s and %s) and recipe.status_id=2
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2,))
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
+            cursor.execute(""" SELECT * FROM report_data
+            where (createDate >= %s and createDate <=%s)
+                and (age between %s and %s) and rec_stat='Назначен врачом'
+                and city_id=%s
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.doctor_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.city_id=city.id
-            where (recipe.createDate >= %s and recipe.createDate <=%s)
-                and (pacient.age between %s and %s) and recipe.status_id=1
-                and user.city_id=%s
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, cities))
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
+            cursor.execute(""" SELECT * FROM report_data
+            where (endDate >= %s and endDate <=%s)
+                and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                and city_id=%s
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.pharm_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.pharm_city=city.id
-            where (recipe.endDate >= %s and recipe.endDate <=%s)
-                and (pacient.age between %s and %s) and recipe.status_id=2
-                and user.city_id=%s
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, cities))
+        elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
+            cursor.execute(""" SELECT * FROM report_data
+            where (createDate >= %s and createDate <=%s)
+                and (age between %s and %s) and category_id=%s
+                and rec_stat='Назначен врачом'
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
 
-        elif gender == 0 and diagnos == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.doctor_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.city_id=city.id
-            where (recipe.createDate >= %s and recipe.createDate <=%s)
-                and (pacient.age between %s and %s) and recipe.category_id=%s
-                and recipe.status_id=1
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, rec_cat,))
+        elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
+            cursor.execute(""" SELECT * FROM report_data
+            where (endDate >= %s and endDate <=%s)
+                and (age between %s and %s) and category_id=%s
+                and rec_stat='Выдан фармацевтом'
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
 
-        elif gender == 0 and diagnos == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.pharm_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.pharm_city=city.id
-            where (recipe.endDate >= %s and recipe.endDate <=%s)
-                and (pacient.age between %s and %s) and recipe.category_id=%s
-                and recipe.status_id=2
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, rec_cat,))
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 1:
+            cursor.execute(""" SELECT * FROM report_data
+            where (createDate >= %s and createDate <=%s)
+                and (age between %s and %s) and rec_stat='Назначен врачом'
+                and visit=%s
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0 and rec_status == 1:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.doctor_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.city_id=city.id
-            where (recipe.createDate >= %s and recipe.createDate <=%s)
-                and (pacient.age between %s and %s) and recipe.status_id=1
-                and recipe.visit=%s
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, visit))
+        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 2:
+            cursor.execute(""" SELECT * FROM report_data
+            where (endDate >= %s and endDate <=%s)
+                and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                and visit=%s
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and drugs == 0 and cities == 0 and rec_status == 2:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.pharm_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.pharm_city=city.id
-            where (recipe.endDate >= %s and recipe.endDate <=%s)
-                and (pacient.age between %s and %s) and recipe.status_id=2
-                and recipe.visit=%s
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, visit))
+        elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 1:
+            cursor.execute(""" SELECT * FROM report_data
+            WHERE (createDate >= %s and createDate <=%s)
+                and (age between %s and %s) and diag_id=%s and rec_stat='Назначен врачом'
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.doctor_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.city_id=city.id
-            where (recipe.createDate >= %s and recipe.createDate <=%s)
-                and (pacient.age between %s and %s) and recipe.diag_id=%s and recipe.status_id=1
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, diagnos,))
+        elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 2:
+            cursor.execute(""" SELECT * FROM report_data
+            where (endDate >= %s and endDate <=%s)
+                and (age between %s and %s) and diag_id=%s and rec_stat='Выдан фармацевтом'
+                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
 
-        elif gender == 0 and rec_cat == 0 and drugs == 0 and cities == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-            recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-            pacient.patr) as fio, pacient.datebirth, pacient.age,
-            pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-            recipe_category.title as rec_cat, diagnos.title as diagnos,
-            group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-            recipe.endDate, city.title as city,
-            recipe.price, recipe.visit,
-            recipe_status.title as rec_stat
-            FROM recipe
-            JOIN pacient ON recipe.pacient_id=pacient.id
-            JOIN user ON recipe.pharm_id=user.id
-            JOIN gender ON pacient.gender_id=gender.id
-            JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-            JOIN recipe_category ON recipe.category_id=recipe_category.id
-            JOIN recipe_status ON recipe.status_id=recipe_status.id
-            JOIN diagnos on recipe.diag_id=diagnos.id
-            JOIN drug on drug.id=crosstrecdrug.drug_id
-            JOIN city ON recipe.pharm_city=city.id
-            where (recipe.endDate >= %s and recipe.endDate <=%s)
-                and (pacient.age between %s and %s) and recipe.diag_id=%s and recipe.status_id=2
-            group by crosstrecdrug.rec_id """, (date1, date2, age1, age2, diagnos,))
-        elif gender != 0 and rec_cat != 0 and diagnos != 0 and drugs != 0 and cities != 0 and visit != 0 and rec_status == 1:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-                recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-                pacient.patr) as fio, pacient.datebirth, pacient.age,
-                pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-                recipe_category.title as rec_cat, diagnos.title as diagnos,
-                group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-                recipe.endDate, city.title as city,
-                recipe.price, recipe.visit,
-                recipe_status.title as rec_stat
-                FROM recipe
-                JOIN pacient ON recipe.pacient_id=pacient.id
-                JOIN user ON recipe.doctor_id=user.id
-                JOIN gender ON pacient.gender_id=gender.id
-                JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-                JOIN recipe_category ON recipe.category_id=recipe_category.id
-                JOIN recipe_status ON recipe.status_id=recipe_status.id
-                JOIN diagnos on recipe.diag_id=diagnos.id
-                JOIN drug on drug.id=crosstrecdrug.drug_id
-                JOIN city ON recipe.city_id=city.id
-                where (recipe.createDate >= %s and recipe.createDate <=%s) and
-                    recipe.price > 0 and pacient.gender_id=%s
-                    and recipe.category_id=%s
-                    and user.city_id=%s and recipe.status_id=1
-                    and recipe.visit=%s and (pacient.age between %s and %s)
-                    and recipe.diag_id=%s and crosstrecdrug.drug_id=%s
-                group by crosstrecdrug.rec_id """, (date1, date2, gender, rec_cat,
-                                             cities, visit, age1, age2, diagnos,drugs))
+        elif gender != 0 and rec_cat != 0 and diagnos != 0 and cities != 0 and visit != 0 and rec_status == 1:
+            cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s) and
+                    price > 0 and gender_id=%s
+                    and category_id=%s
+                    and city_id=%s and rec_stat='Назначен врачом'
+                    and visit=%s and (age between %s and %s)
+                    and diag_id=%s 
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
+                                             cities, visit, age1, age2, diagnos, num, num,))
         else:
-            cursor.execute(""" SELECT crosstrecdrug.rec_id, recipe.category_id,
-                recipe.createDate, concat(pacient.sName, ' ', pacient.fName, ' ',
-                pacient.patr) as fio, pacient.datebirth, pacient.age,
-                pacient.inn, pacient.phone, pacient.parentinn, gender.title as gender,
-                recipe_category.title as rec_cat, diagnos.title as diagnos,
-                group_concat(repeat(drug.title, crosstrecdrug.count)) as list_drugs,
-                recipe.endDate, city.title as city,
-                recipe.price, recipe.visit,
-                recipe_status.title as rec_stat
-                FROM recipe
-                JOIN pacient ON recipe.pacient_id=pacient.id
-                JOIN user ON recipe.pharm_id=user.id
-                JOIN gender ON pacient.gender_id=gender.id
-                JOIN crosstrecdrug on recipe.id=crosstrecdrug.rec_id
-                JOIN recipe_category ON recipe.category_id=recipe_category.id
-                JOIN recipe_status ON recipe.status_id=recipe_status.id
-                JOIN diagnos on recipe.diag_id=diagnos.id
-                JOIN drug on drug.id=crosstrecdrug.drug_id
-                JOIN city ON recipe.pharm_city=city.id
-                where (recipe.endDate >= %s and recipe.endDate <=%s) and
-                    recipe.price > 0 and pacient.gender_id=%s
-                    and recipe.category_id=%s
-                    and user.city_id=%s and recipe.status_id=2
-                    and recipe.visit=%s and (pacient.age between %s and %s)
-                    and recipe.diag_id=%s and crosstrecdrug.drug_id=%s
-                group by crosstrecdrug.rec_id """, (date1, date2, gender, rec_cat,
-                                             cities, visit, age1, age2, diagnos,drugs))
+            cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s) and
+                    price > 0 and gender_id=%s
+                    and category_id=%s
+                    and city_id=%s and rec_stat='Выдан фармацевтом'
+                    and visit=%s and (age between %s and %s)
+                    and diag_id=%s 
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
+                                             cities, visit, age1, age2, diagnos, num, num,))
         mysql.connection.commit()
         records = cursor.fetchall()
         return render_template('test2.html', records=records, userrole=session['user_post'],

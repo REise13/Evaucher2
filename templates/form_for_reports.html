@@ -105,18 +105,6 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="drugs" class="text-uppercase font-weight-bold">Препарат</label>
-                                <div class="data_select">
-                                    <select name="drugs" id="drugs" placeholder="" class="selectpicker form-control" data-live-search="true">
-                                        <option>Выберите</option>
-                                        <option value="0">Все</option>
-                                        {% for drug in drugs %}
-                                            <option value="{{ drug['id'] }}">{{ drug['drug'] }}</option>
-                                        {% endfor %}
-                                    </select> <hr>
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label for="cities" class="text-uppercase font-weight-bold">Город</label>
                                 <div class="data_select">
                                     <select name="cities" id="cities" placeholder="" class="selectpicker form-control">
