@@ -36,86 +36,120 @@
             <!-- end -->
             <div class="row mb-3">
                 <div class="container-fluid">
-                        <button id="btn" class="btn btn-primary shadow-sm">Экспорт в Excel</button>
-                        <div class="table-scrollbar">
-                            <table id="tblData" class="table table-bordered table-hover table-fixed">
+                    <button id="btn" class="btn btn-primary shadow-sm mb-2">Экспорт отчета в Excel</button>
+                    {% if rec_status == 2 %}
+                    <button id="btn2" class="btn btn-info shadow-sm mb-2">Экспорт препаратов по городам</button>
+                    {% endif %}
+                    <div class="table-scrollbar">
+                        <table id="tblData" class="table table-bordered table-hover table-fixed">
+                            <thead class="thead text-white text-center text-uppercase">
+
+                                <tr>
+                                    <th><strong>Код</strong></th>
+                                    <th><strong>Дата выписки</strong></th>
+                                    <th><strong>Пациент</strong></th>
+                                    <th><strong>Номер телефона</strong></th>
+                                    <th><strong>Пол</strong></th>
+                                    <th><strong>Дата рождения</strong></th>
+                                    <th><strong>ИНН</strong></th>
+                                    <th><strong>ИНН родителя</strong></th>
+                                    <th><strong>Возраст</strong></th>
+                                    <th><strong>Код рецепта</strong></th>
+                                    <th><strong>Диагноз</strong></th>
+                                    <th><strong>Препараты</strong></th>
+                                    <th><strong>Дата выдачи</strong></th>
+                                    <th><strong>Город</strong></th>
+                                    <th><strong>Сумма</strong></th>
+                                    <th><strong>Посещение</strong></th>
+                                    <th><strong>Статус</strong></th>
+                                </tr>
+                            </thead>
+                        {% for record in records %}
+                            <tbody>
+                                <tr>
+                                    <td>{{ record['rec_id'] }}</td>
+                                    <td>{{ record['createDate'] }}</td>
+                                    <td>{{ record['fio'] }} </td>
+                                    {% if record['phone'] == None or record['phone'] == '' %}
+                                        <td>―</td>
+                                    {% else %}
+                                        <td> {{ record['phone'] }}</td>
+                                    {% endif %}
+                                    <td>{{ record['gender'] }}</td>
+                                    <td>{{ record['datebirth'] }}</td>
+                                    {% if record['inn'] == None or record['inn'] == '' %}
+                                        <td>―</td>
+                                    {% else %}
+                                        <td>{{ record['inn'] }}</td>
+                                    {% endif %}
+                                    {% if record['parentinn'] == None or record['parentinn'] == '' %}
+                                        <td>―</td>
+                                    {% else %}
+                                        <td>{{ record['parentinn'] }}</td>
+                                    {% endif %}
+                                    <td>{{ record['age'] }}</td>
+                                    <td>{{ record['rec_cat'] }}</td>
+                                    <td>{{ record['diagnos'] }}</td>
+                                    {% if record['category_id'] == 3 %}
+                                        <td>Набор: Нормальные роды</td>
+                                    {% elif record['category_id'] == 4 %}
+                                        <td>Набор: Кесарево сечение</td>
+                                    {% elif record['category_id'] == 5 %}
+                                        <td>Набор: Взрослый хирургический</td>
+                                    {% elif record['category_id'] == 7 %}
+                                        <td>Набор: Детский хирургический</td>
+                                    {% elif record['category_id'] == 10 %}
+                                        <td>Набор: Малый хирургический</td>
+                                    {% else %}
+                                        <td>{{ record['list_drugs'] }}</td>
+                                    {% endif %}
+                                    {% if record['endDate'] == None %}
+                                        <td>―</td>
+                                    {% else %}
+                                        <td>{{ record['endDate'] }}</td>
+                                    {% endif %}
+                                    <td>{{ record['city'] }}</td>
+                                    <td>{{ record['price'] }}</td>
+                                    <td>{{ record['visit'] }}</td>
+                                    <td>{{ record['rec_stat'] }}</td>
+                                </tr>
+                            </tbody>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    {% if rec_status == 2 %}
+                        <div class="table-scrollbar" style="display: none;">
+                            <table id="tblData2" class="table table-bordered table-hover table-fixed">
                                 <thead class="thead text-white text-center text-uppercase">
 
                                     <tr>
-                                        <th><strong>Код</strong></th>
-                                        <th><strong>Дата выписки</strong></th>
-                                        <th><strong>Пациент</strong></th>
-                                        <th><strong>Номер телефона</strong></th>
-                                        <th><strong>Пол</strong></th>
-                                        <th><strong>Дата рождения</strong></th>
-                                        <th><strong>ИНН</strong></th>
-                                        <th><strong>ИНН родителя</strong></th>
-                                        <th><strong>Возраст</strong></th>
-                                        <th><strong>Код рецепта</strong></th>
-                                        <th><strong>Диагноз</strong></th>
-                                        <th><strong>Препараты</strong></th>
-                                        <th><strong>Дата выдачи</strong></th>
+                                        {% if userroleid in [3, 9] %}
+                                            <th><strong>Препараты и наборы</strong></th>
+                                        {% else %}
+                                            <th><strong>Препараты</strong></th>
+                                        {% endif %}    
                                         <th><strong>Город</strong></th>
-                                        <th><strong>Сумма</strong></th>
-                                        <th><strong>Посещение</strong></th>
-                                        <th><strong>Статус</strong></th>
+                                        <th><strong>Категория</strong></th>
+                                        <th><strong>Количество</strong></th>
                                     </tr>
                                 </thead>
-                            {% for record in records %}
+                            {% for item in releasing_drugs %}
                                 <tbody>
-
                                     <tr>
-                                        <td>{{ record['rec_id'] }}</td>
-                                        <td>{{ record['createDate'] }}</td>
-                                        <td>{{ record['fio'] }} </td>
-                                        {% if record['phone'] == None or record['phone'] == '' %}
-                                            <td>―</td>
+                                        {% if item['Nabor'] != None %}
+                                            <td>{{ item['Nabor'] }}</td>
                                         {% else %}
-                                            <td> {{ record['phone'] }}</td>
-                                        {% endif %}
-                                        <td>{{ record['gender'] }}</td>
-                                        <td>{{ record['datebirth'] }}</td>
-                                        {% if record['inn'] == None or record['inn'] == '' %}
-                                            <td>―</td>
-                                        {% else %}
-                                            <td>{{ record['inn'] }}</td>
-                                        {% endif %}
-                                        {% if record['parentinn'] == None or record['parentinn'] == '' %}
-                                            <td>―</td>
-                                        {% else %}
-                                            <td>{{ record['parentinn'] }}</td>
-                                        {% endif %}
-                                        <td>{{ record['age'] }}</td>
-                                        <td>{{ record['rec_cat'] }}</td>
-                                        <td>{{ record['diagnos'] }}</td>
-                                        {% if record['category_id'] == 3 %}
-                                            <td>Набор: Нормальные роды</td>
-                                        {% elif record['category_id'] == 4 %}
-                                            <td>Набор: Кесарево сечение</td>
-                                        {% elif record['category_id'] == 5 %}
-                                            <td>Набор: Взрослый хирургический</td>
-                                        {% elif record['category_id'] == 7 %}
-                                            <td>Набор: Детский хирургический</td>
-                                        {% elif record['category_id'] == 10 %}
-                                            <td>Набор: Малый хирургический</td>
-                                        {% else %}
-                                            <td>{{ record['list_drugs'] }}</td>
-                                        {% endif %}
-                                        {% if record['endDate'] == None %}
-                                            <td>―</td>
-                                        {% else %}
-                                            <td>{{ record['endDate'] }}</td>
-                                        {% endif %}
-                                        <td>{{ record['city'] }}</td>
-                                        <td>{{ record['price'] }}</td>
-                                        <td>{{ record['visit'] }}</td>
-                                        <td>{{ record['rec_stat'] }}</td>
+                                            <td>{{ item['drug_name'] }}</td>
+                                        {% endif %}    
+                                        <td>{{ item['city_name'] }}</td>
+                                        <td>{{ item['category'] }} </td>
+                                        <td>{{ item['total'] }}</td>
                                     </tr>
-
                                 </tbody>
-                             {% endfor %}
+                            {% endfor %}
                             </table>
                         </div>
+                    {% endif %}    
                 </div>
             </div>
         </form>
@@ -126,6 +160,12 @@
    $('#btn').click(function () {
         $("#tblData").table2excel({
             filename: "Otchet_recepti.xls"
+        });
+    });
+
+    $('#btn2').click(function () {
+        $("#tblData2").table2excel({
+            filename: "Preparati_goroda.xls"
         });
     });
 </script>
