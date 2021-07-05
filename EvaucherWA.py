@@ -377,7 +377,7 @@ def getdata(pat_id):
                 ON drug.category_id=drug_category.id
                 WHERE drug.status_id=1 and (drug.flagDrug=0)
                 ORDER by drug.id""")
-    if session['user_role_id'] == [4,7]:
+    if session['user_role_id'] in [4,7]:
        cursor.execute(""" SELECT drug.id as drug_id, drug.ingridient, drug.title as drugname, drug.country,
                 drug.manufacturer, drug_category.id as drCatid, drug_category.title as Drug_category, drug.price
                 FROM drug JOIN drug_category
