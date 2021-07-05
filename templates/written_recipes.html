@@ -48,7 +48,9 @@
                                         <th>Пациент</th>
                                         <th>Врач</th>
                                         <th>Дата</th>
-                                        <th>Сумма</th>
+                                        {% if userroleid !=8 %}
+                                            <th>Сумма</th>
+                                        {% endif %}
                                         <th>Статус</th>
                                     </tr>
                                 </thead>
@@ -61,7 +63,9 @@
                                             <td>{{ recipe['pat_sname'] }} {{ recipe['pat_fname'] }} {{ recipe['pat_patr'] }}</td>
                                             <td>{{ recipe['doctor_sname'] }} {{ recipe['doctor_fname'] }} {{ recipe['doctor_patr'] }}</td>
                                             <td>{{ recipe['createDate'] }}</td>
-                                            <td>{{ recipe['price'] }}</td>
+                                            {% if userroleid !=8 %}
+                                                <td>{{ recipe['price'] }}</td>
+                                            {% endif %}
                                             <td>{{ recipe['rec_stat'] }}</td>
                                         </tr>
                                     </tbody>

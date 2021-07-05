@@ -59,7 +59,9 @@
                                     <th><strong>Препараты</strong></th>
                                     <th><strong>Дата выдачи</strong></th>
                                     <th><strong>Город</strong></th>
-                                    <th><strong>Сумма</strong></th>
+                                    {% if userroleid !=8 %}
+                                        <th><strong>Сумма</strong></th>
+                                    {% endif %}
                                     <th><strong>Посещение</strong></th>
                                     <th><strong>Статус</strong></th>
                                 </tr>
@@ -109,7 +111,9 @@
                                         <td>{{ record['endDate'] }}</td>
                                     {% endif %}
                                     <td>{{ record['city'] }}</td>
-                                    <td>{{ record['price'] }}</td>
+                                    {% if userroleid !=8 %}
+                                        <td>{{ record['price'] }}</td>
+                                    {% endif %}
                                     <td>{{ record['visit'] }}</td>
                                     <td>{{ record['rec_stat'] }}</td>
                                 </tr>
