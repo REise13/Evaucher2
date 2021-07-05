@@ -1,6 +1,6 @@
 {% extends 'templt_for_pages.html' %}
 
-{% block title %} Выданные рецепты {% endblock %}
+{% block title %} Выписанные рецепты {% endblock %}
 
 {% block content %}
 
@@ -21,7 +21,7 @@
 
 <!-- Форма поиска -->
     <div class="page-content p-5" id="content">
-        <h2 class="display-4 text-white">Выданные рецепты</h2>
+        <h2 class="display-4 text-white">Выписанные рецепты</h2>
         <div class="separator"></div>
         <div class="bg-white p-5 shadow-sm">
             <form role="form" action="{{ url_for('written_recipes') }}" method="POST">
