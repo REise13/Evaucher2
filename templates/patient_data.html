@@ -131,10 +131,8 @@
                         </div> <br>
 
                         <div class="form-group">
-                            {% if userroleid == 3 or userroleid == 1 or userroleid == 7 or userroleid == 2  or userroleid == 5 %}
-                            <a href="{{ url_for('patdata_edit', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Изменить данные</a>
-                            {% endif %}
-                            {% if userroleid == 1 or userroleid == 7 or userroleid == 3 %}
+                            {% if userroleid in [1, 3, 4, 7] %}
+                                <a href="{{ url_for('patdata_edit', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Изменить данные</a>
                                 <a href="{{ url_for('add', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Выписать рецепт</a>
                             {% endif %}
                         </div>

@@ -17,7 +17,7 @@
     <h2 class="display-4 text-white">Данные о рецепте</h2>
     <div class="separator"></div>
     <div class="row">
-        <div class="col-lg-7 mx-auto">
+        <div class="col-9 mx-auto">
             <div class="bg-white rounded-lg shadow-sm p-5">
                 <form role="form" action="{{ url_for('recipe_info', recID = recipeinfo['id']) }}" method="POST">
                     <!--flash-message-->
@@ -204,10 +204,12 @@
     
     <script>
         $(document).ready(function () {
-            $('input').on('keyup',function(){ 
+            $("input[type='text']").keyup(function(){ 
                 var $this = $(this);
                 val = $this.val();
-                if(val > $('#rec_sum').val()) {
+                $(':input[type="submit"]').prop('disabled', true)
+               
+                if (parseInt(val) > $('#rec_sum').val())    {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
@@ -222,7 +224,11 @@
             
                         }
                     });
-                }    
+                }
+                
+                else {
+                    $(':input[type="submit"]').prop('disabled', false)
+                }
             });
         });
 
