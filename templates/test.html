@@ -52,8 +52,8 @@
     <h2 class="display-4 text-white">Выписать рецепт</h2>
     <div class="separator"></div>
     <div class="row">
-        <div class="container w-100">
-            <div class="bg-white rounded-sm shadow-sm p-5">
+        <div class="container">
+            <div class="bg-white rounded-sm shadow-sm p-2">
                     <!-- flash сообщения -->
                         {% for message in get_flashed_messages(with_categories=True) %}
                             <div id="#alert" class="alert alert-{{ message[0] }} alert-dismissible w-50 fade show" role="alert">

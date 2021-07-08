@@ -14,6 +14,12 @@
         margin-left: 17rem;
         transition: all 0.4s;
     }
+
+    .table-scrollbar{
+        position: relative;
+        height: 250px;
+        overflow: auto;
+    }
 </style>
 
 <!-- Форма Карточка пациента -->
@@ -21,7 +27,7 @@
         <h2 class="display-4 text-white">О пациенте</h2>
         <div class="separator"></div>
         <div class="row">
-            <div class="container w-100">
+            <div class="container">
                 <div class="bg-white rounded-lg shadow-sm p-5">
                     <!-- Информация -->
                     <form role="form" action="{{ url_for('patient_data', pat_id=patient['id']) }}" method="POST">
@@ -33,7 +39,7 @@
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-			    {% endfor %}
+			                {% endfor %}
 			<!--end-->
                         <h6 class="text-info font-weight-bolder">Данные о пациенте</h6> <hr>
                         <dl class="row">
@@ -99,8 +105,8 @@
                             {% endif %}
                         </dl> <hr>
                         <p class="text-info h5 font-weight-bold">Выписанные рецепты: </p>
-                        <div class="">
-                            <table class="table table-bordered table-hover h-75">
+                        <div class="table-wrapper-scroll-y table-scrollbar">
+                            <table class="table table-bordered table-hover">
                                 <thead class="thead text-white text-center text-uppercase">
 
                                     <tr>
