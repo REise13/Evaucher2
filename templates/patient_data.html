@@ -142,21 +142,20 @@
                                 <a href="{{ url_for('add', pat_id=patient['id']) }}" class="btn btn-primary shadow-sm">Выписать рецепт</a>
                             {% endif %}
                         </div>
-                        <script>
-                            $(document).ready(function($){
-                                $(".rec-row").click(function(){
-                                    window.document.location = $(this).data("href");
-                                });
-                            });
-                        </script>
                     </form>
                 <!-- end -->
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-
-
-
+{% block script %}
+    <script>
+        $(document).ready(function($){
+            $(".rec-row").click(function(){
+                window.document.location = $(this).data("href");
+            });
+        });
+    </script>
 {% endblock %}

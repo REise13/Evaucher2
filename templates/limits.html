@@ -88,14 +88,16 @@
                 </div>
             </form>
         </div>
-        <!-- JS скрипт для ссылок в таблице -->
-        <script>
-            $(document).ready(function($){
-                $(".table-row").click(function(){
-                    window.document.location = $(this).data("href");
-                });
-            });
-        </script>
-        <!-- end -->
-
 {% endblock %}
+
+{% block script %}
+    <!-- JS скрипт для ссылок в таблице -->
+    <script>
+        $(document).ready(function($){
+            $(".table-row").click(function(){
+                window.document.location = $(this).data("href");
+            });
+        });
+    </script>
+    <!-- end -->
+{% endblock %}    

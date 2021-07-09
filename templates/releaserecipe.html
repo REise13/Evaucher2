@@ -201,37 +201,37 @@
             </div>
         </div>
     </div>
-    
-    <script>
-        $(document).ready(function () {
-            $("input[type='text']").keyup(function(){ 
-                var $this = $(this);
-                val = $this.val();
-                $(':input[type="submit"]').prop('disabled', true)
-               
-                if (parseInt(val) > $('#rec_sum').val())    {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышена сумма',
-                        content: 'Введенная сумма превышает сумму рецепта',
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-            
-                        }
-                    });
-                }
-                
-                else {
-                    $(':input[type="submit"]').prop('disabled', false)
-                }
-            });
-        });
+{% endblock %}
 
+{% block script %}
+<script>
+    $(document).ready(function () {
+        $("input[type='text']").keyup(function(){ 
+            var $this = $(this);
+            val = $this.val();
+            $(':input[type="submit"]').prop('disabled', true)
+           
+            if (parseInt(val) > $('#rec_sum').val())    {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'bootstrap',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышена сумма',
+                    content: 'Введенная сумма превышает сумму рецепта',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
         
-    </script>
+                    }
+                });
+            }
+            
+            else {
+                $(':input[type="submit"]').prop('disabled', false)
+            }
+        });
+    });
+</script>
 {% endblock %}

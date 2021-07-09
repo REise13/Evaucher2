@@ -35,18 +35,18 @@
                     <div class="container">
                         <input type="text" class="form-control mb-4" id="sname" name="sname"
                           placeholder="Введите фамилию пациента для поиска"><hr>
-                          {% for message in get_flashed_messages(with_categories=True) %}
-                          <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
-                              <p>{{ message[1] }}</p>
-                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                  <span aria-hidden="true">&times;</span>
-                              </button>
-                              <a role="button" data-href="{{ url_for('patientreg') }}" 
-                              class="btn-redirect btn btn-info text-white
-								mb-2 rounded-pill shadow-sm">Зарегистрировать пациента</button>
-							    </a>
-                          </div>
-                      {% endfor %}
+                        {% for message in get_flashed_messages(with_categories=True) %}
+                            <div id="#alert" class="alert alert-{{message[0]}} alert-dismissible w-50 fade show" role="alert">
+                                <p>{{ message[1] }}</p>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <a role="button" data-href="{{ url_for('patientreg') }}" 
+                                class="btn-redirect btn btn-info text-white
+                                    mb-2 rounded-pill shadow-sm">Зарегистрировать пациента</button>
+                                    </a>
+                            </div>
+                        {% endfor %}
 
                         <div class="table-scrollbar">
                             <table class="table table-bordered table-hover">
@@ -93,35 +93,35 @@
                 </div>
             </form>
         </div>
+{% endblock %}
 
-        <script>
-            $(document).ready(function(){
+{% block script %}
+    <script>
+        $(document).ready(function(){
 
-                $("#sname").on("keyup", function() {
-                    var value = $(this).val().toLowerCase();
-                    $("#tableSearch tr").filter(function() {
-                        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-                    });
+            $("#sname").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#tableSearch tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
                 });
             });
-        </script>
+        });
+    </script>
 
-        <!-- JS скрипт для ссылок в таблице -->
-        <script>
-            $(document).ready(function($){
-                $(".table-row").click(function(){
-                    window.document.location = $(this).data("href");
-                });
+    <!-- JS скрипт для ссылок в таблице -->
+    <script>
+        $(document).ready(function($){
+            $(".table-row").click(function(){
+                window.document.location = $(this).data("href");
             });
-        </script>
+        });
+    </script>
 
-        <script>
-            $(document).ready(function($){
-                $(".btn-redirect").click(function(){
-                    window.document.location = $(this).data("href");
-                });
+    <script>
+        $(document).ready(function($){
+            $(".btn-redirect").click(function(){
+                window.document.location = $(this).data("href");
             });
-        </script>
-        <!-- end -->
-
+        });
+    </script>
 {% endblock %}

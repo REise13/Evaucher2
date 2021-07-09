@@ -366,9 +366,16 @@ def getdata(pat_id):
     diagnosList = cursor.fetchall()
     cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s', (num,))
     recCat = cursor.fetchall()
-    cursor.execute(""" SELECT id, title as drug_cat
-                        from drug_category
-                        where drug_category.title not like '%набор%' """)
+    if session['user_role_id'] in [1,3]:
+        cursor.execute(""" SELECT id, title as drug_cat
+                            from drug_category
+                            where drug_category.title not like '%набор%' and flagCat=0 
+                            ORDER BY title """)
+    if session['user_role_id'] in [4,7]:
+       cursor.execute(""" SELECT id, title as drug_cat
+                            from drug_category
+                            where drug_category.title not like '%набор%' 
+                            ORDER BY title """)                         
     drugCat = cursor.fetchall()
     if session['user_role_id'] in [1,3]:
         cursor.execute(""" SELECT drug.id as drug_id, drug.ingridient, drug.title as drugname, drug.country,
@@ -385,7 +392,7 @@ def getdata(pat_id):
                 WHERE drug.status_id=1 
                 ORDER by drug.id""")             
     selectDrugList = cursor.fetchall()
-    return render_template('test.html', patient=patient,diagnosList=diagnosList,
+    return render_template('patient_addrecipe.html', patient=patient,diagnosList=diagnosList,
                         recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList)
 
 
@@ -472,19 +479,19 @@ def add(pat_id):
                 # и выписка рецепта невозможна
                 if len(nabor) !=0 and category == 3:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 4:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 5:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 7:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 if len(nabor) !=0 and category == 10:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 # иначе вносим данные в базу 
                 cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
@@ -519,7 +526,7 @@ def add(pat_id):
                     # и сообщение с предупреждением
                     if balance < price:
                         flash('Это посещение: ' +str(vis) +'.' + '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
-                        return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                        return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                     else:
                         # иначе вносим данные в базу
                         # обновленный баланс пациента
@@ -549,7 +556,7 @@ def add(pat_id):
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
-                      return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                      return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                     else:
                         # если сумма данного рецепта не превышает баланса, 
                         # то вносим данные в базу
@@ -578,7 +585,7 @@ def add(pat_id):
                 elif reccat == 3 or reccat==4 or reccat==5 or reccat==7 or reccat == 10:
                     # если выбранная категория совпадает с категорией выбанного набора 
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
-                    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+                    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 else:
                     # иначе вносим данные в базу
                     vv = int(totalrecipes[0]['count']) + 1
@@ -601,7 +608,7 @@ def add(pat_id):
                     mysql.connection.commit()
                     flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                     return redirect(url_for('patient_data', pat_id=patient['id'],))
-    return render_template('test.html', patient=patient, userroleid=session['user_role_id'])
+    return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
 
 
 @app.route('/recipeinfo/<int:recID>', methods=['GET', 'POST'])
@@ -1101,7 +1108,7 @@ def get_report():
                                              cities, visit, age1, age2, diagnos, num, num,))
         mysql.connection.commit()
         records = cursor.fetchall()
-        return render_template('test2.html', records=records, userrole=session['user_post'], rec_status=rec_status,
+        return render_template('report.html', records=records, userrole=session['user_post'], rec_status=rec_status,
            releasing_drugs=releasing_drugs, userroleid=session['user_role_id'], userfio=session['user_fio'])
     return render_template('form_for_reports.html',userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
