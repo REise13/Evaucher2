@@ -679,9 +679,7 @@ def recipe_info(recID):
                         (session['id'], datetime.datetime.today(), '127.0.0.1', recipeinfo['pacient_id'], recID,))
         mysql.connection.commit()
         flash('Рецепт отпущен. Код рецепта: ' + str(recID), 'success')
-        return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs,
-            userroleid=session['user_role_id'], userfio=session['user_fio'])
-
+        return redirect(url_for('recipe_info', recID=recID))
     return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs,
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 

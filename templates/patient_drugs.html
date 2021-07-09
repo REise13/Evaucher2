@@ -37,6 +37,8 @@
                 <div class="container-fluid">
                     <div class="col">
                         <a href="{{ url_for('add_drug') }}" class="btn btn-primary shadow-sm">Добавить препарат</a> <hr>
+                        <input type="text" class="form-control mb-4" id="drugSearch" name="drugSearch"
+                          placeholder="Поиск">
                         <div class="table-scrollbar">
                             <table id="drugsData" class="table table-bordered table-hover table-fixed">
                                 <thead class="thead text-white text-uppercase">
@@ -52,7 +54,7 @@
                                     </tr>
                                 </thead>
 
-                                <tbody>
+                                <tbody id="tableData">
                                     {% for druginfo in drugs %}
                                     <tr>
                                         <td>
@@ -90,5 +92,17 @@
         $(document).ready(function() {
             $('.selectpicker').selectpicker();
     });
+    </script>
+
+    <script>
+        $(document).ready(function(){
+
+            $("#drugSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#tableData tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
     </script>
 {% endblock %}
