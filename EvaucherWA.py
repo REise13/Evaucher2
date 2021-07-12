@@ -806,6 +806,24 @@ def drugs():
         return render_template('patient_drugs.html', drugs=drugs, userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы препаратов
 
 
+@app.route('/add-drug')
+def select2():
+    """Возвращает данные для выпадающих списков на форме patient_add_drug.html """
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if session['user_role_id'] == 3:
+        cursor.execute(""" SELECT id, title as drug_cat
+                            from drug_category
+                            where drug_category.title not like '%набор%' and flagCat=0 
+                            ORDER BY title """)
+    if session['user_role_id'] == 4:
+       cursor.execute(""" SELECT id, title as drug_cat
+                            from drug_category
+                            where drug_category.title not like '%набор%' 
+                            ORDER BY title """)        
+    drugCat = cursor.fetchall()
+    return render_template('patient_add_drug.html', drugCat=drugCat)
+
+
 @app.route('/add-drug', methods=['GET', 'POST'])
 def add_drug():
     """ Добавить новый препарат в базу """

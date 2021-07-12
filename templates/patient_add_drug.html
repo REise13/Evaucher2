@@ -50,8 +50,9 @@
                             <label for="drugCat">Категория</label>
                             <div class="data_select">
                                 <select  name="drugCat" id="drugCat" placeholder="Не выбрано" required class="selectpicker">
+                                    <option value="">Выберите</option>
                                     {% for cat in drugCat %}
-                                        <option value="{{ cat['id'] }}">{{ cat['drcategory'] }}</option>
+                                        <option value="{{ cat['id'] }}">{{ cat['drug_cat'] }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -70,7 +71,7 @@
                                 </select>
                             </div>
                         </div>
-                        <input type="submit" value="Добавить">
+                        <input type="submit" class="btn btn-primary" value="Добавить">
                     </form>
                 </div>
             </div>
