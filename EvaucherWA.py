@@ -444,6 +444,11 @@ def add(pat_id):
             # а если категория 097, 
             # то начальный баланс пациента равен
             pat_balance = 1500
+        if category in [11,12, 15, 19]:
+            pat_balance = 1960   
+
+        if category == 18:
+            pat_balance = 650     
         # создаем переменную посещения пациентом данного врача
         # по умолчанию оно равно 1 (первое посещение) 
         visit = 1
@@ -553,6 +558,72 @@ def add(pat_id):
                     # если катеория 097
                     # проверяем баланс также, как при предудущих категориях
                     balance = 1500 - sumprice
+                    vis = int(totalrecipes[0]['count']) + 1
+                    if balance < price:
+                      flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
+                      return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
+                    else:
+                        # если сумма данного рецепта не превышает баланса, 
+                        # то вносим данные в базу
+                        b2 = balance
+                        vv = int(totalrecipes[0]['count']) + 1
+                        cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
+                        cursor.execute(""" INSERT INTO
+                                    recipe(pacient_id, doctor_id, createDate, category_id,
+                                    diag_id, status_id, price, balance, visit, city_id)
+                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                    category, diagnos, status, price, b2, vv, city))
+                        mysql.connection.commit()
+                        cursor.execute('SELECT last_insert_id() as recipeID')
+                        recipe_id = cursor.fetchone()
+                        for l in drugList:
+                            drug, i = l
+                            if len(l) !=2:
+                                cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s, %s)',(recipe_id['recipeID'], drugs, res))
+                            else:
+                                cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s, %s)',(recipe_id['recipeID'], drug, i))
+                        cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
+                            (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
+                        mysql.connection.commit()
+                        flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
+                        return redirect(url_for('patient_data', pat_id=patient['id'],))
+                elif reccat in [11, 12, 15, 19]:
+                    # если катеория 099.1, 099.2, 100.2 или 101.2
+                    # проверяем баланс также, как при предудущих категориях
+                    balance = 1960 - sumprice
+                    vis = int(totalrecipes[0]['count']) + 1
+                    if balance < price:
+                      flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
+                      return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
+                    else:
+                        # если сумма данного рецепта не превышает баланса, 
+                        # то вносим данные в базу
+                        b2 = balance
+                        vv = int(totalrecipes[0]['count']) + 1
+                        cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
+                        cursor.execute(""" INSERT INTO
+                                    recipe(pacient_id, doctor_id, createDate, category_id,
+                                    diag_id, status_id, price, balance, visit, city_id)
+                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                    category, diagnos, status, price, b2, vv, city))
+                        mysql.connection.commit()
+                        cursor.execute('SELECT last_insert_id() as recipeID')
+                        recipe_id = cursor.fetchone()
+                        for l in drugList:
+                            drug, i = l
+                            if len(l) !=2:
+                                cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s, %s)',(recipe_id['recipeID'], drugs, res))
+                            else:
+                                cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s, %s)',(recipe_id['recipeID'], drug, i))
+                        cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
+                            (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
+                        mysql.connection.commit()
+                        flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
+                        return redirect(url_for('patient_data', pat_id=patient['id'],))
+                elif reccat == 18:
+                    # если катеория 101.1
+                    # проверяем баланс также, как при предудущих категориях
+                    balance = 650 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')

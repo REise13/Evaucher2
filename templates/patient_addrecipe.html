@@ -1402,7 +1402,9 @@
 
         $('#price').val(total.toFixed(0));
 
-        if($("#recCat option:selected").val() == 6 && $('#price').val() > 1500) {
+        var selCat = $("#recCat option:selected").val();
+
+        if(selCat == 6 && $('#price').val() > 1500) {
             $.confirm({
                 icon: 'fa fa-exclamation',
                 theme: 'modern',
@@ -1420,7 +1422,7 @@
             });
         }
 
-        else if( $("#recCat option:selected").val() == 1 && $('#price').val() > 1850) {
+        else if( selCat == 1 && $('#price').val() > 1850) {
             $.confirm({
                 icon: 'fa fa-exclamation',
                 theme: 'modern',
@@ -1438,7 +1440,7 @@
             });
         }
 
-        else if($("#recCat option:selected").val() == 2 && $('#price').val() > 1850) {
+        else if(selCat == 2 && $('#price').val() > 1850) {
             $.confirm({
                 icon: 'fa fa-exclamation',
                 theme: 'modern',
@@ -1446,6 +1448,42 @@
                 type: 'red',
                 title: 'Превышен лимит',
                 content: 'Превышен лимит в 1850 рублей на кормящих.',
+                buttons: {
+                    ОК: function () {
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+
+                }
+
+            });
+        }
+
+        else if((selCat == 11 || selCat == 12 || selCat == 15 || selCat == 19) && $('#price').val() > 1960) {
+            $.confirm({
+                icon: 'fa fa-exclamation',
+                theme: 'modern',
+                animation: 'scale',
+                type: 'red',
+                title: 'Превышен лимит',
+                content: 'Превышен лимит в 1960 рублей.',
+                buttons: {
+                    ОК: function () {
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+
+                }
+
+            });
+        }
+
+        else if(selCat == 18 && $('#price').val() > 650) {
+            $.confirm({
+                icon: 'fa fa-exclamation',
+                theme: 'modern',
+                animation: 'scale',
+                type: 'red',
+                title: 'Превышен лимит',
+                content: 'Превышен лимит в 650 рублей.',
                 buttons: {
                     ОК: function () {
                         $(':input[type="submit"]').prop('disabled', true);
