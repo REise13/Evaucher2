@@ -740,7 +740,10 @@ def recipe_info(recID):
         rec_price = int(recipes['price'])
         difference = rec_price - pharm_sum
         balance = recipes['balance']
-        upd_bal = balance + difference
+        if recipes['visit'] > 1:
+            upd_bal = balance + difference
+        else:
+            upd_bal = recipes['balance']    
         # если рецепт не отпущен фармацевтом, 
         # то вносим изменения в базу  по айди выбранныго рецепта
         cursor.execute("""UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s, balance=%s, 

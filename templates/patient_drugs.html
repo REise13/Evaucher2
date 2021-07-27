@@ -58,7 +58,7 @@
                                     {% for druginfo in drugs %}
                                     <tr>
                                         <td>
-                                            <a href="{{ url_for('edit_drug', drugID = druginfo['id']) }}" class="btn btn-outline-primary shadow-sm">Изменить</a>
+                                            <a href="{{ url_for('edit_drug', drugID = druginfo['id']) }}" class="btn btn-outline-info shadow-sm">Изменить</a>
                                                 <br><br>
                                             <a href="{{ url_for('delete_drug', drugID = druginfo['id']) }}" class="btn btn-outline-danger shadow-sm">Удалить</a>
                                         </td>
