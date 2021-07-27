@@ -37,7 +37,7 @@
             <div class="row mb-3">
                 <div class="container-fluid">
                     <a id="btn" href="#!" class="btn btn-primary shadow-sm mb-2">Экспорт отчета в Excel</a>
-                    {% if rec_status == 2  %}
+                    {% if rec_status == 2 and records|length > 1 %}
                         <a id="btn2" href="#!" class="btn btn-info shadow-sm mb-2">Выданные препараты  по городам</a>
                     {% endif %}
                     <div class="table-scrollbar">
@@ -59,7 +59,7 @@
                                     <th><strong>Препараты</strong></th>
                                     <th><strong>Дата выдачи</strong></th>
                                     <th><strong>Город</strong></th>
-                                    {% if userroleid !=8 %}
+                                    {% if userroleid not in [4,8] %}
                                         <th><strong>Сумма</strong></th>
                                     {% endif %}
                                     <th><strong>Посещение</strong></th>
@@ -111,7 +111,7 @@
                                         <td>{{ record['endDate'] }}</td>
                                     {% endif %}
                                     <td>{{ record['city'] }}</td>
-                                    {% if userroleid !=8 %}
+                                    {% if userroleid not in [4,8] %}
                                         <td>{{ record['price'] }}</td>
                                     {% endif %}
                                     <td>{{ record['visit'] }}</td>
