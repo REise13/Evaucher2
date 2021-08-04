@@ -17,7 +17,7 @@
     <div class="separator"></div>
     <div class="drug-form">
         <div class="row">
-            <div class="container w-50">
+            <div class="container">
                 <div class="registr-form bg-white p-5 rounded shadow-sm">
                     <form role="form" action="{{ url_for('add_drug') }}" method="POST">
                         <!-- flash сообщения -->
@@ -49,7 +49,8 @@
                         <div class="form-group">
                             <label for="drugCat">Категория</label>
                             <div class="data_select">
-                                <select  name="drugCat" id="drugCat" placeholder="Не выбрано" required class="selectpicker">
+                                <select  name="drugCat" id="drugCat" placeholder="Не выбрано" 
+                                data-live-search="true" required class="selectpicker form-control">
                                     <option value="">Выберите</option>
                                     {% for cat in drugCat %}
                                         <option value="{{ cat['id'] }}">{{ cat['drug_cat'] }}</option>
@@ -64,7 +65,7 @@
                         <div class="form-group">
                             <label for="drug_status">Статус</label>
                             <div class="data_select">
-                                <select  name="drug_status" id="drug_status" placeholder="Не выбрано" required class="selectpicker">
+                                <select  name="drug_status" id="drug_status" placeholder="Не выбрано" required class="selectpicker form-control">
                                     <option value="">Выберите</option>
                                     <option value="1">В наличии</option>
                                     <option value="2">Нет в наличии</option>

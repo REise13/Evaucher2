@@ -189,7 +189,7 @@
                                 <dt class="col-sm-3">Статус рецепта: </dt>
                                 <dd class="col-sm-9">{{ recipeinfo['rec_status'] }}</dd>
                             </dl>
-                    {% if userroleid in [2, 3, 4] and recipeinfo['status_id'] == 1 and drug['drug_id'] not in  [78, 77, 80, 285, 250, 315, 359] %}        
+                    {% if userroleid in [2, 3, 4] and recipeinfo['status_id'] == 1 %}        
                     <div class="form-group font-weight-bold">
                         Выдан на сумму: <input type="text" name="price" id="price" required> руб.
                     </div>
