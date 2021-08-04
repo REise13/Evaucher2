@@ -641,7 +641,7 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat == 3 or reccat==4 or reccat==5 or reccat==7 or reccat == 10:
+                elif reccat in [3, 4, 5, 7, 10]:
                     # если выбранная категория совпадает с категорией выбанного набора 
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
@@ -724,26 +724,12 @@ def recipe_info(recID):
         endDate = datetime.datetime.today()
         pharm_sum = int(request.form['price'])
         status = 2
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        rec_price = int(recipes['price'])
-        balance = recipes['balance']
-        bal_reserve = recipes['bal_reserve']
-        if recipes['status_id'] == 1:
-            if recipes['visit'] > 1:
-                difference = rec_price - pharm_sum
-                upd_bal = balance + difference
-            else:
-                upd_bal = recipes['balance']
-        if recipes['status_id'] == 2:
-            if recipes['visit'] > 1:
-                upd_bal = bal_reserve - pharm_sum
-            else:
-                upd_bal = bal_reserve                
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)       
         # если рецепт не отпущен фармацевтом, 
         # то вносим изменения в базу  по айди выбранныго рецепта
-        cursor.execute("""UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s, balance=%s, 
+        cursor.execute("""UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s, 
             price=%s, pharm_city=%s WHERE id=%s""", 
-            (pharm_id, endDate, status, upd_bal, pharm_sum, pharm_city, recID,))
+            (pharm_id, endDate, status, pharm_sum, pharm_city, recID,))
         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Отпустил рецепт")',
                         (session['id'], datetime.datetime.today(), '127.0.0.1', recipeinfo['pacient_id'], recID,))
         mysql.connection.commit()
