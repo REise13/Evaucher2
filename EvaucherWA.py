@@ -488,9 +488,9 @@ def add(pat_id):
                 # иначе вносим данные в базу 
                 cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
-                                    diag_id, status_id, price, balance, bal_reserve, visit, city_id)
-                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
-                                                                    category, diagnos, status, price, pat_balance, pat_balance,  visit, city))
+                                    diag_id, status_id, price, balance, visit, city_id)
+                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                    category, diagnos, status, price, pat_balance,  visit, city))
                 mysql.connection.commit()
                 cursor.execute('SELECT last_insert_id() as recipeID')
                 recipe_id = cursor.fetchone()
@@ -529,9 +529,9 @@ def add(pat_id):
                         cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
                         cursor.execute(""" INSERT INTO
                                         recipe(pacient_id, doctor_id, createDate, category_id,
-                                        diag_id, status_id, price, balance, bal_reserve, visit, city_id)
-                                    VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
-                                                                        category, diagnos, status, price, b2, b2, vv, city))
+                                        diag_id, status_id, price, balance, visit, city_id)
+                                    VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                        category, diagnos, status, price, b2, vv, city))
                         mysql.connection.commit()
                         cursor.execute('SELECT last_insert_id() as recipeID')
                         recipe_id = cursor.fetchone()
@@ -558,9 +558,9 @@ def add(pat_id):
                         cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
                         cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
-                                    diag_id, status_id, price, balance, bal_reserve, visit, city_id)
-                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
-                                                                    category, diagnos, status, price, b2, b2, vv, city))
+                                    diag_id, status_id, price, balance, visit, city_id)
+                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                    category, diagnos, status, price, b2, vv, city))
                         mysql.connection.commit()
                         cursor.execute('SELECT last_insert_id() as recipeID')
                         recipe_id = cursor.fetchone()
@@ -591,9 +591,9 @@ def add(pat_id):
                         cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
                         cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
-                                    diag_id, status_id, price, balance, bal_reserve, visit, city_id)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
-                                                                    category, diagnos, status, price, b2, b2, vv, city))
+                                    diag_id, status_id, price, balance, visit, city_id)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                    category, diagnos, status, price, b2, vv, city))
                         mysql.connection.commit()
                         cursor.execute('SELECT last_insert_id() as recipeID')
                         recipe_id = cursor.fetchone()
@@ -624,9 +624,9 @@ def add(pat_id):
                         cursor.execute('update pacient set Visits=Visits+1 where id=%s', (pat_id,))
                         cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
-                                    diag_id, status_id, price, balance, bal_reserve, visit, city_id)
-                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
-                                                                    category, diagnos, status, price, b2, b2, vv, city))
+                                    diag_id, status_id, price, balance, visit, city_id)
+                                VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                    category, diagnos, status, price, b2, vv, city))
                         mysql.connection.commit()
                         cursor.execute('SELECT last_insert_id() as recipeID')
                         recipe_id = cursor.fetchone()
@@ -650,9 +650,9 @@ def add(pat_id):
                     vv = int(totalrecipes[0]['count']) + 1
                     cursor.execute(""" INSERT INTO
                                         recipe(pacient_id, doctor_id, createDate, category_id,
-                                        diag_id, status_id, price, balance, bal_reserve, visit, city_id)
-                                    VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
-                                                                        category, diagnos, status, price, price, price, vv, city))
+                                        diag_id, status_id, price, balance, visit, city_id)
+                                    VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (pat_id, doctor_id, createDate,
+                                                                        category, diagnos, status, price, price, vv, city))
                     mysql.connection.commit()
                     cursor.execute('SELECT last_insert_id() as recipeID')
                     recipe_id = cursor.fetchone()
