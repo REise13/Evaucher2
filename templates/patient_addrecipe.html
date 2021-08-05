@@ -2,6 +2,7 @@
 
 {% block title %} Выписать рецепт {% endblock %}
 
+
 {% block content %}
 <style>
     input[type=checkbox] {
@@ -70,6 +71,9 @@
                                     <dd class="col-sm-9">{{ patient['fio'] }}</dd>
                                 </dl>
                             </div>
+                            <input type="hidden" name="pat_id" value="" id="pat_id">
+                            <input type="hidden" name="cat_id" value="" id="cat_id" >
+
                             <div class="form-group">
                                 <label for="diagnos" class="font-weight-bold">Диагноз</label>
                                 <div class="data-select"></div>
@@ -86,7 +90,7 @@
                             <div class="form-group">
                                 <label for="recCat" class="font-weight-bold">Категория рецепта</label>
                                 <div class="data-select">
-                                    <select name="recCatlist" id="recCat" onChange="Selected(this)"
+                                    <select name="recCatlist" id="recCat" 
                                         class="form-control" data-width="auto" required>
                                         <option value="">Выберите</option>
                                         {% for cat in recCat %}
@@ -98,7 +102,7 @@
                             <div class="form-group" id="drugsCat" style="display:none;">
                                 <label for="drugCat" class="font-weight-bold">Категория препаратов</label>
                                 <div class="data-select">
-                                    <select name="drugCat" id="drugCat" onChange="Selected2(this)"
+                                    <select name="drugCat" id="drugCat" 
                                         class="form-control" data-width="auto" required>
                                         <option value="">Выберите</option>
                                         {% for cat in drugCat %}
@@ -1062,303 +1066,316 @@
 
 <!-- Block script -->
 {% block script %}
-    <script>
-    $(document).ready(function () {
-    // make sure labels are drawn in the correct state
-        $('label').each(function () {
-            if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
-        });
-
-        // toggle label css when checkbox is clicked
-        $(':checkbox').click(function (e) {
-            var checked = $(this).attr('checked');
-            $(this).closest('label').toggleClass('selected', checked);
-        });
-    });
-    </script>
-
-
-    <script>
-    function Selected(recCat) {
-        var rec = recCat.value;
-        if (rec == 10) {
-            document.getElementById("NaborHM").style.display='block';
-            document.getElementById("NaborNR").style.display='none';
-            document.getElementById("NaborKS").style.display='none';
-            document.getElementById("NaborHB").style.display='none';
-            document.getElementById("NaborHD").style.display='none';
-            document.getElementById("drugsCat").style.display='none';
-        }
-        else if (rec == 3) {
-            document.getElementById("NaborNR").style.display='block';
-            document.getElementById("NaborHM").style.display='none';
-            document.getElementById("NaborKS").style.display='none';
-            document.getElementById("NaborHB").style.display='none';
-            document.getElementById("NaborHD").style.display='none';
-            document.getElementById("drugsCat").style.display='none';
-        }
-        else if (rec == 4) {
-            document.getElementById("NaborKS").style.display='block';
-            document.getElementById("NaborNR").style.display='none';
-            document.getElementById("NaborHM").style.display='none';
-            document.getElementById("NaborHB").style.display='none';
-            document.getElementById("NaborHD").style.display='none';
-            document.getElementById("drugsCat").style.display='none';
-        }
-        else if (rec == 5) {
-            document.getElementById("NaborHB").style.display='block';
-            document.getElementById("NaborKS").style.display='none';
-            document.getElementById("NaborNR").style.display='none';
-            document.getElementById("NaborHM").style.display='none';
-            document.getElementById("NaborHD").style.display='none';
-            document.getElementById("drugsCat").style.display='none';
-        }
-        else if (rec == 7) {
-            document.getElementById("NaborHD").style.display='block';
-            document.getElementById("NaborNR").style.display='none';
-            document.getElementById("NaborHM").style.display='none';
-            document.getElementById("NaborHB").style.display='none';
-            document.getElementById("NaborKS").style.display='none';
-            document.getElementById("drugsCat").style.display='none';
-        }
-        else {
-            document.getElementById("drugsCat").style.display='block';
-            document.getElementById("NaborNR").style.display='none';
-            document.getElementById("NaborHM").style.display='none';
-            document.getElementById("NaborHB").style.display='none';
-            document.getElementById("NaborKS").style.display='none';
-            document.getElementById("NaborHD").style.display='none';
-
-        }
-    }
-    </script>
-
-    <script>
-    function Selected2(drugCat) {
-        var drug = drugCat.value;
-        if (drug == 1) {
-            document.getElementById("1").style.display='block';
-        }
-        else {
-            document.getElementById("1").style.display='none';
-        }
-
-        if (drug == 2) {
-            document.getElementById("2").style.display='block';
-        }
-        else {
-            document.getElementById("2").style.display='none';
-        }
-
-        if (drug == 3) {
-            document.getElementById("3").style.display='block';
-        }
-        else {
-            document.getElementById("3").style.display='none';
-        }
-
-        if (drug == 4) {
-            document.getElementById("4").style.display='block';
-        }
-        else {
-            document.getElementById("4").style.display='none';
-        }
-        if (drug == 5) {
-
-            $.confirm({
-                icon: 'fa fa-exclamation-triangle',
-                theme: 'modern',
-                animation: 'scale',
-                type: 'red',
-                title: 'Антибактериальные средства',
-                content: 'Вы уверены в целесообразности назначения?',
-                buttons: {
-                    Да: function () {
-                        document.getElementById("5").style.display='block';
-                        $('input:checkbox'). prop('disabled', false);
-                    },
-                    Нет: function () {
-                        $('input:checkbox'). prop('disabled', true);
-
-                    }
-                }
-
+<script>
+        $(document).ready(function () {
+            $('label').each(function () {
+                if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
             });
-        }
-        else {
-            document.getElementById("5").style.display='none';
-            $('input:checkbox'). prop('disabled', false);
-        }
-        if (drug == 6) {
-            document.getElementById("6").style.display='block';
-        }
-        else {
-            document.getElementById("6").style.display='none';
-        }
-        if (drug == 7) {
-            document.getElementById("7").style.display='block';
-        }
-        else {
-            document.getElementById("7").style.display='none';
-        }
+            
+            $(':checkbox').click(function (e) {
+                var checked = $(this).attr('checked');
+                $(this).closest('label').toggleClass('selected', checked);
+            });
+        });
+</script>
 
-        if (drug == 8) {
-            document.getElementById("8").style.display='block';
-        }
-        else {
-            document.getElementById("8").style.display='none';
-        }
-        if (drug == 9) {
-            document.getElementById("9").style.display='block';
-        }
-        else {
-            document.getElementById("9").style.display='none';
-        }
-        if (drug == 10) {
-            document.getElementById("10").style.display='block';
-        }
-        else {
-            document.getElementById("10").style.display='none';
-        }
-        if (drug == 11) {
-            document.getElementById("11").style.display='block';
-        }
-        else {
-            document.getElementById("11").style.display='none';
-        }
-        if (drug == 12) {
-            document.getElementById("12").style.display='block';
-        }
-        else {
-            document.getElementById("12").style.display='none';
-        }
-        if (drug == 13) {
-            document.getElementById("13").style.display='block';
-        }
-        else {
-            document.getElementById("13").style.display='none';
-        }
-        if (drug == 14) {
-            document.getElementById("14").style.display='block';
-        }
-        else {
-            document.getElementById("14").style.display='none';
-        }
-        if (drug == 15) {
-            document.getElementById("15").style.display='block';
-        }
-        else {
-            document.getElementById("15").style.display='none';
-        }
-        if (drug == 16) {
-            document.getElementById("16").style.display='block';
-        }
-        else {
-            document.getElementById("16").style.display='none';
-        }
-        if (drug == 17) {
-            document.getElementById("17").style.display='block';
-        }
-        else {
-            document.getElementById("17").style.display='none';
-        }
-        if (drug == 18) {
-            document.getElementById("18").style.display='block';
-        }
-        else {
-            document.getElementById("18").style.display='none';
-        }
-        if (drug == 19) {
-            document.getElementById("19").style.display='block';
-        }
-        else {
-            document.getElementById("19").style.display='none';
-        }
-        if (drug == 25) {
-            document.getElementById("25").style.display='block';
-        }
-        else {
-            document.getElementById("25").style.display='none';
-        }
-        if (drug == 26) {
-            document.getElementById("26").style.display='block';
-        }
-        else {
-            document.getElementById("26").style.display='none';
-        }
-        if (drug == 27) {
-            document.getElementById("27").style.display='block';
-        }
-        else {
-            document.getElementById("27").style.display='none';
-        }
-        if (drug == 28) {
-            document.getElementById("28").style.display='block';
-        }
-        else {
-            document.getElementById("28").style.display='none';
-        }
-        if (drug == 29) {
-            document.getElementById("29").style.display='block';
-        }
-        else {
-            document.getElementById("29").style.display='none';
-        }
-        if (drug == 30) {
-            document.getElementById("30").style.display='block';
-        }
-        else {
-            document.getElementById("30").style.display='none';
-        }
-        if (drug == 31) {
-            document.getElementById("31").style.display='block';
-        }
-        else {
-            document.getElementById("31").style.display='none';
-        }
-        if (drug == 32) {
-            document.getElementById("32").style.display='block';
-        }
-        else {
-            document.getElementById("32").style.display='none';
-        }
-        if (drug == 33) {
-            document.getElementById("33").style.display='block';
-        }
-        else {
-            document.getElementById("33").style.display='none';
-        }
-        if (drug == 34) {
-            document.getElementById("34").style.display='block';
-        }
-        else {
-            document.getElementById("34").style.display='none';
-        }
-        if (drug == 35) {
-            document.getElementById("35").style.display='block';
-        }
-        else {
-            document.getElementById("35").style.display='none';
-        }
-        if (drug == 36) {
-            document.getElementById("36").style.display='block';
-        }
-        else {
-            document.getElementById("36").style.display='none';
-        }
-        if (drug == 37) {
-            document.getElementById("37").style.display='block';
-        }
-        else {
-            document.getElementById("37").style.display='none';
-        }
-        if (drug == 38) {
-            document.getElementById("38").style.display='block';
-        }
-        else {
-            document.getElementById("38").style.display='none';
-        }
-    }
+
+    <script>
+        $(document).ready(function(){
+            $('#recCat').change(function(){
+                var rec = $(this).val();
+                if (rec == 10) {
+                    document.getElementById("NaborHM").style.display='block';
+                    document.getElementById("NaborNR").style.display='none';
+                    document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborHB").style.display='none';
+                    document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("drugsCat").style.display='none';
+                }
+                else if (rec == 3) {
+                    document.getElementById("NaborNR").style.display='block';
+                    document.getElementById("NaborHM").style.display='none';
+                    document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborHB").style.display='none';
+                    document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("drugsCat").style.display='none';
+                }
+                else if (rec == 4) {
+                    document.getElementById("NaborKS").style.display='block';
+                    document.getElementById("NaborNR").style.display='none';
+                    document.getElementById("NaborHM").style.display='none';
+                    document.getElementById("NaborHB").style.display='none';
+                    document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("drugsCat").style.display='none';
+                }
+                else if (rec == 5) {
+                    document.getElementById("NaborHB").style.display='block';
+                    document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborNR").style.display='none';
+                    document.getElementById("NaborHM").style.display='none';
+                    document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("drugsCat").style.display='none';
+                }
+                else if (rec == 7) {
+                    document.getElementById("NaborHD").style.display='block';
+                    document.getElementById("NaborNR").style.display='none';
+                    document.getElementById("NaborHM").style.display='none';
+                    document.getElementById("NaborHB").style.display='none';
+                    document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("drugsCat").style.display='none';
+                }
+                else {
+                    document.getElementById("drugsCat").style.display='block';
+                    document.getElementById("NaborNR").style.display='none';
+                    document.getElementById("NaborHM").style.display='none';
+                    document.getElementById("NaborHB").style.display='none';
+                    document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborHD").style.display='none';
+    
+                }
+            });
+
+            $('#drugCat').change(function(){
+                var drug = $(this).val();
+                if (drug == 1) {
+                    document.getElementById("1").style.display='block';
+                }
+                else {
+                    document.getElementById("1").style.display='none';
+                }
+        
+                if (drug == 2) {
+                    document.getElementById("2").style.display='block';
+                }
+                else {
+                    document.getElementById("2").style.display='none';
+                }
+        
+                if (drug == 3) {
+                    document.getElementById("3").style.display='block';
+                }
+                else {
+                    document.getElementById("3").style.display='none';
+                }
+        
+                if (drug == 4) {
+                    document.getElementById("4").style.display='block';
+                }
+                else {
+                    document.getElementById("4").style.display='none';
+                }
+                if (drug == 5) {
+        
+                    $.confirm({
+                        icon: 'fa fa-exclamation-triangle',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Антибактериальные средства',
+                        content: 'Вы уверены в целесообразности назначения?',
+                        buttons: {
+                            Да: function () {
+                                document.getElementById("5").style.display='block';
+                                $('input:checkbox'). prop('disabled', false);
+                            },
+                            Нет: function () {
+                                $('input:checkbox'). prop('disabled', true);
+        
+                            }
+                        }
+        
+                    });
+                }
+                else {
+                    document.getElementById("5").style.display='none';
+                    $('input:checkbox'). prop('disabled', false);
+                }
+                if (drug == 6) {
+                    document.getElementById("6").style.display='block';
+                }
+                else {
+                    document.getElementById("6").style.display='none';
+                }
+                if (drug == 7) {
+                    document.getElementById("7").style.display='block';
+                }
+                else {
+                    document.getElementById("7").style.display='none';
+                }
+        
+                if (drug == 8) {
+                    document.getElementById("8").style.display='block';
+                }
+                else {
+                    document.getElementById("8").style.display='none';
+                }
+                if (drug == 9) {
+                    document.getElementById("9").style.display='block';
+                }
+                else {
+                    document.getElementById("9").style.display='none';
+                }
+                if (drug == 10) {
+                    document.getElementById("10").style.display='block';
+                }
+                else {
+                    document.getElementById("10").style.display='none';
+                }
+                if (drug == 11) {
+                    document.getElementById("11").style.display='block';
+                }
+                else {
+                    document.getElementById("11").style.display='none';
+                }
+                if (drug == 12) {
+                    document.getElementById("12").style.display='block';
+                }
+                else {
+                    document.getElementById("12").style.display='none';
+                }
+                if (drug == 13) {
+                    document.getElementById("13").style.display='block';
+                }
+                else {
+                    document.getElementById("13").style.display='none';
+                }
+                if (drug == 14) {
+                    document.getElementById("14").style.display='block';
+                }
+                else {
+                    document.getElementById("14").style.display='none';
+                }
+                if (drug == 15) {
+                    document.getElementById("15").style.display='block';
+                }
+                else {
+                    document.getElementById("15").style.display='none';
+                }
+                if (drug == 16) {
+                    document.getElementById("16").style.display='block';
+                }
+                else {
+                    document.getElementById("16").style.display='none';
+                }
+                if (drug == 17) {
+                    document.getElementById("17").style.display='block';
+                }
+                else {
+                    document.getElementById("17").style.display='none';
+                }
+                if (drug == 18) {
+                    document.getElementById("18").style.display='block';
+                }
+                else {
+                    document.getElementById("18").style.display='none';
+                }
+                if (drug == 19) {
+                    document.getElementById("19").style.display='block';
+                }
+                else {
+                    document.getElementById("19").style.display='none';
+                }
+                if (drug == 25) {
+                    document.getElementById("25").style.display='block';
+                }
+                else {
+                    document.getElementById("25").style.display='none';
+                }
+                if (drug == 26) {
+                    document.getElementById("26").style.display='block';
+                }
+                else {
+                    document.getElementById("26").style.display='none';
+                }
+                if (drug == 27) {
+                    document.getElementById("27").style.display='block';
+                }
+                else {
+                    document.getElementById("27").style.display='none';
+                }
+                if (drug == 28) {
+                    document.getElementById("28").style.display='block';
+                }
+                else {
+                    document.getElementById("28").style.display='none';
+                }
+                if (drug == 29) {
+                    document.getElementById("29").style.display='block';
+                }
+                else {
+                    document.getElementById("29").style.display='none';
+                }
+                if (drug == 30) {
+                    document.getElementById("30").style.display='block';
+                }
+                else {
+                    document.getElementById("30").style.display='none';
+                }
+                if (drug == 31) {
+                    document.getElementById("31").style.display='block';
+                }
+                else {
+                    document.getElementById("31").style.display='none';
+                }
+                if (drug == 32) {
+                    document.getElementById("32").style.display='block';
+                }
+                else {
+                    document.getElementById("32").style.display='none';
+                }
+                if (drug == 33) {
+                    document.getElementById("33").style.display='block';
+                }
+                else {
+                    document.getElementById("33").style.display='none';
+                }
+                if (drug == 34) {
+                    document.getElementById("34").style.display='block';
+                }
+                else {
+                    document.getElementById("34").style.display='none';
+                }
+                if (drug == 35) {
+                    document.getElementById("35").style.display='block';
+                }
+                else {
+                    document.getElementById("35").style.display='none';
+                }
+                if (drug == 36) {
+                    document.getElementById("36").style.display='block';
+                }
+                else {
+                    document.getElementById("36").style.display='none';
+                }
+                if (drug == 37) {
+                    document.getElementById("37").style.display='block';
+                }
+                else {
+                    document.getElementById("37").style.display='none';
+                }
+                if (drug == 38) {
+                    document.getElementById("38").style.display='block';
+                }
+                else {
+                    document.getElementById("38").style.display='none';
+                }
+            });
+        });
+       
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            $('label').each(function () {
+                if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
+            });
+
+            $(':checkbox').click(function (e) {
+                var checked = $(this).attr('checked');
+                $(this).closest('label').toggleClass('selected', checked);
+            });
+        });
     </script>
 
     <!--Автоматический счетчик цены при выборе препаратов-->
@@ -1515,7 +1532,6 @@
     });
     </script>
     <!--end-->
-
 
     <script>
     $(document).ready(function() {

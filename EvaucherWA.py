@@ -396,7 +396,6 @@ def getdata(pat_id):
                         recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList)
 
 
-
 @app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
 def add(pat_id):
     """ Функция выписки рецепта """
