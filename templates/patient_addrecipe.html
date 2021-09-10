@@ -1475,7 +1475,7 @@
             });
         }
 
-        else if((selCat == 11 || selCat == 12 || selCat == 15 || selCat == 19) && $('#price').val() > 1960) {
+        else if((selCat == 11 || selCat == 12 || selCat == 14 || selCat == 16 || selCat == 18 || selCat == 20 || selCat == 22 ) && $('#price').val() > 1960) {
             $.confirm({
                 icon: 'fa fa-exclamation',
                 theme: 'modern',
@@ -1493,14 +1493,14 @@
             });
         }
 
-        else if(selCat == 18 && $('#price').val() > 650) {
+        else if((selCat == 13 || selCat == 15 || selCat == 17 || selCat == 19 || selCat == 21 || selCat == 23) && $('#price').val() > 760) {
             $.confirm({
                 icon: 'fa fa-exclamation',
                 theme: 'modern',
                 animation: 'scale',
                 type: 'red',
                 title: 'Превышен лимит',
-                content: 'Превышен лимит в 650 рублей.',
+                content: 'Превышен лимит в 760 рублей.',
                 buttons: {
                     ОК: function () {
                         $(':input[type="submit"]').prop('disabled', true);
