@@ -443,11 +443,17 @@ def add(pat_id):
             # а если категория 097, 
             # то начальный баланс пациента равен
             pat_balance = 1500
-        if category in [11,12, 15, 19]:
+        
+        # если катеория 100.1, 100.2, 100.4, 100.6, 
+        # 100.8, 101.1 или 102.1
+        if category in [11, 12, 14, 16, 18, 20, 22]:
             pat_balance = 1960   
 
-        if category == 18:
-            pat_balance = 650     
+        # если категория 100.3, 100.5, 100.7, 
+        # 100.9, 101.2 или 102.2 
+        if category in [13, 15, 17, 19, 21, 23]:
+            pat_balance = 760
+                 
         # создаем переменную посещения пациентом данного врача
         # по умолчанию оно равно 1 (первое посещение) 
         visit = 1
@@ -574,8 +580,9 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat in [11, 12, 15, 19]:
-                    # если катеория 099.1, 099.2, 100.2 или 101.2
+                elif reccat in [11, 12, 14, 16, 18, 20, 22]:
+                    # если катеория 100.1, 100.2, 100.4, 100.6, 
+                    # 100.8, 101.1 или 102.1
                     # проверяем баланс также, как при предудущих категориях
                     balance = 1960 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
@@ -607,10 +614,11 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat == 18:
-                    # если катеория 101.1
+                elif reccat in [13, 15, 17, 19, 21, 23]:
+                    # если категория 100.3, 100.5, 100.7, 
+                    # 100.9, 101.2 или 102.2 
                     # проверяем баланс также, как при предудущих категориях
-                    balance = 650 - sumprice
+                    balance = 760 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
