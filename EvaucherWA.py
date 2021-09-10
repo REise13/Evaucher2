@@ -881,7 +881,7 @@ def select2():
     if session['user_role_id'] == 4:
        cursor.execute(""" SELECT id, title as drug_cat
                             from drug_category
-                            where drug_category.title not like '%набор%' 
+                            where drug_category.title not like '%набор%' and flagCat=1
                             ORDER BY title """)        
     drugCat = cursor.fetchall()
     return render_template('patient_add_drug.html', drugCat=drugCat)
