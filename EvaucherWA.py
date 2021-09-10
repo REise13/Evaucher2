@@ -453,7 +453,7 @@ def add(pat_id):
         # 100.9, 101.2 или 102.2 
         if category in [13, 15, 17, 19, 21, 23]:
             pat_balance = 760
-                 
+
         # создаем переменную посещения пациентом данного врача
         # по умолчанию оно равно 1 (первое посещение) 
         visit = 1
@@ -860,6 +860,7 @@ def drugs():
                 drug.price, drug.status_id
                 FROM drug JOIN drug_category
                 ON drug.category_id=drug_category.id
+                WHERE drug.flagDrug=1
                 order by drug.id""")
         mysql.connection.commit()
         # передать полученный словарь словарей 
