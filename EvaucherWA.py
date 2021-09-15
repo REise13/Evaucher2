@@ -435,7 +435,7 @@ def add(pat_id):
         # создаем переменную и передаем 
         # туда сумму только что выписываемого рецепта
         pat_balance = price
-        if category == 1 or category ==2:
+        if category == 1 or category == 2:
             # если выбрана категория 092 или 093, 
             # то начальный баланс равен
             pat_balance = 1850
@@ -446,12 +446,12 @@ def add(pat_id):
         
         # если катеория 100.1, 100.2, 100.4, 100.6, 
         # 100.8, 101.1 или 102.1
-        if category in [11, 12, 14, 16, 18, 20, 22]:
+        if category in [11, 12, 14, 16, 18, 20, 22, 24, 26]:
             pat_balance = 1960   
 
         # если категория 100.3, 100.5, 100.7, 
         # 100.9, 101.2 или 102.2 
-        if category in [13, 15, 17, 19, 21, 23]:
+        if category in [13, 15, 17, 19, 21, 23, 25, 27]:
             pat_balance = 760
 
         # создаем переменную посещения пациентом данного врача
@@ -580,9 +580,9 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat in [11, 12, 14, 16, 18, 20, 22]:
+                elif reccat in [11, 12, 14, 16, 18, 20, 22, 24, 26]:
                     # если катеория 100.1, 100.2, 100.4, 100.6, 
-                    # 100.8, 101.1 или 102.1
+                    # 100.8, 101.1, 102.1, 101.3 или 101.5
                     # проверяем баланс также, как при предудущих категориях
                     balance = 1960 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
@@ -614,10 +614,10 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat in [13, 15, 17, 19, 21, 23]:
+                elif reccat in [13, 15, 17, 19, 21, 23, 25, 27]:
                     # если категория 100.3, 100.5, 100.7, 
-                    # 100.9, 101.2 или 102.2 
-                    # проверяем баланс также, как при предудущих категориях
+                    # 100.9, 101.2, 102.2, 101.4 или 101.6 
+                    # проверяем баланс также, как при предыдущих категориях
                     balance = 760 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
