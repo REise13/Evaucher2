@@ -1377,159 +1377,164 @@
             });
         });
     </script>
+   
 
     <!--Автоматический счетчик цены при выборе препаратов-->
     <!--Фиксирует сумму в текстовом поле id=price-->
     <script>
-
-    $(document).ready(function() {
-    $(':input[type="submit"]').prop('disabled', true);
-    var inputs = document.getElementsByTagName("input");
-    for(var i = 0; i < inputs.length; i++) {
-        var el = inputs[i];
-        while(el = el.parentNode) {
-            if(el.nodeName.toLowerCase() === 'tr') {
-                inputs[i].onfocus = function() {
-                    this.parentRow.style.backgroundColor = '#F55F7C';
-                    this.parentRow.style.color = 'white';
-                };
-                inputs[i].onblur = function() {
-                    this.parentRow.style.backgroundColor = '';
-                    this.parentRow.style.color = 'black';
-                };
-                inputs[i].parentRow = el;
-                break;
-        }
-    }
-    }
-
-
-    function calculateSum(){
-        var total=0;
-        $('table tbody tr').each(function() {
-            var tr = $(this);
-
-            if (tr.find('input[name="chck"]').is(':checked')) {
-                var columns = tr.find('td').next('td').next('td');
-                var quantity=parseInt(tr.find('input[type="text"]').val());
-                var cost=parseInt(columns.next('td').html().split('руб.')[0]);
-                total+=cost*quantity;
+        $(document).ready(function() {
+        $(':input[type="submit"]').prop('disabled', true);
+        var inputs = document.getElementsByTagName("input");
+        for(var i = 0; i < inputs.length; i++) {
+            var el = inputs[i];
+            while(el = el.parentNode) {
+                if(el.nodeName.toLowerCase() === 'tr') {
+                    inputs[i].onfocus = function() {
+                        this.parentRow.style.backgroundColor = '#F55F7C';
+                        this.parentRow.style.color = 'white';
+                    };
+                    inputs[i].onblur = function() {
+                        this.parentRow.style.backgroundColor = '';
+                        this.parentRow.style.color = 'black';
+                    };
+                    inputs[i].parentRow = el;
+                    break;
+                }
             }
+        }
+
+        function calculateSum(){
+            var total=0;
+            $('table tbody tr').each(function() {
+                var tr = $(this);
+
+                if (tr.find('input[name="chck"]').is(':checked')) {
+                    var columns = tr.find('td').next('td').next('td');
+                    var quantity=parseInt(tr.find('input[type="text"]').val());
+                    var cost=parseInt(columns.next('td').html().split('руб.')[0]);
+                    total+=cost*quantity;
+                }
+            });
+
+            $('#price').val(total.toFixed(0));
+
+            var selCat = $("#recCat option:selected").val();
+
+            //array ONE with recipe category id's:
+            var arr1 = ['11', '12', '14', '16', '18', '20', '22', '24', '26']
+
+            //array TWO with recipe category id's:
+            var arr2 = ['13', '15', '17', '19', '21', '23', '25', '27']
+
+            if(selCat == 6 && $('#price').val() > 1500) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1500 рублей на ребенка',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if( selCat == 1 && $('#price').val() > 1850) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1850 рублей на беременных.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if(selCat == 2 && $('#price').val() > 1850) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1850 рублей на кормящих.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if(($.inArray(selCat, arr1)) && $('#price').val() > 1960) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1960 рублей.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if(($.inArray(selCat, arr2)) && $('#price').val() > 760) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 760 рублей.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
+                $(':input[type="submit"]').prop('disabled', true);
+            }
+
+            else {
+                $(':input[type="submit"]').prop('disabled', false);
+            }
+
+        }
+
+        $("input[type='text']").keyup(function() {
+            calculateSum();
         });
 
-        $('#price').val(total.toFixed(0));
+        $("input[name='chck']").change(function() {
+            calculateSum();
+        });
 
-        var selCat = $("#recCat option:selected").val();
-
-        if(selCat == 6 && $('#price').val() > 1500) {
-            $.confirm({
-                icon: 'fa fa-exclamation',
-                theme: 'modern',
-                animation: 'scale',
-                type: 'red',
-                title: 'Превышен лимит',
-                content: 'Превышен лимит в 1500 рублей на ребенка',
-                buttons: {
-                    ОК: function () {
-                        $(':input[type="submit"]').prop('disabled', true);
-                    }
-
-                }
-
-            });
-        }
-
-        else if( selCat == 1 && $('#price').val() > 1850) {
-            $.confirm({
-                icon: 'fa fa-exclamation',
-                theme: 'modern',
-                animation: 'scale',
-                type: 'red',
-                title: 'Превышен лимит',
-                content: 'Превышен лимит в 1850 рублей на беременных.',
-                buttons: {
-                    ОК: function () {
-                        $(':input[type="submit"]').prop('disabled', true);
-                    }
-
-                }
-
-            });
-        }
-
-        else if(selCat == 2 && $('#price').val() > 1850) {
-            $.confirm({
-                icon: 'fa fa-exclamation',
-                theme: 'modern',
-                animation: 'scale',
-                type: 'red',
-                title: 'Превышен лимит',
-                content: 'Превышен лимит в 1850 рублей на кормящих.',
-                buttons: {
-                    ОК: function () {
-                        $(':input[type="submit"]').prop('disabled', true);
-                    }
-
-                }
-
-            });
-        }
-
-        else if((selCat == 11 || selCat == 12 || selCat == 14 || selCat == 16 || selCat == 18 || selCat == 20 || selCat == 22 ) && $('#price').val() > 1960) {
-            $.confirm({
-                icon: 'fa fa-exclamation',
-                theme: 'modern',
-                animation: 'scale',
-                type: 'red',
-                title: 'Превышен лимит',
-                content: 'Превышен лимит в 1960 рублей.',
-                buttons: {
-                    ОК: function () {
-                        $(':input[type="submit"]').prop('disabled', true);
-                    }
-
-                }
-
-            });
-        }
-
-        else if((selCat == 13 || selCat == 15 || selCat == 17 || selCat == 19 || selCat == 21 || selCat == 23) && $('#price').val() > 760) {
-            $.confirm({
-                icon: 'fa fa-exclamation',
-                theme: 'modern',
-                animation: 'scale',
-                type: 'red',
-                title: 'Превышен лимит',
-                content: 'Превышен лимит в 760 рублей.',
-                buttons: {
-                    ОК: function () {
-                        $(':input[type="submit"]').prop('disabled', true);
-                    }
-
-                }
-
-            });
-        }
-
-        else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
-            $(':input[type="submit"]').prop('disabled', true);
-        }
-
-        else {
-            $(':input[type="submit"]').prop('disabled', false);
-        }
-
-    }
-
-    $("input[type='text']").keyup(function() {
-        calculateSum();
-    });
-
-    $("input[name='chck']").change(function() {
-        calculateSum();
-    });
-
-    });
+        });
     </script>
     <!--end-->
 
