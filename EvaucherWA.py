@@ -790,10 +790,12 @@ def limits():
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if session['user_role_id'] == 3: # Оператор_P
         # идентификатор Врача
-        num = 1 
+        num1 = 1 
+        num2 = 3
     if session['user_role_id'] == 4: # Оператор_U
         # идентификатор Доктора
-        num = 7 
+        num1 = 7 
+        num2 = 4
     cursor.execute(""" SELECT limits.id,
                         limits.indicator_limit, limits.indicator_used, limits.indicator_sum,
                         user.sName, user.fName, user.patr, user.phone_number as phone,
@@ -803,7 +805,7 @@ def limits():
                         JOIN user on limits.doctor_id=user.id
                         JOIN recipe_category on limits.category_id=recipe_category.id
                         JOIN user_post on user.post_id=user_post.id
-                        WHERE user.role_id=%s """, (num,))
+                        WHERE user.role_id=%s OR user.role_id=%s """, (num1, num2,))
     limits = cursor.fetchall()
     return render_template('limits.html', limits=limits, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
