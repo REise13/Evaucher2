@@ -355,27 +355,28 @@ def patdata_edit(pat_id):
 def getdata(pat_id):
     """ Возвращает данные для выпадающих списков на форме выписки рецепта """
     patient = get_pat_ID(pat_id)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
         # идентификатор для пациента Врача
         num = 0
+        cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE flagDiag=%s ORDER BY title ASC', (num,))
     if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
+        num = 1
         # идентификатор для пациента Доктора
-        num = 1      
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE flagDiag=%s', (num,))
+        cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE id != 12 ORDER BY title ASC')
     diagnosList = cursor.fetchall()
     cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s', (num,))
     recCat = cursor.fetchall()
     if session['user_role_id'] in [1,3]:
         cursor.execute(""" SELECT id, title as drug_cat
                             from drug_category
-                            where drug_category.title not like '%набор%' and flagCat=0 
+                            where drug_category.title not like '%набор%' and flagCat=0
                             ORDER BY title """)
     if session['user_role_id'] in [4,7]:
        cursor.execute(""" SELECT id, title as drug_cat
                             from drug_category
-                            where drug_category.title not like '%набор%' 
-                            ORDER BY title """)                         
+                            where drug_category.title not like '%набор%'
+                            ORDER BY title """)
     drugCat = cursor.fetchall()
     if session['user_role_id'] in [1,3]:
         cursor.execute(""" SELECT drug.id as drug_id, drug.ingridient, drug.title as drugname, drug.country,
@@ -389,8 +390,8 @@ def getdata(pat_id):
                 drug.manufacturer, drug_category.id as drCatid, drug_category.title as Drug_category, drug.price
                 FROM drug JOIN drug_category
                 ON drug.category_id=drug_category.id
-                WHERE drug.status_id=1 
-                ORDER by drug.id""")             
+                WHERE drug.status_id=1
+                ORDER by drug.id""")
     selectDrugList = cursor.fetchall()
     return render_template('patient_addrecipe.html', patient=patient,diagnosList=diagnosList,
                         recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList)
