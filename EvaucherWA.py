@@ -990,7 +990,7 @@ def rel_recipes():
                             JOIN recipe_category ON recipe.category_id=recipe_category.id
                             JOIN recipe_status ON recipe.status_id=recipe_status.id
                             JOIN city ON recipe.pharm_city=city.id
-                            WHERE pacient.flagReg=%s    
+                            WHERE pacient.flagReg=%s and recipe.status_id=2
                             ORDER by recipe.endDate ASC """, (flag,))
         mysql.connection.commit()
         relRecipes = cursor.fetchall()
