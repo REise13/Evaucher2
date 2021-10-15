@@ -1035,21 +1035,26 @@ def written_recipes():
 
 @app.route('/get-report')
 def get_data_for_report_form():
-    """ Возвращает данные для выпадающих списков на форме составления отчета """
+    """ Возвращает данные для выпадающих списков на форме составления отчета form_for_report.html """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if session['user_role_id'] in [3,9]:
         num = 0
     if session['user_role_id'] in [4, 8]:
-        num = 1    
-    cursor.execute("""SELECT id, title as recCat 
+        num = 1
+    cursor.execute("""SELECT id, title as recCat
         FROM recipe_category WHERE flagCat=%s""", (num,))
     rec_cat = cursor.fetchall()
     cursor.execute('SELECT id, title as gender FROM gender')
     gender = cursor.fetchall()
-    cursor.execute("""SELECT id, title as diagnos 
-        FROM diagnos WHERE flagDiag=%s""", (num,))
+    if session['user_role_id'] in [3, 9]:
+        cursor.execute("""SELECT id, title as diagnos
+            FROM diagnos WHERE flagDiag=%s ORDER BY title ASC""", (num,))
+
+    if session['user_role_id'] in [4, 8]:
+        cursor.execute("""SELECT id, title as diagnos
+            FROM diagnos ORDER BY title ASC""")
     diagnos = cursor.fetchall()
-    cursor.execute('SELECT id, title as city FROM city')
+    cursor.execute('SELECT id, title as city FROM city ORDER BY title ASC')
     cities = cursor.fetchall()
     cursor.execute('SELECT id, title as status from recipe_status')
     rec_status = cursor.fetchall()
