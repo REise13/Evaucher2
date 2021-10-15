@@ -862,7 +862,6 @@ def drugs():
                 drug.price, drug.status_id
                 FROM drug JOIN drug_category
                 ON drug.category_id=drug_category.id
-                WHERE drug.flagDrug=1
                 order by drug.id""")
         mysql.connection.commit()
         # передать полученный словарь словарей 
