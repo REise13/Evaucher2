@@ -1079,116 +1079,210 @@ def get_report():
         if session['user_role_id'] in [3, 9]: # Оператор_P, д1
             # идентификатор для категории, диагноза д1
             num = 0
+            if gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 0 and visit == 0:
+                cursor.execute(""" SELECT * FROM report_data
+                WHERE (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s)
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and flagCat=%s and flagDiag=%s""", (date1, date2, age1, age2, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s)
+                    and rec_stat='Выдан фармацевтом'
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and city_id=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and city_id=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
+
+            elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and category_id=%s
+                    and rec_stat='Назначен врачом'
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
+
+            elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and category_id=%s
+                    and rec_stat='Выдан фармацевтом'
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and visit=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and visit=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                WHERE (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and diag_id=%s and rec_stat='Назначен врачом'
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
+
+            elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and diag_id=%s and rec_stat='Выдан фармацевтом'
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
+
+            elif gender != 0 and rec_cat != 0 and diagnos != 0 and cities != 0 and visit != 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                    where (createDate >= %s and createDate <=%s) and
+                        price > 0 and gender_id=%s
+                        and category_id=%s
+                        and city_id=%s and rec_stat='Назначен врачом'
+                        and visit=%s and (age between %s and %s)
+                        and diag_id=%s
+                        and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
+                                                 cities, visit, age1, age2, diagnos, num, num,))
+            else:
+                cursor.execute(""" SELECT * FROM report_data
+                    where (endDate >= %s and endDate <=%s) and
+                        price > 0 and gender_id=%s
+                        and category_id=%s
+                        and city_id=%s and rec_stat='Выдан фармацевтом'
+                        and visit=%s and (age between %s and %s)
+                        and diag_id=%s
+                        and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
+                                                 cities, visit, age1, age2, diagnos, num, num,))
+
         if session['user_role_id'] in [4, 8]: # Оператор_U, д2
             # идентификатор для категории, диагноза д2
             num = 1
+            if gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 0 and visit == 0:
+                cursor.execute(""" SELECT * FROM report_data
+                    WHERE (createDate >= %s and createDate <=%s)
+                        and (age between %s and %s)
+                        and flagCat=%s """, (date1, date2, age1, age2, num,))
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and flagCat=%s """, (date1, date2, age1, age2, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s)
+                    and rec_stat='Выдан фармацевтом'
+                    and flagCat=%s """, (date1, date2, age1, age2, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and city_id=%s
+                    and flagCat=%s""", (date1, date2, age1, age2, cities, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and city_id=%s
+                    and flagCat=%s""", (date1, date2, age1, age2, cities, num,))
+
+            elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and category_id=%s
+                    and rec_stat='Назначен врачом'
+                    and flagCat=%s""", (date1, date2, age1, age2, rec_cat, num,))
+
+            elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and category_id=%s
+                    and rec_stat='Выдан фармацевтом'
+                    and flagCat=%s """, (date1, date2, age1, age2, rec_cat, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and visit=%s
+                    and flagCat=%s """, (date1, date2, age1, age2, visit, num,))
+
+            elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and visit=%s
+                    and flagCat=%s""", (date1, date2, age1, age2, visit, num,))
+
+            elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                WHERE (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and diag_id=%s and rec_stat='Назначен врачом'
+                    and flagCat=%s""", (date1, date2, age1, age2, diagnos, num,))
+
+            elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and diag_id=%s and rec_stat='Выдан фармацевтом'
+                    and flagCat=%s """, (date1, date2, age1, age2, diagnos, num,))
+
+            elif gender != 0 and rec_cat != 0 and diagnos != 0 and cities != 0 and visit != 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                    where (createDate >= %s and createDate <=%s) and
+                        price > 0 and gender_id=%s
+                        and category_id=%s
+                        and city_id=%s and rec_stat='Назначен врачом'
+                        and visit=%s and (age between %s and %s)
+                        and diag_id=%s
+                        and flagCat=%s """, (date1, date2, gender, rec_cat,
+                                                 cities, visit, age1, age2, diagnos, num,))
+            else:
+                cursor.execute(""" SELECT * FROM report_data
+                    where (endDate >= %s and endDate <=%s) and
+                        price > 0 and gender_id=%s
+                        and category_id=%s
+                        and city_id=%s and rec_stat='Выдан фармацевтом'
+                        and visit=%s and (age between %s and %s)
+                        and diag_id=%s
+                        and flagCat=%s """, (date1, date2, gender, rec_cat,
+                                                 cities, visit, age1, age2, diagnos, num,))
+        mysql.connection.commit()
+        records = cursor.fetchall()
+
         cursor.execute(""" SELECT drug_name, city_name, category, SUM(COUNT) AS total,
                 CASE drug_id
                     WHEN 80 THEN 'Набор: Нормальные роды'
                     WHEN 315 THEN 'Набор: Кесарево сечение'
                     WHEN 285 THEN 'Набор: Взрослый хирургический'
                     WHEN 359 THEN 'Набор: Малый хирургический'
-                    WHEN 250 THEN 'Набор: детский хирургический'    
+                    WHEN 250 THEN 'Набор: детский хирургический'
                 END AS Nabor
                 FROM drugs_for_report
                 WHERE (endDate >=%s and endDate <=%s) and flagCat=%s
                 GROUP BY drug_name, city_name, category """, (date1, date2, num,))
         releasing_drugs = cursor.fetchall()
-        if gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 0 and visit == 0:
-            cursor.execute(""" SELECT * FROM report_data 
-                WHERE (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) 
-                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT * FROM report_data
-            where (createDate >= %s and createDate <=%s)
-                and (age between %s and %s) and rec_stat='Назначен врачом'
-                and flagCat=%s and flagDiag=%s""", (date1, date2, age1, age2, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT * FROM report_data
-            where (endDate >= %s and endDate <=%s)
-                and (age between %s and %s) 
-                and rec_stat='Выдан фармацевтом'
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT * FROM report_data
-            where (createDate >= %s and createDate <=%s)
-                and (age between %s and %s) and rec_stat='Назначен врачом'
-                and city_id=%s
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT * FROM report_data
-            where (endDate >= %s and endDate <=%s)
-                and (age between %s and %s) and rec_stat='Выдан фармацевтом'
-                and city_id=%s
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
-
-        elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT * FROM report_data
-            where (createDate >= %s and createDate <=%s)
-                and (age between %s and %s) and category_id=%s
-                and rec_stat='Назначен врачом'
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
-
-        elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT * FROM report_data
-            where (endDate >= %s and endDate <=%s)
-                and (age between %s and %s) and category_id=%s
-                and rec_stat='Выдан фармацевтом'
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 1:
-            cursor.execute(""" SELECT * FROM report_data
-            where (createDate >= %s and createDate <=%s)
-                and (age between %s and %s) and rec_stat='Назначен врачом'
-                and visit=%s
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 2:
-            cursor.execute(""" SELECT * FROM report_data
-            where (endDate >= %s and endDate <=%s)
-                and (age between %s and %s) and rec_stat='Выдан фармацевтом'
-                and visit=%s
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 1:
-            cursor.execute(""" SELECT * FROM report_data
-            WHERE (createDate >= %s and createDate <=%s)
-                and (age between %s and %s) and diag_id=%s and rec_stat='Назначен врачом'
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
-
-        elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 2:
-            cursor.execute(""" SELECT * FROM report_data
-            where (endDate >= %s and endDate <=%s)
-                and (age between %s and %s) and diag_id=%s and rec_stat='Выдан фармацевтом'
-                and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
-
-        elif gender != 0 and rec_cat != 0 and diagnos != 0 and cities != 0 and visit != 0 and rec_status == 1:
-            cursor.execute(""" SELECT * FROM report_data
-                where (createDate >= %s and createDate <=%s) and
-                    price > 0 and gender_id=%s
-                    and category_id=%s
-                    and city_id=%s and rec_stat='Назначен врачом'
-                    and visit=%s and (age between %s and %s)
-                    and diag_id=%s 
-                    and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
-                                             cities, visit, age1, age2, diagnos, num, num,))
-        else:
-            cursor.execute(""" SELECT * FROM report_data
-                where (endDate >= %s and endDate <=%s) and
-                    price > 0 and gender_id=%s
-                    and category_id=%s
-                    and city_id=%s and rec_stat='Выдан фармацевтом'
-                    and visit=%s and (age between %s and %s)
-                    and diag_id=%s 
-                    and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
-                                             cities, visit, age1, age2, diagnos, num, num,))
-        mysql.connection.commit()
-        records = cursor.fetchall()
         return render_template('report.html', records=records, userrole=session['user_post'], rec_status=rec_status,
            releasing_drugs=releasing_drugs, userroleid=session['user_role_id'], userfio=session['user_fio'])
     return render_template('form_for_reports.html',userrole=session['user_post'],
