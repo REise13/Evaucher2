@@ -719,6 +719,7 @@ def recipe_info(recID):
     mysql.connection.commit()
     pharminfo = cursor.fetchone()
     recID = recipeinfo['id']
+    session['rec_id'] = recID
     # запрос получения данных о препаратах, назначенных пациенту по коду рецепта
     cursor.execute(""" SELECT drug.title as drug_name, drug.ingridient, drug.country,
                 drug.manufacturer, drug.price as drug_price,
@@ -764,7 +765,7 @@ def add_identific_data(pat_id):
                         (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id,))
         mysql.connection.commit()
         flash('Идентификационные данные успешно добавлены.', 'success')
-        return redirect(url_for('patient_data', pat_id=patient['id']))
+        return redirect(url_for('recipe_info', recID=session['rec_id']))
     return render_template('add_identific_data.html', patient=patient)
 
 
