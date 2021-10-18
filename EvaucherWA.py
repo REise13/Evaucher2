@@ -727,6 +727,32 @@ def recipe_info(recID):
                 FROM drug
                 JOIN crosstrecdrug ON drug.id = crosstrecdrug.drug_id WHERE crosstrecdrug.rec_id=%s""", (recID,))
     recDrugs = cursor.fetchall()
+    # баланс пацента при просмотре информации о рецепте
+    # если рецепт еще не отпущен фармацевтом
+    if int(recipeinfo['status_id']) == 1:
+        # если посещение первое, то получаем цену выписанного рецепта,
+        # где передаем айди пациента, категорию рецепта, и выбранного рецепта
+        if recipeinfo['visit'] == 1:
+            # если посещение первое, получаем цену выписанного рецепта
+            check_bal = "select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s and id=%s"
+        else:
+            # если посещение второе и рецепт уже выдан, получаем общую сумму, включая данный рецепт
+            check_bal = "select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s and id<%s"
+    if int(recipeinfo['status_id'] == 2):
+        # если рецепт уже отпущен, суммируем 
+        check_bal = "select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s and id <=%s"
+    # получаем начальный баланс пациента по его айди, категории рецепта и первом посещении
+    get_fst_bal = "select balance from recipe where pacient_id=%s and category_id=%s and visit=1"
+    cursor.execute(get_fst_bal, (recipeinfo['pacient_id'], recipeinfo['rec_cat_id']))
+    default_balance = cursor.fetchall()
+    cursor.execute(check_bal, (recipeinfo['pacient_id'], recipeinfo['rec_cat_id'], recID,))
+    pat_bal = cursor.fetchall()
+
+    # вычитаем из начального баланса ту сумму, на кооторую выдан рецепт
+    diff = int(default_balance[0]['balance']) - int(pat_bal[0]['sum_rec'])
+    # обновляем отображение баланса на странице
+    update_balance = diff   
+
     if request.method == 'POST':
         pharm_id = session['id']
         pharm_city = session['city_id']
@@ -744,8 +770,8 @@ def recipe_info(recID):
         mysql.connection.commit()
         flash('Рецепт отпущен. Код рецепта: ' + str(recID), 'success')
         return redirect(url_for('recipe_info', recID=recID))
-    return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs,
-            userroleid=session['user_role_id'], userfio=session['user_fio'])
+    return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs, 
+        new_balance=update_balance, userroleid=session['user_role_id'], userfio=session['user_fio'])
 
 
 @app.route('/<int:pat_id>/add-data', methods=['GET', 'POST'])
@@ -807,7 +833,7 @@ def limits():
                         JOIN user on limits.doctor_id=user.id
                         JOIN recipe_category on limits.category_id=recipe_category.id
                         JOIN user_post on user.post_id=user_post.id
-                        WHERE user.role_id=%s OR user.role_id=%s """, (num1, num2,))
+                        WHERE user.role_id=%s OR user.role_id=%s ORDER BY user.sName """, (num1, num2,))
     limits = cursor.fetchall()
     return render_template('limits.html', limits=limits, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])

@@ -42,7 +42,15 @@
                         {% if recipeinfo['rec_cat_id'] not in [3, 4, 5, 7, 10] %}
                             <dl class="row">
                                 <dt class="col-sm-3">Баланс пациента: </dt>
+                                {% if recipeinfo['status_id'] == 1 %}
                                 <dd class="col-sm-9">{{ recipeinfo['balance'] }} руб.</dd>
+                                <input type="text" name="pat_balance" id="pat_balance"
+                                    value="{{ recipeinfo['balance'] }}" style="display: none;">
+                                {% else %}
+                                <dd class="col-sm-9">{{ new_balance }} руб.</dd>
+                                <input type="text" name="pat_balance" id="pat_balance"
+                                    value="{{ new_balance }}" style="display: none;">
+                                {% endif %}
                             </dl>
                         {% endif %}
                         <dl class="row">
@@ -216,35 +224,34 @@
 {% block script %}
 <script>
     $(document).ready(function () {
-        if ($(':input[type="submit"]').val() == 'Отпустить рецепт') {
-            $("input[type='text']").keyup(function(){ 
+        var button = $(':input[type="submit"]').val();
+        if (button == 'Отпустить рецепт') {
+            $("input[type='text']").keyup(function(){
                 var $this = $(this);
                 val = $this.val();
-                $(':input[type="submit"]').prop('disabled', true)
-               
-                if (parseInt(val) > $('#rec_sum').val()) {
+
+                if (parseInt(val) > $('#pat_balance').val()) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
                         animation: 'scale',
                         type: 'red',
                         title: 'Превышена сумма',
-                        content: 'Введенная сумма превышает сумму рецепта',
+                        content: 'Введенная сумма превышает лимит.',
                         buttons: {
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-            
+
                         }
                     });
                 }
-                
+
                 else {
                     $(':input[type="submit"]').prop('disabled', false)
                 }
             });
         }
-       
     });
-</script>
+</script>        
 {% endblock %}
