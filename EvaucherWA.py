@@ -365,7 +365,7 @@ def getdata(pat_id):
         # идентификатор для пациента Доктора
         cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE id != 12 ORDER BY title ASC')
     diagnosList = cursor.fetchall()
-    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s', (num,))
+    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s ORDER BY title ASC', (num,))
     recCat = cursor.fetchall()
     if session['user_role_id'] in [1,3]:
         cursor.execute(""" SELECT id, title as drug_cat
@@ -446,13 +446,13 @@ def add(pat_id):
             pat_balance = 1500
         
         # если катеория 100.1, 100.2, 100.4, 100.6, 
-        # 100.8, 101.1, 101.3, 101.5 или 102.1
-        if category in [11, 12, 14, 16, 18, 20, 22, 24, 26]:
+        # 100.8, 101.1, 101.3, 101.5, 101.7 или 102.1
+        if category in [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]:
             pat_balance = 1960   
 
         # если категория 100.3, 100.5, 100.7, 
-        # 100.9, 101.2, 101.4, 101.6 или 102.2 
-        if category in [13, 15, 17, 19, 21, 23, 25, 27]:
+        # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2 
+        if category in [13, 15, 17, 19, 21, 23, 25, 27, 29]:
             pat_balance = 760
 
         # создаем переменную посещения пациентом данного врача
@@ -581,9 +581,9 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat in [11, 12, 14, 16, 18, 20, 22, 24, 26]:
+                elif reccat in [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]:
                     # если катеория 100.1, 100.2, 100.4, 100.6, 
-                    # 100.8, 101.1, 101.3, 101.5 или 102.1
+                    # 100.8, 101.1, 101.3, 101.5, 101.7 или 102.1
                     # проверяем баланс также, как при предудущих категориях
                     balance = 1960 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
@@ -615,9 +615,9 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat in [13, 15, 17, 19, 21, 23, 25, 27]:
+                elif reccat in [13, 15, 17, 19, 21, 23, 25, 27, 29]:
                     # если категория 100.3, 100.5, 100.7, 
-                    # 100.9, 101.2, 101.4, 101.6 или 102.2
+                    # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2
                     # проверяем баланс также, как при предыдущих категориях
                     balance = 760 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
