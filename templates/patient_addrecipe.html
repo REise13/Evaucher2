@@ -47,38 +47,6 @@
     }
 </style>
 
-<script>
-    $(document).ready(function() {
-        load_data();
-        function load_data(pt='', ct='')
-        {
-            $.ajax({
-                url:"/get_pat_balance",
-                method:"POST",
-                data:{pt:pt, ct:ct},
-                success:function(data)
-                { 
-                    if(data.htmlresponse != "") {
-                        $('#patBal').append('<p class="font-weight-bold"> Баланс пациента: ' + data.htmlresponse + ' руб.</p>'); 
-                        var obj=$.parseJSON(data.htmlresponse);
-                        $('#pat_int').val(obj); 
-                    } else {
-                        $('#patBal').empty();
-                        $('#pat_int').val("");
-                    }
-                    
-                }
-            })
-        }
-    
-        $('#recCat').on('change', function(){
-            $('#cat_id').val($('#recCat').val());
-            var ct = $('#cat_id').val(); 
-            var pt = $('#pat_id').val();
-            load_data(pt, ct);
-        });
-    });
-</script>
     <!--Форма Выписать рецепт-->
     <div class="page-content p-5" id="content">
         <h2 class="display-4 text-white">Выписать рецепт</h2>
@@ -103,9 +71,8 @@
                                     <dd class="col-sm-9">{{ patient['fio'] }}</dd>
                                 </dl>
                             </div>
-                            
-                            <div id="patBal"></div>
-                            <input type="hidden" value="" id="pat_int">
+                            <input type="hidden" name="pat_id" value="" id="pat_id">
+                            <input type="hidden" name="cat_id" value="" id="cat_id" >
 
                             <div class="form-group">
                                 <label for="diagnos" class="font-weight-bold">Диагноз</label>
@@ -131,10 +98,7 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                            </div>
-                            <input type="hidden" name="pat_id" value="{{ patient['id'] }}" id="pat_id">
-                            <input type="hidden" name="cat_id" value="" id="cat_id" >
-                            <hr>
+                            </div> <hr>
                             <div class="form-group" id="drugsCat" style="display:none;">
                                 <label for="drugCat" class="font-weight-bold">Категория препаратов</label>
                                 <div class="data-select">
@@ -1462,212 +1426,102 @@
             //array TWO with recipe category id's:
             var arr2 = ['13', '15', '17', '19', '21', '23', '25', '27','29']
 
-            //patient balance
-            var patBalance = $('#pat_int').val()
+            if(selCat == 6 && $('#price').val() > 1500) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1500 рублей на ребенка',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
 
-            // money limit 
-            var child_money = 1500
-            var woman_limit = 1850
-            var tub_flu = 1960
-            var tub_vit = 875
+                    }
 
-            if (patBalance == "") {
-                if(selCat == 6 && $('#price').val() > child_money) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит  на ребенка',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if( selCat == 1 && $('#price').val() > woman_limit) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит на беременных.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(selCat == 2 && $('#price').val() > woman_limit) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит на кормящих.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr1)) && $('#price').val() > tub_flu) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит 1960 руб.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr2)) && $('#price').val() > tub_vit) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит в 875 рублей.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
-                    $(':input[type="submit"]').prop('disabled', true);
-                }
-    
-                else {
-                    $(':input[type="submit"]').prop('disabled', false);
-                }
+                });
             }
+
+            else if( selCat == 1 && $('#price').val() > 1850) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1850 рублей на беременных.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if(selCat == 2 && $('#price').val() > 1850) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1850 рублей на кормящих.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if(($.inArray(selCat, arr1)) && $('#price').val() > 1960) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 1960 рублей.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if(($.inArray(selCat, arr2)) && $('#price').val() > 760) {
+                $.confirm({
+                    icon: 'fa fa-exclamation',
+                    theme: 'modern',
+                    animation: 'scale',
+                    type: 'red',
+                    title: 'Превышен лимит',
+                    content: 'Превышен лимит в 870 рублей.',
+                    buttons: {
+                        ОК: function () {
+                            $(':input[type="submit"]').prop('disabled', true);
+                        }
+
+                    }
+
+                });
+            }
+
+            else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
+                $(':input[type="submit"]').prop('disabled', true);
+            }
+
             else {
-                if(selCat == 6 && $('#price').val() < child_money && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if( (selCat == 1 || selCat == 2) && $('#price').val() < woman_limit && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr1)) && $('#price').val() < tub_flu && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr2)) && $('#price').val() < tub_vit && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
-                    $(':input[type="submit"]').prop('disabled', true);
-                }
-    
-                else {
-                    $(':input[type="submit"]').prop('disabled', false);
-                }
+                $(':input[type="submit"]').prop('disabled', false);
             }
 
         }
