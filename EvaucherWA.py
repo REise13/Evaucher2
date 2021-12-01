@@ -397,6 +397,42 @@ def getdata(pat_id):
                         recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList)
 
 
+@app.route("/get_pat_balance",methods=["POST","GET"])
+def get_pat_balance():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)   
+    if request.method == 'POST':
+        pt_id = int(request.form['pt'])
+        ct_id = int(request.form['ct'])
+        child_limit = 1500
+        woman_limit = 1850
+        tub_flu = 1960
+        tub_vit = 875
+        # array ONE with recipe category id's:
+        arr1 = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]
+        # array TWO with recipe category id's:
+        arr2 = [13, 15, 17, 19, 21, 23, 25, 27, 29]
+        patb_diff = int()
+
+        if ct_id == 6:
+            patb_diff = child_limit
+        if ct_id == 1 or ct_id == 2:
+            patb_diff = woman_limit
+        if ct_id in arr1:
+            patb_diff = tub_flu
+        if ct_id in arr2:
+            patb_diff = tub_vit
+        print(patb_diff) 
+        print(pt_id)
+        print(ct_id)
+        cursor.execute("select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s", (pt_id, ct_id,))
+        patBal = cursor.fetchall()
+        pat_int = ""
+        if patBal[0]['sum_rec'] != None:
+            pat_int = int(patb_diff - int(patBal[0]['sum_rec']))
+            print(patb_diff)            
+    return jsonify({'htmlresponse': pat_int})
+
+
 @app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
 def add(pat_id):
     """ Функция выписки рецепта """
