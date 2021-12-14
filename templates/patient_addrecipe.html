@@ -108,9 +108,13 @@
                     if(data.htmlresponse != "") {
                         $('#drugCat').prop('disabled', true);
                         $.confirm({
+                            icon: 'fa fa-exclamation',
+                            theme: 'modern',
                             title: 'Превышен лимит',
                             content: 'Превышен лимит выписки рецептов в данной категории. Обратитесь к администратору.',
                             type: 'red',
+                            boxWidth: '466px',
+                            useBootstrap: false,
                             typeAnimated: true,
                             buttons: {
                                 OK: {
