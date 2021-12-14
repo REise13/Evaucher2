@@ -433,6 +433,44 @@ def get_pat_balance():
     return jsonify({'htmlresponse': pat_int})
 
 
+@app.route("/get_drug_cat",methods=["POST","GET"])
+def get_drug_cat():
+    if request.method == 'POST':
+        dr_ct_id = int(request.form['dr_ct'])
+
+        # array with recipe category id's:
+        arr = [13, 15, 17, 19, 21, 23, 25, 27, 29]
+        status = ""
+
+        if dr_ct_id in arr:
+            status = "Y";
+        drug_cat = ""
+        if status != "":
+            drug_cat = status
+    return jsonify({'htmlresponse': drug_cat})
+
+
+@app.route("/get_user_limit",methods=["POST","GET"])
+def get_user_limit():
+    if request.method == 'POST':
+        user_id = int(request.form['user_id'])
+        ct_id = int(request.form['ct_id'])
+        print(user_id)
+        print(ct_id)
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("""SELECT indicator_limit, indicator_used
+                FROM limits where doctor_id=%s and category_id=%s""",(user_id, ct_id,))
+        limit = cursor.fetchall()
+        status = ""
+
+        if limit[0]['indicator_used'] == limit[0]['indicator_limit']:
+            status = "Y";
+        userLimit = ""
+        if status != "":
+            userLimit = status
+    return jsonify({'htmlresponse': userLimit})
+
+
 @app.route('/<int:pat_id>/add', methods=['GET', 'POST'])
 def add(pat_id):
     """ Функция выписки рецепта """

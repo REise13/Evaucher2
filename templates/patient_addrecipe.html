@@ -50,6 +50,8 @@
 <script>
     $(document).ready(function() {
         load_data();
+        load_drugCat();
+        load_userLimit();
         function load_data(pt='', ct='')
         {
             $.ajax({
@@ -57,25 +59,86 @@
                 method:"POST",
                 data:{pt:pt, ct:ct},
                 success:function(data)
-                { 
+                {
                     if(data.htmlresponse != "") {
-                        $('#patBal').append('<p class="font-weight-bold"> Баланс пациента: ' + data.htmlresponse + ' руб.</p>'); 
+                        if ($('#patBal').is(':empty')) {
+                            $('#patBal').append('<p class="font-weight-bold"> Баланс пациента: ' + data.htmlresponse + ' руб.</p>');
+                        } else {
+                            $('#patBal').empty();
+                            $('#patBal').append('<p class="font-weight-bold"> Баланс пациента: ' + data.htmlresponse + ' руб.</p>');
+                        }
                         var obj=$.parseJSON(data.htmlresponse);
-                        $('#pat_int').val(obj); 
+                        $('#pat_int').val(obj);
                     } else {
                         $('#patBal').empty();
                         $('#pat_int').val("");
                     }
-                    
+
                 }
             })
         }
-    
+
+        function load_drugCat(dr_ct='')
+        {
+            $.ajax({
+                url:"/get_drug_cat",
+                method:"POST",
+                data:{dr_ct: dr_ct},
+                success:function(data)
+                {
+                    if(data.htmlresponse != "") {
+                        $('#drugCat option').hide();
+                        $('#drugCat option[value="19"]').show();
+                    } else {
+                        $('#drugCat option').show();
+                    }
+
+                }
+            })
+        }
+
+        function load_userLimit(user_id='', ct_id='')
+        {
+            $.ajax({
+                url:"/get_user_limit",
+                method:"POST",
+                data:{user_id: user_id, ct_id:ct_id},
+                success:function(data)
+                {
+                    if(data.htmlresponse != "") {
+                        $('#drugCat').prop('disabled', true);
+                        $.confirm({
+                            title: 'Превышен лимит',
+                            content: 'Превышен лимит выписки рецептов в данной категории. Обратитесь к администратору.',
+                            type: 'red',
+                            typeAnimated: true,
+                            buttons: {
+                                OK: {
+                                    text: 'OK',
+                                    btnClass: 'btn-dark',
+                                    action: function(){
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        $('#drugCat').prop('disabled', false);
+                    }
+                }
+            })
+        }
+
         $('#recCat').on('change', function(){
             $('#cat_id').val($('#recCat').val());
-            var ct = $('#cat_id').val(); 
+            var ct = $('#cat_id').val();
+            var ct_id = $('#cat_id').val();
             var pt = $('#pat_id').val();
+            var dr_ct = $('#cat_id').val();
+            var user_id = $('#user_id').val();
             load_data(pt, ct);
+            load_drugCat(dr_ct);
+            load_userLimit(user_id, ct_id);
+
         });
     });
 </script>
@@ -97,6 +160,7 @@
                             {% endfor %}
                         <!-- end -->
                         <form role="form" action="{{ url_for('add', pat_id=patient['id']) }}" method="POST">
+                            <div id="userLimit"></div>
                             <div class="form-group">
                                 <dl class="row">
                                     <dt class="col-sm-3">ФИО пациента</dt>
@@ -105,6 +169,7 @@
                             </div>
                             
                             <div id="patBal"></div>
+                            <input type="hidden" value="{{ session['id'] }}" id="user_id">
                             <input type="hidden" value="" id="pat_int">
 
                             <div class="form-group">
@@ -134,6 +199,7 @@
                             </div>
                             <input type="hidden" name="pat_id" value="{{ patient['id'] }}" id="pat_id">
                             <input type="hidden" name="cat_id" value="" id="cat_id" >
+                            <input type="hidden" name="drugcat_id" value="" id="drugcat_id">
                             <hr>
                             <div class="form-group" id="drugsCat" style="display:none;">
                                 <label for="drugCat" class="font-weight-bold">Категория препаратов</label>
