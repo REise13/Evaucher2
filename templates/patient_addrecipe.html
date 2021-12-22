@@ -112,9 +112,9 @@
                             theme: 'modern',
                             title: 'Превышен лимит',
                             content: 'Превышен лимит выписки рецептов в данной категории. Обратитесь к администратору.',
-                            type: 'red',
                             boxWidth: '466px',
                             useBootstrap: false,
+                            type: 'red',
                             typeAnimated: true,
                             buttons: {
                                 OK: {
@@ -146,6 +146,7 @@
         });
     });
 </script>
+
     <!--Форма Выписать рецепт-->
     <div class="page-content p-5" id="content">
         <h2 class="display-4 text-white">Выписать рецепт</h2>
@@ -163,24 +164,26 @@
                                 </div>
                             {% endfor %}
                         <!-- end -->
+                        <div id="limitStatus"></div>
                         <form role="form" action="{{ url_for('add', pat_id=patient['id']) }}" method="POST">
-                            <div id="userLimit"></div>
                             <div class="form-group">
                                 <dl class="row">
                                     <dt class="col-sm-3">ФИО пациента</dt>
                                     <dd class="col-sm-9">{{ patient['fio'] }}</dd>
                                 </dl>
                             </div>
-                            
+
                             <div id="patBal"></div>
                             <input type="hidden" value="{{ session['id'] }}" id="user_id">
                             <input type="hidden" value="" id="pat_int">
 
+                            <div class="form-group" id="patBal"></div>
+                            <input type="hidden" name="pat_id" value="" id="pat_bal">
                             <div class="form-group">
                                 <label for="diagnos" class="font-weight-bold">Диагноз</label>
                                 <div class="data-select"></div>
                                 <select name="diagnoslist" id="diagnos"
-                                oninvalid="this.setCustomValidity('Выберите диагноз из списка.')" 
+                                oninvalid="this.setCustomValidity('Выберите диагноз из списка.')"
                                 oninput="setCustomValidity('')"
                                 class="form-control" data-width="auto form-control" required>
                                     <option value="">Выберите</option>
@@ -188,27 +191,32 @@
                                         <option value="{{ diagnos['id'] }}">{{ diagnos['diagnos'] }}</option>
                                     {% endfor %}
                                 </select>
-                            </div> 
+                            </div>
                             <div class="form-group">
                                 <label for="recCat" class="font-weight-bold">Категория рецепта</label>
                                 <div class="data-select">
-                                    <select name="recCatlist" id="recCat" 
+                                    <select name="recCatlist" id="recCat"
                                         class="form-control" data-width="auto" required>
                                         <option value="">Выберите</option>
-                                        {% for cat in recCat %}
-                                            <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
-                                        {% endfor %}
+                                        {% if patIndCat|length > 0 %}
+                                            {% for cat in patIndCat %}
+                                                <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            {% for cat in recCat %}
+                                                <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
+                                            {% endfor %}
+                                        {% endif %}
                                     </select>
                                 </div>
-                            </div>
+                            </div> <hr>
                             <input type="hidden" name="pat_id" value="{{ patient['id'] }}" id="pat_id">
                             <input type="hidden" name="cat_id" value="" id="cat_id" >
                             <input type="hidden" name="drugcat_id" value="" id="drugcat_id">
-                            <hr>
                             <div class="form-group" id="drugsCat" style="display:none;">
                                 <label for="drugCat" class="font-weight-bold">Категория препаратов</label>
                                 <div class="data-select">
-                                    <select name="drugCat" id="drugCat" 
+                                    <select name="drugCat" id="drugCat"
                                         class="form-control" data-width="auto" required>
                                         <option value="">Выберите</option>
                                         {% for cat in drugCat %}
@@ -216,7 +224,7 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                            </div> 
+                            </div>
 
                         <!--Наборы-->
                             <!--Набор хирургия малая-->
@@ -320,6 +328,27 @@
                                             <td>Детский хирургический</td>
                                             <td><input type="text" name="qnty" value="0" class="w-25"></td>
                                             <td>11000руб.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!--Набор инсультный-->
+                            <div id="NaborINS" class="form-group" style="display: none;">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="thead text-white text-uppercase">
+                                        <tr>
+                                            <th>Выбрать</th>
+                                            <th>НАБОР</th>
+                                            <th>Количество</th>
+                                            <th>Цена</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><input type="checkbox" name="chck" value="539" /></td>
+                                            <td>Инсультный</td>
+                                            <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                            <td>руб.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1177,7 +1206,7 @@
             $('label').each(function () {
                 if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
             });
-            
+
             $(':checkbox').click(function (e) {
                 var checked = $(this).attr('checked');
                 $(this).closest('label').toggleClass('selected', checked);
@@ -1190,12 +1219,22 @@
         $(document).ready(function(){
             $('#recCat').change(function(){
                 var rec = $(this).val();
-                if (rec == 10) {
+                if (rec == 9) {
+                    document.getElementById("NaborINS").style.display='block';
+                    document.getElementById("NaborNR").style.display='none';
+                    document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborHB").style.display='none';
+                    document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("NaborHM").style.display='none';
+                    document.getElementById("drugsCat").style.display='none';
+                }
+                else if (rec == 10) {
                     document.getElementById("NaborHM").style.display='block';
                     document.getElementById("NaborNR").style.display='none';
                     document.getElementById("NaborKS").style.display='none';
                     document.getElementById("NaborHB").style.display='none';
                     document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("NaborINS").style.display='none';
                     document.getElementById("drugsCat").style.display='none';
                 }
                 else if (rec == 3) {
@@ -1204,6 +1243,7 @@
                     document.getElementById("NaborKS").style.display='none';
                     document.getElementById("NaborHB").style.display='none';
                     document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("NaborINS").style.display='none';
                     document.getElementById("drugsCat").style.display='none';
                 }
                 else if (rec == 4) {
@@ -1212,6 +1252,7 @@
                     document.getElementById("NaborHM").style.display='none';
                     document.getElementById("NaborHB").style.display='none';
                     document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("NaborINS").style.display='none';
                     document.getElementById("drugsCat").style.display='none';
                 }
                 else if (rec == 5) {
@@ -1220,6 +1261,7 @@
                     document.getElementById("NaborNR").style.display='none';
                     document.getElementById("NaborHM").style.display='none';
                     document.getElementById("NaborHD").style.display='none';
+                    document.getElementById("NaborINS").style.display='none';
                     document.getElementById("drugsCat").style.display='none';
                 }
                 else if (rec == 7) {
@@ -1228,6 +1270,7 @@
                     document.getElementById("NaborHM").style.display='none';
                     document.getElementById("NaborHB").style.display='none';
                     document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborINS").style.display='none';
                     document.getElementById("drugsCat").style.display='none';
                 }
                 else {
@@ -1236,9 +1279,11 @@
                     document.getElementById("NaborHM").style.display='none';
                     document.getElementById("NaborHB").style.display='none';
                     document.getElementById("NaborKS").style.display='none';
+                    document.getElementById("NaborINS").style.display='none';
                     document.getElementById("NaborHD").style.display='none';
-    
+
                 }
+
             });
 
             $('#drugCat').change(function(){
@@ -1249,21 +1294,21 @@
                 else {
                     document.getElementById("1").style.display='none';
                 }
-        
+
                 if (drug == 2) {
                     document.getElementById("2").style.display='block';
                 }
                 else {
                     document.getElementById("2").style.display='none';
                 }
-        
+
                 if (drug == 3) {
                     document.getElementById("3").style.display='block';
                 }
                 else {
                     document.getElementById("3").style.display='none';
                 }
-        
+
                 if (drug == 4) {
                     document.getElementById("4").style.display='block';
                 }
@@ -1271,7 +1316,7 @@
                     document.getElementById("4").style.display='none';
                 }
                 if (drug == 5) {
-        
+
                     $.confirm({
                         icon: 'fa fa-exclamation-triangle',
                         theme: 'modern',
@@ -1286,10 +1331,10 @@
                             },
                             Нет: function () {
                                 $('input:checkbox'). prop('disabled', true);
-        
+
                             }
                         }
-        
+
                     });
                 }
                 else {
@@ -1308,7 +1353,7 @@
                 else {
                     document.getElementById("7").style.display='none';
                 }
-        
+
                 if (drug == 8) {
                     document.getElementById("8").style.display='block';
                 }
@@ -1467,7 +1512,7 @@
                 }
             });
         });
-       
+
     </script>
 
 
@@ -1483,7 +1528,7 @@
             });
         });
     </script>
-   
+
 
     <!--Автоматический счетчик цены при выборе препаратов-->
     <!--Фиксирует сумму в текстовом поле id=price-->
@@ -1527,102 +1572,94 @@
             var selCat = $("#recCat option:selected").val();
 
             //array ONE with recipe category id's:
-            var arr1 = ['11', '12', '14', '16', '18', '20', '22', '24', '26', '28']
+            var arr3 = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28];
 
             //array TWO with recipe category id's:
-            var arr2 = ['13', '15', '17', '19', '21', '23', '25', '27','29']
+            var arr2 = [13, 15, 17, 19, 21, 23, 25, 27, 29];
 
             //patient balance
-            var patBalance = $('#pat_int').val()
+            var patBalance = $('#pat_int').val();
 
-            // money limit 
+            // money limit
             var child_money = 1500
             var woman_limit = 1850
             var tub_flu = 1960
             var tub_vit = 875
 
             if (patBalance == "") {
-                if(selCat == 6 && $('#price').val() > child_money) {
+                if(selCat == 6 && $('#price').val() > 1500) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
                         animation: 'scale',
                         type: 'red',
                         title: 'Превышен лимит',
-                        content: 'Превышен лимит  на ребенка',
-                        boxWidth: '500px',
-                        useBootstrap: false,
+                        content: 'Превышен лимит в 1500 рублей на ребенка',
                         buttons: {
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
-                else if( selCat == 1 && $('#price').val() > woman_limit) {
+
+                else if( selCat == 1 && $('#price').val() > 1850) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
                         animation: 'scale',
                         type: 'red',
                         title: 'Превышен лимит',
-                        content: 'Превышен лимит на беременных.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
+                        content: 'Превышен лимит в 1850 рублей на беременных.',
                         buttons: {
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
-                else if(selCat == 2 && $('#price').val() > woman_limit) {
+
+                else if(selCat == 2 && $('#price').val() > 1850) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
                         animation: 'scale',
                         type: 'red',
                         title: 'Превышен лимит',
-                        content: 'Превышен лимит на кормящих.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
+                        content: 'Превышен лимит в 1850 рублей на кормящих.',
                         buttons: {
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
-                else if(($.inArray(selCat, arr1)) && $('#price').val() > tub_flu) {
+
+                else if((selCat == 11 || selCat == 12 || selCat == 14 || selCat == 16 || selCat == 18 || selCat == 20 || selCat == 22 || selCat == 24 || selCat == 26 || selCat == 28) && $('#price').val() > 1960) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
                         animation: 'scale',
                         type: 'red',
                         title: 'Превышен лимит',
-                        content: 'Превышен лимит 1960 руб.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
+                        content: 'Превышен лимит в 1960 рублей.',
                         buttons: {
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
-                else if(($.inArray(selCat, arr2)) && $('#price').val() > tub_vit) {
+
+                else if(selCat == 13 && $('#price').val() > 875) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
@@ -1630,22 +1667,164 @@
                         type: 'red',
                         title: 'Превышен лимит',
                         content: 'Превышен лимит в 875 рублей.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
                         buttons: {
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
+
+                else if(selCat == 15 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 17 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 19 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 21 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 23 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 25 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 27 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
+                else if(selCat == 29 && $('#price').val() > 875) {
+                    $.confirm({
+                        icon: 'fa fa-exclamation',
+                        theme: 'modern',
+                        animation: 'scale',
+                        type: 'red',
+                        title: 'Превышен лимит',
+                        content: 'Превышен лимит в 875 рублей.',
+                        buttons: {
+                            ОК: function () {
+                                $(':input[type="submit"]').prop('disabled', true);
+                            }
+
+                        }
+
+                    });
+                }
+
                 else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
                     $(':input[type="submit"]').prop('disabled', true);
                 }
-    
+
                 else {
                     $(':input[type="submit"]').prop('disabled', false);
                 }
@@ -1665,12 +1844,12 @@
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
+
                 else if( (selCat == 1 || selCat == 2) && $('#price').val() < woman_limit && $('#price').val() > parseInt(patBalance)) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
@@ -1685,13 +1864,13 @@
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
-                else if(($.inArray(selCat, arr1)) && $('#price').val() < tub_flu && $('#price').val() > parseInt(patBalance)) {
+
+                else if(($.inArray(selCat, arr3)) && $('#price').val() > parseInt(patBalance)) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
@@ -1705,13 +1884,13 @@
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
-                else if(($.inArray(selCat, arr2)) && $('#price').val() < tub_vit && $('#price').val() > parseInt(patBalance)) {
+
+                else if(($.inArray(selCat, arr2)) && $('#price').val() > parseInt(patBalance)) {
                     $.confirm({
                         icon: 'fa fa-exclamation',
                         theme: 'modern',
@@ -1725,21 +1904,20 @@
                             ОК: function () {
                                 $(':input[type="submit"]').prop('disabled', true);
                             }
-    
+
                         }
-    
+
                     });
                 }
-    
+
                 else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
                     $(':input[type="submit"]').prop('disabled', true);
                 }
-    
+
                 else {
                     $(':input[type="submit"]').prop('disabled', false);
                 }
             }
-
         }
 
         $("input[type='text']").keyup(function() {
