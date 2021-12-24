@@ -399,37 +399,61 @@ def getdata(pat_id):
 
 @app.route("/get_pat_balance",methods=["POST","GET"])
 def get_pat_balance():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)   
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     if request.method == 'POST':
         pt_id = int(request.form['pt'])
         ct_id = int(request.form['ct'])
-        child_limit = 1500
-        woman_limit = 1850
-        tub_flu = 1960
-        tub_vit = 875
+
+        cursor.execute('select id, sum from money_limit')
+        money_limit = cursor.fetchall()
+
         # array ONE with recipe category id's:
         arr1 = [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]
         # array TWO with recipe category id's:
         arr2 = [13, 15, 17, 19, 21, 23, 25, 27, 29]
         patb_diff = int()
 
-        if ct_id == 6:
-            patb_diff = child_limit
-        if ct_id == 1 or ct_id == 2:
-            patb_diff = woman_limit
+        if ct_id == 6: # 097
+            patb_diff = int(money_limit[1]['sum'])
+        if ct_id == 1 or ct_id == 2:  # 092 and 093
+            patb_diff = int(money_limit[0]['sum'])
         if ct_id in arr1:
-            patb_diff = tub_flu
+            patb_diff = int(money_limit[2]['sum'])
         if ct_id in arr2:
-            patb_diff = tub_vit
-        print(patb_diff) 
-        print(pt_id)
-        print(ct_id)
+            patb_diff = int(money_limit[3]['sum'])
+        if ct_id == 10: # 091
+            patb_diff = int(money_limit[4]['sum'])
+        if ct_id == 3:  # 094
+            patb_diff = int(money_limit[5]['sum'])
+        if ct_id == 4: # 095
+            patb_diff = int(money_limit[6]['sum'])
+        if ct_id == 5: # 096
+            patb_diff = int(money_limit[7]['sum'])
+        if ct_id == 7: # 098
+            patb_diff = int(money_limit[8]['sum'])
+        if ct_id == 8: # 099
+            patb_diff = int(money_limit[9]['sum'])
+        if ct_id == 9: # 100
+            patb_diff = int(money_limit[10]['sum'])
+
+        if ct_id in [3,4,5,7,9,10]:
+            cursor.execute('SELECT id FROM recipe WHERE pacient_id=%s AND category_id IN(3,4,5,7,9,10)', (pt_id,))
+            nabor = cursor.fetchall()
+        else:
+            nabor = ""    
         cursor.execute("select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s", (pt_id, ct_id,))
         patBal = cursor.fetchall()
         pat_int = ""
         if patBal[0]['sum_rec'] != None:
-            pat_int = int(patb_diff - int(patBal[0]['sum_rec']))
-            print(patb_diff)            
+            if len(nabor) != 0:
+                pat_int = -1
+            else:
+                pat_int = int(patb_diff - int(patBal[0]['sum_rec']))
+        else:
+            if len(nabor) != 0:
+                pat_int = -1
+            else:
+                pat_int = patb_diff    
     return jsonify({'htmlresponse': pat_int})
 
 
@@ -513,11 +537,11 @@ def add(pat_id):
         if category == 1 or category == 2:
             # если выбрана категория 092 или 093, 
             # то начальный баланс равен
-            pat_balance = 1850
-        if category == 6:
+            pat_balance = 2100
+        if category == 6 or category == 8:
             # а если категория 097, 
             # то начальный баланс пациента равен
-            pat_balance = 1500
+            pat_balance = 1700
         
         # если катеория 100.1, 100.2, 100.4, 100.6, 
         # 100.8, 101.1, 101.3, 101.5, 101.7 или 102.1
@@ -527,7 +551,7 @@ def add(pat_id):
         # если категория 100.3, 100.5, 100.7, 
         # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2 
         if category in [13, 15, 17, 19, 21, 23, 25, 27, 29]:
-            pat_balance = 870
+            pat_balance = 875
 
         # создаем переменную посещения пациентом данного врача
         # по умолчанию оно равно 1 (первое посещение) 
@@ -562,7 +586,7 @@ def add(pat_id):
                 # проверяем выдавался ли ранее набор пациенту и в других категориях,
                 # если да, то выводим предупреждение 
                 # и выписка рецепта невозможна
-                if len(nabor) !=0 and category in [3,4,5,7,10]:
+                if len(nabor) !=0 and category in [3,4,5,7,9,10]:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 # иначе вносим данные в базу 
@@ -593,7 +617,7 @@ def add(pat_id):
                 if reccat == 1 or reccat == 2:
                     # не выходит ли сумма выписываемого рецепта 
                     # за баланс пользователя в категории 092 или 093
-                    balance = 1850 - sumprice
+                    balance = 2100 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     # если превышает баланс, то выписка невозможна 
                     # и сообщение с предупреждением
@@ -622,10 +646,10 @@ def add(pat_id):
                         mysql.connection.commit()
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
-                elif reccat == 6:
+                elif reccat == 6 or reccat == 8:
                     # если катеория 097
                     # проверяем баланс также, как при предудущих категориях
-                    balance = 1500 - sumprice
+                    balance = 1700 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
@@ -693,7 +717,7 @@ def add(pat_id):
                     # если категория 100.3, 100.5, 100.7, 
                     # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2
                     # проверяем баланс также, как при предыдущих категориях
-                    balance = 870 - sumprice
+                    balance = 875 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
                     if balance < price:
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')

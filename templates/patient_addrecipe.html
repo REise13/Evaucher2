@@ -2,7 +2,6 @@
 
 {% block title %} Выписать рецепт {% endblock %}
 
-
 {% block content %}
 <style>
     input[type=checkbox] {
@@ -61,15 +60,40 @@
                 success:function(data)
                 {
                     if(data.htmlresponse != "") {
+                        var obj=$.parseJSON(data.htmlresponse);
+                        $('#pat_int').val(obj);
                         if ($('#patBal').is(':empty')) {
                             $('#patBal').append('<p class="font-weight-bold"> Баланс пациента: ' + data.htmlresponse + ' руб.</p>');
                         } else {
                             $('#patBal').empty();
                             $('#patBal').append('<p class="font-weight-bold"> Баланс пациента: ' + data.htmlresponse + ' руб.</p>');
                         }
-                        var obj=$.parseJSON(data.htmlresponse);
-                        $('#pat_int').val(obj);
-                    } else {
+
+                        if (obj == "-1") {
+                            $('#patBal').empty();
+                            $("input[name='chck']").prop('disabled', true); 
+                            $.confirm({
+                                icon: 'fa fa-exclamation',
+                                theme: 'modern',
+                                title: 'Ошибка',
+                                content: 'Пациент уже получал набор. Вы не можете выписать его еще раз.',
+                                boxWidth: '466px',
+                                useBootstrap: false,
+                                type: 'red',
+                                typeAnimated: true,
+                                buttons: {
+                                    OK: {
+                                        text: 'OK',
+                                        btnClass: 'btn-dark',
+                                        action: function(){
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        $("input[name='chck']").prop('disabled', false); 
                         $('#patBal').empty();
                         $('#pat_int').val("");
                     }
@@ -112,9 +136,9 @@
                             theme: 'modern',
                             title: 'Превышен лимит',
                             content: 'Превышен лимит выписки рецептов в данной категории. Обратитесь к администратору.',
-                            type: 'red',
                             boxWidth: '466px',
                             useBootstrap: false,
+                            type: 'red',
                             typeAnimated: true,
                             buttons: {
                                 OK: {
@@ -146,189 +170,207 @@
         });
     });
 </script>
-    <!--Форма Выписать рецепт-->
-    <div class="page-content p-5" id="content">
-        <h2 class="display-4 text-white">Выписать рецепт</h2>
-        <div class="separator"></div>
-        <div class="row">
-            <div class="container">
-                <div class="bg-white rounded-sm shadow-sm p-5">
-                        <!-- flash сообщения -->
-                            {% for message in get_flashed_messages(with_categories=True) %}
-                                <div id="#alert" class="alert alert-{{ message[0] }} alert-dismissible w-50 fade show" role="alert">
-                                    <p>{{ message[1] }}</p>
-                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                            {% endfor %}
-                        <!-- end -->
-                        <form role="form" action="{{ url_for('add', pat_id=patient['id']) }}" method="POST">
-                            <div id="userLimit"></div>
-                            <div class="form-group">
-                                <dl class="row">
-                                    <dt class="col-sm-3">ФИО пациента</dt>
-                                    <dd class="col-sm-9">{{ patient['fio'] }}</dd>
-                                </dl>
-                            </div>
-                            
-                            <div id="patBal"></div>
-                            <input type="hidden" value="{{ session['id'] }}" id="user_id">
-                            <input type="hidden" value="" id="pat_int">
 
-                            <div class="form-group">
-                                <label for="diagnos" class="font-weight-bold">Диагноз</label>
-                                <div class="data-select"></div>
-                                <select name="diagnoslist" id="diagnos"
-                                oninvalid="this.setCustomValidity('Выберите диагноз из списка.')" 
-                                oninput="setCustomValidity('')"
-                                class="form-control" data-width="auto form-control" required>
+<!--Форма Выписать рецепт-->
+<div class="page-content p-5" id="content">
+    <h2 class="display-4 text-white">Выписать рецепт</h2>
+    <div class="separator"></div>
+    <div class="row">
+        <div class="container w-100">
+            <div class="bg-white rounded-sm shadow-sm p-5">
+                    <!-- flash сообщения -->
+                        {% for message in get_flashed_messages(with_categories=True) %}
+                            <div id="#alert" class="alert alert-{{ message[0] }} alert-dismissible w-50 fade show" role="alert">
+                                <p>{{ message[1] }}</p>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+						{% endfor %}
+                    <!-- end -->
+                    <form role="form" action="{{ url_for('add', pat_id=patient['id']) }}" method="POST">
+                        <div class="form-group">
+                            <dl class="row">
+                                <dt class="col-sm-3">ФИО пациента</dt>
+                                <dd class="col-sm-9">{{ patient['fio'] }}</dd>
+                            </dl>
+                        </div>
+                        <div id="patBal"></div>
+                        <input type="hidden" value="{{ session['id'] }}" id="user_id">
+                        <input type="hidden" value="" id="pat_int">
+
+                        <div class="form-group" id="patBal"></div>
+                        <input type="hidden" name="pat_id" value="" id="pat_bal">
+                        <div class="form-group">
+                            <label for="diagnos" class="font-weight-bold">Диагноз</label>
+                            <div class="data-select"></div>
+                            <select name="diagnoslist" id="diagnos"
+                            class="form-control" data-width="auto form-control">
+                                <option value="">Выберите</option>
+                                {% for diagnos in diagnosList %}
+                                    <option value="{{ diagnos['id'] }}">{{ diagnos['diagnos'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div> <hr>
+                        <div class="form-group">
+                            <label for="recCat" class="font-weight-bold">Категория рецепта</label>
+                            <div class="data-select">
+                                <select name="recCatlist" id="recCat" onChange="Selected(this)"
+                                    class="form-control" data-width="auto">
                                     <option value="">Выберите</option>
-                                    {% for diagnos in diagnosList %}
-                                        <option value="{{ diagnos['id'] }}">{{ diagnos['diagnos'] }}</option>
+                                    {% for cat in recCat %}
+                                        <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
                                     {% endfor %}
                                 </select>
-                            </div> 
-                            <div class="form-group">
-                                <label for="recCat" class="font-weight-bold">Категория рецепта</label>
-                                <div class="data-select">
-                                    <select name="recCatlist" id="recCat" 
-                                        class="form-control" data-width="auto" required>
-                                        <option value="">Выберите</option>
-                                        {% for cat in recCat %}
-                                            <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
                             </div>
-                            <input type="hidden" name="pat_id" value="{{ patient['id'] }}" id="pat_id">
-                            <input type="hidden" name="cat_id" value="" id="cat_id" >
-                            <input type="hidden" name="drugcat_id" value="" id="drugcat_id">
-                            <hr>
-                            <div class="form-group" id="drugsCat" style="display:none;">
-                                <label for="drugCat" class="font-weight-bold">Категория препаратов</label>
-                                <div class="data-select">
-                                    <select name="drugCat" id="drugCat" 
-                                        class="form-control" data-width="auto" required>
-                                        <option value="">Выберите</option>
-                                        {% for cat in drugCat %}
-                                            <option value="{{ cat['id'] }}">{{ cat['drug_cat'] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div> 
+                        </div> <hr>
+                        <input type="hidden" name="pat_id" value="{{ patient['id'] }}" id="pat_id">
+                        <input type="hidden" name="cat_id" value="" id="cat_id" >
+                        <input type="hidden" name="drugcat_id" value="" id="drugcat_id">
+                        <div class="form-group" id="drugsCat" style="display:none;">
+                            <label for="drugCat" class="font-weight-bold">Категория препаратов</label>
+                            <div class="data-select">
+                                <select name="drugCat" id="drugCat" onChange="Selected2(this)"
+                                    class="form-control" data-width="auto">
+                                    <option value="">Выберите</option>
+                                    {% for cat in drugCat %}
+                                        <option value="{{ cat['id'] }}">{{ cat['drug_cat'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div> 
 
-                        <!--Наборы-->
-                            <!--Набор хирургия малая-->
-                            <div id="NaborHM" class="form-group" style="display: none;">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="thead text-white text-uppercase">
-                                        <tr>
-                                            <th>Выбрать</th>
-                                            <th>НАБОР</th>
-                                            <th>Количество</th>
-                                            <th>Цена</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><input type="checkbox" name="chck" value="359" /></td>
-                                            <td>Малый хирургический</td>
-                                            <td><input type="text" name="qnty" value="0" class="w-25"></td>
-                                            <td>500руб.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!--Набор Нормальные роды-->
-                            <div id="NaborNR" class="form-group" style="display: none;">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="thead text-white text-uppercase">
-                                        <tr>
-                                            <th>Выбрать</th>
-                                            <th>Набор</th>
-                                            <th>Количество</th>
-                                            <th>Цена</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><input type="checkbox" name="chck" value="80" /></td>
-                                            <td>Нормальные роды</td>
-                                            <td><input type="text" name="qnty" value="0" class="w-25"></td>
-                                            <td>5240руб.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            
-                            <!-- Набор кес.сечение-->
-                            <div id="NaborKS" class="form-group" style="display: none;">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="thead text-white text-uppercase">
-                                        <tr>
-                                            <th>Выбрать</th>
-                                            <th>Набор</th>
-                                            <th>Количество</th>
-                                            <th>Цена</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><input type="checkbox" name="chck" value="315" /></td>
-                                            <td>Кесарево сечение</td>
-                                            <td><input type="text" name="qnty" value="0" class="w-25"></td>
-                                            <td>8860руб.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!--Набор хирургия большая-->
-                            <div id="NaborHB" class="form-group" style="display: none;">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="thead text-white text-uppercase">
-                                        <tr>
-                                            <th>Выбрать</th>
-                                            <th>Набор</th>
-                                            <th>Количество</th>
-                                            <th>Цена</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><input type="checkbox" name="chck" value="285" /></td>
-                                            <td>Взрослый хирургический</td>
-                                            <td><input type="text" name="qnty" value="0" class="w-25"></td>
-                                            <td>11000руб.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <!--Набор хирургия детская-->
-                            <div id="NaborHD" class="form-group" style="display: none;">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="thead text-white text-uppercase">
-                                        <tr>
-                                            <th>Выбрать</th>
-                                            <th>Набор</th>
-                                            <th>Количество</th>
-                                            <th>Цена</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><input type="checkbox" name="chck" value="250" /></td>
-                                            <td>Детский хирургический</td>
-                                            <td><input type="text" name="qnty" value="0" class="w-25"></td>
-                                            <td>11000руб.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>    
-                        <!--end-->
+                    <!--Наборы-->
+                        <!--Набор хирургия малая-->
+                        <div id="NaborHM" class="form-group" style="display: none;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Выбрать</th>
+                                        <th>НАБОР</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" name="chck" value="359" /></td>
+                                        <td>Малый хирургический</td>
+                                        <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                        <td>3475руб.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--Набор Нормальные роды-->
+                        <div id="NaborNR" class="form-group" style="display: none;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Выбрать</th>
+                                        <th>Набор</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" name="chck" value="80" /></td>
+                                        <td>Нормальные роды</td>
+                                        <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                        <td>6000руб.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Набор кес.сечение-->
+                        <div id="NaborKS" class="form-group" style="display: none;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Выбрать</th>
+                                        <th>Набор</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" name="chck" value="315" /></td>
+                                        <td>Кесарево сечение</td>
+                                        <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                        <td>10250руб.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--Набор хирургия большая-->
+                        <div id="NaborHB" class="form-group" style="display: none;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Выбрать</th>
+                                        <th>Набор</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" name="chck" value="285" /></td>
+                                        <td>Взрослый хирургический</td>
+                                        <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                        <td>13900руб.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--Набор хирургия детская-->
+                        <div id="NaborHD" class="form-group" style="display: none;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Выбрать</th>
+                                        <th>Набор</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" name="chck" value="250" /></td>
+                                        <td>Детский хирургический</td>
+                                        <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                        <td>9500руб.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="NaborINSL" class="form-group" style="display: none;">
+                            <table class="table table-bordered table-hover">
+                                <thead class="thead text-white text-uppercase">
+                                    <tr>
+                                        <th>Выбрать</th>
+                                        <th>Набор</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="checkbox" name="chck" value="250" /></td>
+                                        <td>Инсультный</td>
+                                        <td><input type="text" name="qnty" value="0" class="w-25"></td>
+                                        <td>6400руб.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    <!--end-->
 
 
-                        <!--Препараты-->
+                    <!--Препараты-->
                         <div id="1" style="display: none;" class="table-wrapper-scroll-y table-scrollbar">
                             <table id="test" class="table table-bordered table-hover">
                                 <thead class="thead text-white text-uppercase">
@@ -347,7 +389,7 @@
                                         <td>{{drug['drugname']}}<br> {{drug['ingridient']}}<br> {{drug['country']}}<br>
                                             {{ drug['manufacturer'] }}<br></td>
                                         <td id="count">
-                                        <input type="text" name="qnty" id="qnty" value="0" class="">
+                                           <input type="text" name="qnty" id="qnty" value="0" class="">
                                         </td>
                                         <td id="pric">{{drug['price']}}руб.</td>
                                     </tr>
@@ -372,7 +414,7 @@
                                     <tr>
                                         <td><input type="checkbox" name="chck" value="{{drug['drug_id']}}" /></td>
                                         <td>{{drug['drugname']}}<br> {{drug['ingridient']}}<br> {{drug['country']}} <br>
-                                            {{ drug['manufacturer'] }}<br></td>
+                                             {{ drug['manufacturer'] }}<br></td>
                                         <td><input type="text" name="qnty" value="0"></td>
                                         <td>{{drug['price']}}руб.</td>
                                     </tr>
@@ -397,7 +439,7 @@
                                     <tr>
                                         <td><input type="checkbox" name="chck" value="{{drug['drug_id']}}" /></td>
                                         <td>{{drug['drugname']}}<br> {{drug['ingridient']}}<br> {{drug['country']}} <br>
-                                                {{ drug['manufacturer'] }}<br></td>
+                                                   {{ drug['manufacturer'] }}<br></td>
                                         <td><input type="text" name="qnty" value="0"></td>
                                         <td>{{drug['price']}}руб.</td>
                                     </tr>
@@ -1165,600 +1207,418 @@
                     </form>
                 </div>
                 <!-- end -->
-            </div>
         </div>
     </div>
-{% endblock %}
-<!-- block content end -->
+</div>
+<!--end-->
 
-<!-- Block script -->
-{% block script %}
+
 <script>
-        $(document).ready(function () {
-            $('label').each(function () {
-                if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
-            });
-            
-            $(':checkbox').click(function (e) {
-                var checked = $(this).attr('checked');
-                $(this).closest('label').toggleClass('selected', checked);
-            });
+    $(document).ready(function () {
+    // make sure labels are drawn in the correct state
+        $('label').each(function () {
+            if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
         });
+
+        // toggle label css when checkbox is clicked
+        $(':checkbox').click(function (e) {
+            var checked = $(this).attr('checked');
+            $(this).closest('label').toggleClass('selected', checked);
+        });
+    });
 </script>
 
 
-    <script>
-        $(document).ready(function(){
-            $('#recCat').change(function(){
-                var rec = $(this).val();
-                if (rec == 10) {
-                    document.getElementById("NaborHM").style.display='block';
-                    document.getElementById("NaborNR").style.display='none';
-                    document.getElementById("NaborKS").style.display='none';
-                    document.getElementById("NaborHB").style.display='none';
-                    document.getElementById("NaborHD").style.display='none';
-                    document.getElementById("drugsCat").style.display='none';
-                }
-                else if (rec == 3) {
-                    document.getElementById("NaborNR").style.display='block';
-                    document.getElementById("NaborHM").style.display='none';
-                    document.getElementById("NaborKS").style.display='none';
-                    document.getElementById("NaborHB").style.display='none';
-                    document.getElementById("NaborHD").style.display='none';
-                    document.getElementById("drugsCat").style.display='none';
-                }
-                else if (rec == 4) {
-                    document.getElementById("NaborKS").style.display='block';
-                    document.getElementById("NaborNR").style.display='none';
-                    document.getElementById("NaborHM").style.display='none';
-                    document.getElementById("NaborHB").style.display='none';
-                    document.getElementById("NaborHD").style.display='none';
-                    document.getElementById("drugsCat").style.display='none';
-                }
-                else if (rec == 5) {
-                    document.getElementById("NaborHB").style.display='block';
-                    document.getElementById("NaborKS").style.display='none';
-                    document.getElementById("NaborNR").style.display='none';
-                    document.getElementById("NaborHM").style.display='none';
-                    document.getElementById("NaborHD").style.display='none';
-                    document.getElementById("drugsCat").style.display='none';
-                }
-                else if (rec == 7) {
-                    document.getElementById("NaborHD").style.display='block';
-                    document.getElementById("NaborNR").style.display='none';
-                    document.getElementById("NaborHM").style.display='none';
-                    document.getElementById("NaborHB").style.display='none';
-                    document.getElementById("NaborKS").style.display='none';
-                    document.getElementById("drugsCat").style.display='none';
-                }
-                else {
-                    document.getElementById("drugsCat").style.display='block';
-                    document.getElementById("NaborNR").style.display='none';
-                    document.getElementById("NaborHM").style.display='none';
-                    document.getElementById("NaborHB").style.display='none';
-                    document.getElementById("NaborKS").style.display='none';
-                    document.getElementById("NaborHD").style.display='none';
-    
-                }
-            });
+<script>
+    function Selected(recCat) {
+        var rec = recCat.value;
+        if (rec == 10) {
+            document.getElementById("NaborHM").style.display='block';
+            document.getElementById("NaborNR").style.display='none';
+            document.getElementById("NaborKS").style.display='none';
+            document.getElementById("NaborHB").style.display='none';
+            document.getElementById("NaborHD").style.display='none';
+            document.getElementById("NaborINSL").style.display='none';
+            document.getElementById("drugsCat").style.display='none';
+        }
+        else if (rec == 3) {
+            document.getElementById("NaborNR").style.display='block';
+            document.getElementById("NaborHM").style.display='none';
+            document.getElementById("NaborKS").style.display='none';
+            document.getElementById("NaborHB").style.display='none';
+            document.getElementById("NaborHD").style.display='none';
+            document.getElementById("NaborINSL").style.display='none';
+            document.getElementById("drugsCat").style.display='none';
+        }
+        else if (rec == 4) {
+            document.getElementById("NaborKS").style.display='block';
+            document.getElementById("NaborNR").style.display='none';
+            document.getElementById("NaborHM").style.display='none';
+            document.getElementById("NaborHB").style.display='none';
+            document.getElementById("NaborHD").style.display='none';
+            document.getElementById("NaborINSL").style.display='none';
+            document.getElementById("drugsCat").style.display='none';
+        }
+        else if (rec == 5) {
+            document.getElementById("NaborHB").style.display='block';
+            document.getElementById("NaborKS").style.display='none';
+            document.getElementById("NaborNR").style.display='none';
+            document.getElementById("NaborHM").style.display='none';
+            document.getElementById("NaborHD").style.display='none';
+            document.getElementById("NaborINSL").style.display='none';
+            document.getElementById("drugsCat").style.display='none';
+        }
+        else if (rec == 7) {
+            document.getElementById("NaborHD").style.display='block';
+            document.getElementById("NaborNR").style.display='none';
+            document.getElementById("NaborHM").style.display='none';
+            document.getElementById("NaborHB").style.display='none';
+            document.getElementById("NaborKS").style.display='none';
+            document.getElementById("NaborINSL").style.display='none';
+            document.getElementById("drugsCat").style.display='none';
+        }
+        else if (rec == 9) {
+            document.getElementById("NaborINSL").style.display='block';
+            document.getElementById("NaborNR").style.display='none';
+            document.getElementById("NaborHM").style.display='none';
+            document.getElementById("NaborHB").style.display='none';
+            document.getElementById("NaborKS").style.display='none';
+            document.getElementById("NaborHD").style.display='none';
+            document.getElementById("drugsCat").style.display='none';
+        }
+        else {
+            document.getElementById("drugsCat").style.display='block';
+            document.getElementById("NaborNR").style.display='none';
+            document.getElementById("NaborHM").style.display='none';
+            document.getElementById("NaborHB").style.display='none';
+            document.getElementById("NaborKS").style.display='none';
+            document.getElementById("NaborHD").style.display='none';
+            document.getElementById("NaborINSL").style.display='none';
+        }
+    }
+</script>
 
-            $('#drugCat').change(function(){
-                var drug = $(this).val();
-                if (drug == 1) {
-                    document.getElementById("1").style.display='block';
-                }
-                else {
-                    document.getElementById("1").style.display='none';
-                }
-        
-                if (drug == 2) {
-                    document.getElementById("2").style.display='block';
-                }
-                else {
-                    document.getElementById("2").style.display='none';
-                }
-        
-                if (drug == 3) {
-                    document.getElementById("3").style.display='block';
-                }
-                else {
-                    document.getElementById("3").style.display='none';
-                }
-        
-                if (drug == 4) {
-                    document.getElementById("4").style.display='block';
-                }
-                else {
-                    document.getElementById("4").style.display='none';
-                }
-                if (drug == 5) {
-        
-                    $.confirm({
-                        icon: 'fa fa-exclamation-triangle',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Антибактериальные средства',
-                        content: 'Вы уверены в целесообразности назначения?',
-                        buttons: {
-                            Да: function () {
-                                document.getElementById("5").style.display='block';
-                                $('input:checkbox'). prop('disabled', false);
-                            },
-                            Нет: function () {
-                                $('input:checkbox'). prop('disabled', true);
-        
-                            }
-                        }
-        
-                    });
-                }
-                else {
-                    document.getElementById("5").style.display='none';
-                    $('input:checkbox'). prop('disabled', false);
-                }
-                if (drug == 6) {
-                    document.getElementById("6").style.display='block';
-                }
-                else {
-                    document.getElementById("6").style.display='none';
-                }
-                if (drug == 7) {
-                    document.getElementById("7").style.display='block';
-                }
-                else {
-                    document.getElementById("7").style.display='none';
-                }
-        
-                if (drug == 8) {
-                    document.getElementById("8").style.display='block';
-                }
-                else {
-                    document.getElementById("8").style.display='none';
-                }
-                if (drug == 9) {
-                    document.getElementById("9").style.display='block';
-                }
-                else {
-                    document.getElementById("9").style.display='none';
-                }
-                if (drug == 10) {
-                    document.getElementById("10").style.display='block';
-                }
-                else {
-                    document.getElementById("10").style.display='none';
-                }
-                if (drug == 11) {
-                    document.getElementById("11").style.display='block';
-                }
-                else {
-                    document.getElementById("11").style.display='none';
-                }
-                if (drug == 12) {
-                    document.getElementById("12").style.display='block';
-                }
-                else {
-                    document.getElementById("12").style.display='none';
-                }
-                if (drug == 13) {
-                    document.getElementById("13").style.display='block';
-                }
-                else {
-                    document.getElementById("13").style.display='none';
-                }
-                if (drug == 14) {
-                    document.getElementById("14").style.display='block';
-                }
-                else {
-                    document.getElementById("14").style.display='none';
-                }
-                if (drug == 15) {
-                    document.getElementById("15").style.display='block';
-                }
-                else {
-                    document.getElementById("15").style.display='none';
-                }
-                if (drug == 16) {
-                    document.getElementById("16").style.display='block';
-                }
-                else {
-                    document.getElementById("16").style.display='none';
-                }
-                if (drug == 17) {
-                    document.getElementById("17").style.display='block';
-                }
-                else {
-                    document.getElementById("17").style.display='none';
-                }
-                if (drug == 18) {
-                    document.getElementById("18").style.display='block';
-                }
-                else {
-                    document.getElementById("18").style.display='none';
-                }
-                if (drug == 19) {
-                    document.getElementById("19").style.display='block';
-                }
-                else {
-                    document.getElementById("19").style.display='none';
-                }
-                if (drug == 25) {
-                    document.getElementById("25").style.display='block';
-                }
-                else {
-                    document.getElementById("25").style.display='none';
-                }
-                if (drug == 26) {
-                    document.getElementById("26").style.display='block';
-                }
-                else {
-                    document.getElementById("26").style.display='none';
-                }
-                if (drug == 27) {
-                    document.getElementById("27").style.display='block';
-                }
-                else {
-                    document.getElementById("27").style.display='none';
-                }
-                if (drug == 28) {
-                    document.getElementById("28").style.display='block';
-                }
-                else {
-                    document.getElementById("28").style.display='none';
-                }
-                if (drug == 29) {
-                    document.getElementById("29").style.display='block';
-                }
-                else {
-                    document.getElementById("29").style.display='none';
-                }
-                if (drug == 30) {
-                    document.getElementById("30").style.display='block';
-                }
-                else {
-                    document.getElementById("30").style.display='none';
-                }
-                if (drug == 31) {
-                    document.getElementById("31").style.display='block';
-                }
-                else {
-                    document.getElementById("31").style.display='none';
-                }
-                if (drug == 32) {
-                    document.getElementById("32").style.display='block';
-                }
-                else {
-                    document.getElementById("32").style.display='none';
-                }
-                if (drug == 33) {
-                    document.getElementById("33").style.display='block';
-                }
-                else {
-                    document.getElementById("33").style.display='none';
-                }
-                if (drug == 34) {
-                    document.getElementById("34").style.display='block';
-                }
-                else {
-                    document.getElementById("34").style.display='none';
-                }
-                if (drug == 35) {
-                    document.getElementById("35").style.display='block';
-                }
-                else {
-                    document.getElementById("35").style.display='none';
-                }
-                if (drug == 36) {
-                    document.getElementById("36").style.display='block';
-                }
-                else {
-                    document.getElementById("36").style.display='none';
-                }
-                if (drug == 37) {
-                    document.getElementById("37").style.display='block';
-                }
-                else {
-                    document.getElementById("37").style.display='none';
-                }
-                if (drug == 38) {
-                    document.getElementById("38").style.display='block';
-                }
-                else {
-                    document.getElementById("38").style.display='none';
-                }
-            });
-        });
-       
-    </script>
-
-
-    <script>
-        $(document).ready(function () {
-            $('label').each(function () {
-                if ($(this).find(':checkbox').attr('checked')) $(this).addClass('selected');
-            });
-
-            $(':checkbox').click(function (e) {
-                var checked = $(this).attr('checked');
-                $(this).closest('label').toggleClass('selected', checked);
-            });
-        });
-    </script>
-   
-
-    <!--Автоматический счетчик цены при выборе препаратов-->
-    <!--Фиксирует сумму в текстовом поле id=price-->
-    <script>
-        $(document).ready(function() {
-        $(':input[type="submit"]').prop('disabled', true);
-        var inputs = document.getElementsByTagName("input");
-        for(var i = 0; i < inputs.length; i++) {
-            var el = inputs[i];
-            while(el = el.parentNode) {
-                if(el.nodeName.toLowerCase() === 'tr') {
-                    inputs[i].onfocus = function() {
-                        this.parentRow.style.backgroundColor = '#F55F7C';
-                        this.parentRow.style.color = 'white';
-                    };
-                    inputs[i].onblur = function() {
-                        this.parentRow.style.backgroundColor = '';
-                        this.parentRow.style.color = 'black';
-                    };
-                    inputs[i].parentRow = el;
-                    break;
-                }
-            }
+<script>
+     function Selected2(drugCat) {
+        var drug = drugCat.value;
+        if (drug == 1) {
+            document.getElementById("1").style.display='block';
+        }
+        else {
+            document.getElementById("1").style.display='none';
         }
 
-        function calculateSum(){
-            var total=0;
-            $('table tbody tr').each(function() {
-                var tr = $(this);
-
-                if (tr.find('input[name="chck"]').is(':checked')) {
-                    var columns = tr.find('td').next('td').next('td');
-                    var quantity=parseInt(tr.find('input[type="text"]').val());
-                    var cost=parseInt(columns.next('td').html().split('руб.')[0]);
-                    total+=cost*quantity;
-                }
-            });
-
-            $('#price').val(total.toFixed(0));
-
-            var selCat = $("#recCat option:selected").val();
-
-            //array ONE with recipe category id's:
-            var arr1 = ['11', '12', '14', '16', '18', '20', '22', '24', '26', '28']
-
-            //array TWO with recipe category id's:
-            var arr2 = ['13', '15', '17', '19', '21', '23', '25', '27','29']
-
-            //patient balance
-            var patBalance = $('#pat_int').val()
-
-            // money limit 
-            var child_money = 1500
-            var woman_limit = 1850
-            var tub_flu = 1960
-            var tub_vit = 875
-
-            if (patBalance == "") {
-                if(selCat == 6 && $('#price').val() > child_money) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит  на ребенка',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if( selCat == 1 && $('#price').val() > woman_limit) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит на беременных.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(selCat == 2 && $('#price').val() > woman_limit) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит на кормящих.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr1)) && $('#price').val() > tub_flu) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит 1960 руб.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr2)) && $('#price').val() > tub_vit) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит в 875 рублей.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
-                    $(':input[type="submit"]').prop('disabled', true);
-                }
-    
-                else {
-                    $(':input[type="submit"]').prop('disabled', false);
-                }
-            }
-            else {
-                if(selCat == 6 && $('#price').val() < child_money && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if( (selCat == 1 || selCat == 2) && $('#price').val() < woman_limit && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr1)) && $('#price').val() < tub_flu && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if(($.inArray(selCat, arr2)) && $('#price').val() < tub_vit && $('#price').val() > parseInt(patBalance)) {
-                    $.confirm({
-                        icon: 'fa fa-exclamation',
-                        theme: 'modern',
-                        animation: 'scale',
-                        type: 'red',
-                        title: 'Превышен лимит',
-                        content: 'Превышен лимит баланса пациента.',
-                        boxWidth: '500px',
-                        useBootstrap: false,
-                        buttons: {
-                            ОК: function () {
-                                $(':input[type="submit"]').prop('disabled', true);
-                            }
-    
-                        }
-    
-                    });
-                }
-    
-                else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
-                    $(':input[type="submit"]').prop('disabled', true);
-                }
-    
-                else {
-                    $(':input[type="submit"]').prop('disabled', false);
-                }
-            }
-
+        if (drug == 2) {
+            document.getElementById("2").style.display='block';
+        }
+        else {
+            document.getElementById("2").style.display='none';
         }
 
-        $("input[type='text']").keyup(function() {
-            calculateSum();
+        if (drug == 3) {
+            document.getElementById("3").style.display='block';
+        }
+        else {
+            document.getElementById("3").style.display='none';
+        }
+
+        if (drug == 4) {
+            document.getElementById("4").style.display='block';
+        }
+        else {
+            document.getElementById("4").style.display='none';
+        }
+        if (drug == 5) {
+
+            $.confirm({
+                icon: 'fa fa-exclamation-triangle',
+                theme: 'modern',
+                animation: 'scale',
+                type: 'red',
+                title: 'Антибактериальные средства',
+                content: 'Вы уверены в целесообразности назначения?',
+                buttons: {
+                    Да: function () {
+                        document.getElementById("5").style.display='block';
+                        $('input:checkbox'). prop('disabled', false);
+                    },
+                    Нет: function () {
+                        $('input:checkbox'). prop('disabled', true);
+
+                    }
+                }
+
+            });
+        }
+        else {
+            document.getElementById("5").style.display='none';
+            $('input:checkbox'). prop('disabled', false);
+        }
+        if (drug == 6) {
+            document.getElementById("6").style.display='block';
+        }
+        else {
+            document.getElementById("6").style.display='none';
+        }
+        if (drug == 7) {
+            document.getElementById("7").style.display='block';
+        }
+        else {
+            document.getElementById("7").style.display='none';
+        }
+
+        if (drug == 8) {
+            document.getElementById("8").style.display='block';
+        }
+        else {
+            document.getElementById("8").style.display='none';
+        }
+        if (drug == 9) {
+            document.getElementById("9").style.display='block';
+        }
+        else {
+            document.getElementById("9").style.display='none';
+        }
+        if (drug == 10) {
+            document.getElementById("10").style.display='block';
+        }
+        else {
+            document.getElementById("10").style.display='none';
+        }
+        if (drug == 11) {
+            document.getElementById("11").style.display='block';
+        }
+        else {
+            document.getElementById("11").style.display='none';
+        }
+        if (drug == 12) {
+            document.getElementById("12").style.display='block';
+        }
+        else {
+            document.getElementById("12").style.display='none';
+        }
+        if (drug == 13) {
+            document.getElementById("13").style.display='block';
+        }
+        else {
+            document.getElementById("13").style.display='none';
+        }
+        if (drug == 14) {
+            document.getElementById("14").style.display='block';
+        }
+        else {
+            document.getElementById("14").style.display='none';
+        }
+        if (drug == 15) {
+            document.getElementById("15").style.display='block';
+        }
+        else {
+            document.getElementById("15").style.display='none';
+        }
+        if (drug == 16) {
+            document.getElementById("16").style.display='block';
+        }
+        else {
+            document.getElementById("16").style.display='none';
+        }
+        if (drug == 17) {
+            document.getElementById("17").style.display='block';
+        }
+        else {
+            document.getElementById("17").style.display='none';
+        }
+        if (drug == 18) {
+            document.getElementById("18").style.display='block';
+        }
+        else {
+            document.getElementById("18").style.display='none';
+        }
+        if (drug == 19) {
+            document.getElementById("19").style.display='block';
+        }
+        else {
+            document.getElementById("19").style.display='none';
+        }
+        if (drug == 25) {
+            document.getElementById("25").style.display='block';
+        }
+        else {
+            document.getElementById("25").style.display='none';
+        }
+        if (drug == 26) {
+            document.getElementById("26").style.display='block';
+        }
+        else {
+            document.getElementById("26").style.display='none';
+        }
+        if (drug == 27) {
+            document.getElementById("27").style.display='block';
+        }
+        else {
+            document.getElementById("27").style.display='none';
+        }
+        if (drug == 28) {
+            document.getElementById("28").style.display='block';
+        }
+        else {
+            document.getElementById("28").style.display='none';
+        }
+        if (drug == 29) {
+            document.getElementById("29").style.display='block';
+        }
+        else {
+            document.getElementById("29").style.display='none';
+        }
+        if (drug == 30) {
+            document.getElementById("30").style.display='block';
+        }
+        else {
+            document.getElementById("30").style.display='none';
+        }
+        if (drug == 31) {
+            document.getElementById("31").style.display='block';
+        }
+        else {
+            document.getElementById("31").style.display='none';
+        }
+        if (drug == 32) {
+            document.getElementById("32").style.display='block';
+        }
+        else {
+            document.getElementById("32").style.display='none';
+        }
+        if (drug == 33) {
+            document.getElementById("33").style.display='block';
+        }
+        else {
+            document.getElementById("33").style.display='none';
+        }
+        if (drug == 34) {
+            document.getElementById("34").style.display='block';
+        }
+        else {
+            document.getElementById("34").style.display='none';
+        }
+        if (drug == 35) {
+            document.getElementById("35").style.display='block';
+        }
+        else {
+            document.getElementById("35").style.display='none';
+        }
+        if (drug == 36) {
+            document.getElementById("36").style.display='block';
+        }
+        else {
+            document.getElementById("36").style.display='none';
+        }
+        if (drug == 37) {
+            document.getElementById("37").style.display='block';
+        }
+        else {
+            document.getElementById("37").style.display='none';
+        }
+        if (drug == 38) {
+            document.getElementById("38").style.display='block';
+        }
+        else {
+            document.getElementById("38").style.display='none';
+        }
+     }
+</script>
+
+<!--Автоматический счетчик цены при выборе препаратов-->
+<!--Фиксирует сумму в текстовом поле id=price-->
+<script>
+
+$(document).ready(function() {
+    $(':input[type="submit"]').prop('disabled', true);
+    var inputs = document.getElementsByTagName("input");
+    for(var i = 0; i < inputs.length; i++) {
+        var el = inputs[i];
+        while(el = el.parentNode) {
+            if(el.nodeName.toLowerCase() === 'tr') {
+                inputs[i].onfocus = function() {
+                    this.parentRow.style.backgroundColor = '#F55F7C';
+                    this.parentRow.style.color = 'white';
+                };
+                inputs[i].onblur = function() {
+                    this.parentRow.style.backgroundColor = '';
+                    this.parentRow.style.color = 'black';
+                };
+                inputs[i].parentRow = el;
+                break;
+        }
+    }
+}
+
+
+    function calculateSum(){
+        var total=0;
+        $('table tbody tr').each(function() {
+            var tr = $(this);
+
+            if (tr.find('input[name="chck"]').is(':checked')) {
+                var columns = tr.find('td').next('td').next('td');
+                var quantity=parseInt(tr.find('input[type="text"]').val());
+                var cost=parseInt(columns.next('td').html().split('руб.')[0]);
+                total+=cost*quantity;
+            }
         });
 
-        $("input[name='chck']").change(function() {
-            calculateSum();
-        });
+        $('#price').val(total.toFixed(0));
 
-        });
-    </script>
-    <!--end-->
+        //patient balance
+        var patBalance = $('#pat_int').val();
 
-    <script>
+        if($('#price').val() > parseInt(patBalance)) {
+            $.confirm({
+                icon: 'fa fa-exclamation',
+                theme: 'modern',
+                animation: 'scale',
+                type: 'red',
+                title: 'Превышен лимит',
+                content: 'Превышен лимит баланса пациента.',
+                boxWidth: '500px',
+                useBootstrap: false,
+                buttons: {
+                    ОК: function () {
+                        $(':input[type="submit"]').prop('disabled', true);
+                    }
+
+                }
+
+            });
+        }
+
+        else if ($('#price').val() == 0 || $('#price').val() == 'NaN') {
+            $(':input[type="submit"]').prop('disabled', true);
+        }
+
+        else {
+            $(':input[type="submit"]').prop('disabled', false);
+        }
+
+    }
+
+    $("input[type='text']").keyup(function() {
+        calculateSum();
+    });
+
+    $("input[name='chck']").change(function() {
+        calculateSum();
+    });
+
+});
+</script>
+<!--end-->
+
+
+<script>
     $(document).ready(function() {
         $('.selectpicker').selectpicker();
     });
-    </script>
+</script>
+
+
+
 {% endblock %}
-<!-- Block script end -->
