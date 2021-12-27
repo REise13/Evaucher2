@@ -205,7 +205,7 @@
                             <label for="diagnos" class="font-weight-bold">Диагноз</label>
                             <div class="data-select"></div>
                             <select name="diagnoslist" id="diagnos"
-                            class="form-control" data-width="auto form-control">
+                            class="form-control" data-width="auto form-control" required>
                                 <option value="">Выберите</option>
                                 {% for diagnos in diagnosList %}
                                     <option value="{{ diagnos['id'] }}">{{ diagnos['diagnos'] }}</option>
@@ -216,7 +216,7 @@
                             <label for="recCat" class="font-weight-bold">Категория рецепта</label>
                             <div class="data-select">
                                 <select name="recCatlist" id="recCat" onChange="Selected(this)"
-                                    class="form-control" data-width="auto">
+                                    class="form-control" data-width="auto" required>
                                     <option value="">Выберите</option>
                                     {% if patIndCat|length != 0 %}
                                         {% for ind_cat in patIndCat %}
