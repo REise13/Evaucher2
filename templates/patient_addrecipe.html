@@ -218,9 +218,15 @@
                                 <select name="recCatlist" id="recCat" onChange="Selected(this)"
                                     class="form-control" data-width="auto">
                                     <option value="">Выберите</option>
-                                    {% for cat in recCat %}
-                                        <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
-                                    {% endfor %}
+                                    {% if patIndCat|length != 0 %}
+                                        {% for ind_cat in patIndCat %}
+                                            <option value="{{ ind_cat['rec_id'] }}">{{ ind_cat['rec_cat'] }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for cat in recCat %}
+                                            <option value="{{ cat['rec_id'] }}">{{ cat['rec_cat'] }}</option>
+                                        {% endfor %}
+                                    {% endif %}        
                                 </select>
                             </div>
                         </div> <hr>

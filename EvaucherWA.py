@@ -365,7 +365,7 @@ def getdata(pat_id):
         # идентификатор для пациента Доктора
         cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE id != 12 ORDER BY title ASC')
     diagnosList = cursor.fetchall()
-    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s ORDER BY title ASC', (num,))
+    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s AND rel_ind=1 ORDER BY title ASC', (num,))
     recCat = cursor.fetchall()
     if session['user_role_id'] in [1,3]:
         cursor.execute(""" SELECT id, title as drug_cat
@@ -393,8 +393,26 @@ def getdata(pat_id):
                 WHERE drug.status_id=1
                 ORDER by drug.id""")
     selectDrugList = cursor.fetchall()
+    cursor.execute(""" select recipe.category_id as rec_id, recipe_category.title as rec_cat, recipe_category.rel_ind
+                from recipe
+                join recipe_category
+                on recipe.category_id=recipe_category.id
+                WHERE recipe.pacient_id=%s and recipe_category.rel_ind=2
+                     """, (pat_id,))
+    patCat = cursor.fetchall()
+    patIndCat = tuple()
+    patCheck = []
+    patnewCat = []
+    recCatList = recCat
+    if patCat:
+        for cat in patCat:
+            if cat not in patnewCat:
+                patnewCat.append(cat)
+        pat = tuple(patnewCat)
+        patcats= recCatList + pat
+        patIndCat = sorted(patcats, key=lambda x: (x['rec_cat']))
     return render_template('patient_addrecipe.html', patient=patient,diagnosList=diagnosList,
-                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList)
+                        recCat=recCat, drugCat=drugCat, selectDrugList=selectDrugList, patIndCat=patIndCat)
 
 
 @app.route("/get_pat_balance",methods=["POST","GET"])
@@ -511,8 +529,8 @@ def add(pat_id):
         status = 1
         drugs = request.form.getlist('chck')
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        # создаем запрос к базе для получения данных 
-        # о выписанныхт раннее рецептах пациенту 
+        # создаем запрос к базе для получения данных
+        # о выписанныхт раннее рецептах пациенту
         # в выбранной категории рецепта
         cursor.execute(""" select *, count(recipe.pacient_id) as count,
                             sum(recipe.price) as sumprice
@@ -523,7 +541,7 @@ def add(pat_id):
                         group by recipe.pacient_id
                          """, (pat_id, category,))
         totalrecipes = cursor.fetchall()
-        # запрос к базе данных для получения данных 
+        # запрос к базе данных для получения данных
         # о количестве выписанных рецептов в данной категории пользователем
         cursor.execute("""SELECT id, doctor_id, category_id, indicator_limit, indicator_used, indicator_sum
                 FROM limits where doctor_id=%s and category_id=%s""",(doctor_id, category))
@@ -531,51 +549,51 @@ def add(pat_id):
         # запрос к базе для получения данных о выданном наборе пациенту
         cursor.execute('SELECT * FROM recipe WHERE pacient_id=%s AND (category_id=3 OR category_id=4 OR category_id=5 OR category_id=7 OR category_id=10)', (pat_id,))
         nabor = cursor.fetchall()
-        # создаем переменную и передаем 
+        # создаем переменную и передаем
         # туда сумму только что выписываемого рецепта
         pat_balance = price
         if category == 1 or category == 2:
-            # если выбрана категория 092 или 093, 
+            # если выбрана категория 092 или 093,
             # то начальный баланс равен
             pat_balance = 2100
         if category == 6 or category == 8:
-            # а если категория 097, 
+            # а если категория 097,
             # то начальный баланс пациента равен
             pat_balance = 1700
-        
-        # если катеория 100.1, 100.2, 100.4, 100.6, 
+
+        # если катеория 100.1, 100.2, 100.4, 100.6,
         # 100.8, 101.1, 101.3, 101.5, 101.7 или 102.1
         if category in [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]:
-            pat_balance = 1960   
+            pat_balance = 1960
 
-        # если категория 100.3, 100.5, 100.7, 
-        # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2 
+        # если категория 100.3, 100.5, 100.7,
+        # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2
         if category in [13, 15, 17, 19, 21, 23, 25, 27, 29]:
             pat_balance = 875
 
         # создаем переменную посещения пациентом данного врача
-        # по умолчанию оно равно 1 (первое посещение) 
+        # по умолчанию оно равно 1 (первое посещение)
         visit = 1
         res = []
-        # проходимся циклом по выбранным препаратам 
-        # и количеству каждого выбранного препарата 
+        # проходимся циклом по выбранным препаратам
+        # и количеству каждого выбранного препарата
         # и записываем его в список drugList
         for count in count_drug:
             if count != '0':
                 res.append(count)
         drugList = zip(drugs, res)
         if len(totalrecipes) == 0:
-            # если в данной категории у пациента первое посещение, 
+            # если в данной категории у пациента первое посещение,
             # то обновляем данные в базе
             cursor.execute('update pacient set Visits=1 where id=%s', (pat_id,))
         if len(limit)==0:
-            # если пользователь первый раз выписывает рецепт в выбранной категории, 
+            # если пользователь первый раз выписывает рецепт в выбранной категории,
             # то добавляем соответствую запись в лимиты базы;
             # где количество доступных выписок в данной категории равно 10
             cursor.execute("""INSERT INTO limits(doctor_id, category_id, indicator_limit, indicator_used, indicator_sum)
-                        VALUES (%s, %s,10,0,0) """, (doctor_id, category,))            
+                        VALUES (%s, %s,10,0,0) """, (doctor_id, category,))
         if len(limit) !=0 and limit[0]['indicator_used'] == limit[0]['indicator_limit']:
-            # если лимит выписанных рецептов в выбранной категории достигнут, 
+            # если лимит выписанных рецептов в выбранной категории достигнут,
             # то выводим предупреждение и выписка рецепта невозможна
             flash('Превышен лимит выписки рецепта в данной категории. Обратитесь к администратору.', 'danger')
         else:
@@ -584,12 +602,12 @@ def add(pat_id):
             WHERE doctor_id=%s and category_id=%s """, (doctor_id, category))
             if len(totalrecipes) == 0:
                 # проверяем выдавался ли ранее набор пациенту и в других категориях,
-                # если да, то выводим предупреждение 
+                # если да, то выводим предупреждение
                 # и выписка рецепта невозможна
                 if len(nabor) !=0 and category in [3,4,5,7,9,10]:
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
-                # иначе вносим данные в базу 
+                # иначе вносим данные в базу
                 cursor.execute(""" INSERT INTO
                                     recipe(pacient_id, doctor_id, createDate, category_id,
                                     diag_id, status_id, price, balance, visit, city_id)
@@ -599,27 +617,27 @@ def add(pat_id):
                 cursor.execute('SELECT last_insert_id() as recipeID')
                 recipe_id = cursor.fetchone()
                 # проходимся циклом из словаря препаратов и их количества
-                # и вносим полученные данные в базу 
+                # и вносим полученные данные в базу
                 for drug, i in drugList:
                     cursor.execute('INSERT INTO crosstrecdrug(rec_id, drug_id, count) VALUES(%s,%s,%s)',(recipe_id['recipeID'], drug,i))
                 cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Выписал рецепт")',
                     (session['id'], datetime.datetime.today(), '127.0.0.1', pat_id, recipe_id['recipeID'],))
                 mysql.connection.commit()
-                # выводим сообщение на страницу с информацией 
+                # выводим сообщение на страницу с информацией
                 # об успешной выпиской и кодом данного рецепта
                 flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                 return redirect(url_for('patient_data', pat_id=patient['id'],))
             else:
-                # если пациенту раннее уже был выписан рецепт(-ы) в данной категории, 
+                # если пациенту раннее уже был выписан рецепт(-ы) в данной категории,
                 # то проверяем ряд условий
                 sumprice = int(totalrecipes[0]['sumprice'])
                 reccat = int(totalrecipes[0]['category_id'])
                 if reccat == 1 or reccat == 2:
-                    # не выходит ли сумма выписываемого рецепта 
+                    # не выходит ли сумма выписываемого рецепта
                     # за баланс пользователя в категории 092 или 093
                     balance = 2100 - sumprice
                     vis = int(totalrecipes[0]['count']) + 1
-                    # если превышает баланс, то выписка невозможна 
+                    # если превышает баланс, то выписка невозможна
                     # и сообщение с предупреждением
                     if balance < price:
                         flash('Это посещение: ' +str(vis) +'.' + '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
@@ -655,7 +673,7 @@ def add(pat_id):
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
                       return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                     else:
-                        # если сумма данного рецепта не превышает баланса, 
+                        # если сумма данного рецепта не превышает баланса,
                         # то вносим данные в базу
                         b2 = balance
                         vv = int(totalrecipes[0]['count']) + 1
@@ -680,7 +698,7 @@ def add(pat_id):
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
                 elif reccat in [11, 12, 14, 16, 18, 20, 22, 24, 26, 28]:
-                    # если катеория 100.1, 100.2, 100.4, 100.6, 
+                    # если катеория 100.1, 100.2, 100.4, 100.6,
                     # 100.8, 101.1, 101.3, 101.5, 101.7 или 102.1
                     # проверяем баланс также, как при предудущих категориях
                     balance = 1960 - sumprice
@@ -689,7 +707,7 @@ def add(pat_id):
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
                       return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                     else:
-                        # если сумма данного рецепта не превышает баланса, 
+                        # если сумма данного рецепта не превышает баланса,
                         # то вносим данные в базу
                         b2 = balance
                         vv = int(totalrecipes[0]['count']) + 1
@@ -714,7 +732,7 @@ def add(pat_id):
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
                 elif reccat in [13, 15, 17, 19, 21, 23, 25, 27, 29]:
-                    # если категория 100.3, 100.5, 100.7, 
+                    # если категория 100.3, 100.5, 100.7,
                     # 100.9, 101.2, 101.4, 101.6, 101.8 или 102.2
                     # проверяем баланс также, как при предыдущих категориях
                     balance = 875 - sumprice
@@ -723,7 +741,7 @@ def add(pat_id):
                       flash('Это посещение: ' +str(vis) +'.'+ '\nСумма выписываемого рецепта превышает остаток на балансе пациента в данной категории.' + '\nОстаток: '+ str(balance)+ ' руб.','danger')
                       return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                     else:
-                        # если сумма данного рецепта не превышает баланса, 
+                        # если сумма данного рецепта не превышает баланса,
                         # то вносим данные в базу
                         b2 = balance
                         vv = int(totalrecipes[0]['count']) + 1
@@ -748,7 +766,7 @@ def add(pat_id):
                         flash('Рецепт выписан. Код рецепта: '+ str(recipe_id['recipeID']), 'success')
                         return redirect(url_for('patient_data', pat_id=patient['id'],))
                 elif reccat in [3, 4, 5, 7, 10]:
-                    # если выбранная категория совпадает с категорией выбанного набора 
+                    # если выбранная категория совпадает с категорией выбанного набора
                     flash('Пациент уже получал набор! \nВы не можете выписать его еще раз!','danger')
                     return render_template('patient_addrecipe.html', patient=patient, userroleid=session['user_role_id'])
                 else:
