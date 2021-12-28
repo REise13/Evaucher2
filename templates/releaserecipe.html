@@ -201,9 +201,17 @@
                     <div class="form-group font-weight-bold">
                         Выдан на сумму: <input type="text" name="price" id="price" required> руб.
                     </div>
-                    <div class="form-group">    
-                        <input type="submit" class="btn btn-primary" value="Отпустить рецепт">
-                    </div>
+                        {% if recipeinfo['passport'] == None and recipeinfo['inn'] == None  and recipeinfo['parentinn'] == None %}
+                            <div class="form-group">
+                                <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="Введите идентификационные данные.">
+                                    <button class="btn btn-primary" style="pointer-events: none;" type="button" disabled>Отпустить рецепт</button>
+                                </span>                                    
+                            </div>
+                        {% else %}    
+                            <div class="form-group">    
+                                <input type="submit" class="btn btn-primary" value="Отпустить рецепт">
+                            </div>
+                        {% endif %}    
                     {% endif %}
 
                     {% if userroleid in [3, 4] and recipeinfo['status_id'] == 2 %}        
@@ -252,6 +260,10 @@
                 }
             });
         }
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
     });
 </script>        
 {% endblock %}
