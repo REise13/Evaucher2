@@ -40,7 +40,7 @@
                     {% if rec_status == 2 and records|length > 1 %}
                         <a id="btn2" href="#!" class="btn btn-info shadow-sm mb-2">Выданные препараты  по городам</a>
                     {% endif %}
-                    <div class="table-scrollbar">
+                    <<div class="table-scrollbar">
                         <table id="tblData" class="table table-bordered table-hover table-fixed">
                             <thead class="thead text-white text-center text-uppercase">
 
@@ -59,7 +59,7 @@
                                     <th><strong>Препараты</strong></th>
                                     <th><strong>Дата выдачи</strong></th>
                                     <th><strong>Город</strong></th>
-                                    {% if userroleid not in [4,8] %}
+                                    {% if userroleid in [3,4,8] %}
                                         <th><strong>Сумма</strong></th>
                                     {% endif %}
                                     <th><strong>Посещение</strong></th>
@@ -100,18 +100,27 @@
                                         <td>Набор: Взрослый хирургический</td>
                                     {% elif record['category_id'] == 7 %}
                                         <td>Набор: Детский хирургический</td>
+                                    {% elif record['category_id'] == 9 %}
+                                        <td>Набор: Инсультный</td>
                                     {% elif record['category_id'] == 10 %}
                                         <td>Набор: Малый хирургический</td>
                                     {% else %}
                                         <td>{{ record['list_drugs'] }}</td>
                                     {% endif %}
+
                                     {% if record['endDate'] == None %}
                                         <td>―</td>
                                     {% else %}
                                         <td>{{ record['endDate'] }}</td>
                                     {% endif %}
+
+                                    {% if record['status_id']==1 %}
                                     <td>{{ record['city'] }}</td>
-                                    {% if userroleid not in [4,8] %}
+                                    {% elif record['status_id']==2 %}
+                                    <td>{{ record['release_city'] }}</td>
+                                    {%endif%}
+
+                                    {% if userroleid in [3,4,8] %}
                                         <td>{{ record['price'] }}</td>
                                     {% endif %}
                                     <td>{{ record['visit'] }}</td>
