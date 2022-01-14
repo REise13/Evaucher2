@@ -5,9 +5,7 @@ import MySQLdb.cursors
 import re
 import datetime
 import os
-# import time
-
-# from dotenv import load_dotenv
+import time
 
 
 
@@ -66,7 +64,7 @@ def login():
             mysql.connection.commit()
             return redirect(url_for('main'))
         else:
-            flash('Введены неправильный логин и/или пароль.', 'danger')    
+            flash('Введены неправильный логин и/или пароль.', 'danger')
     return render_template('login.html')
 
 
@@ -98,7 +96,7 @@ def get_data_for_reg_user():
     cursor.execute('SELECT id, title as role FROM user_role')
     roles = cursor.fetchall()
     return render_template('add_user.html', cities=cities, posts=posts, roles=roles)
-   
+
 
 #страница регистрации пользователя
 @app.route('/register-user', methods = ['GET', 'POST'])
@@ -175,17 +173,17 @@ def search_patient():
             sql_pharm =  """SELECT pacient.id, pacient.sName, pacient.fName,
                                 pacient.patr, pacient.passport, pacient.parentinn,
                                 pacient.inn, pacient.phone
-                                FROM pacient WHERE sName=%s """                   
+                                FROM pacient WHERE sName=%s """
             if session['user_role_id'] in [1,3,9]: # Врач, Оператор_P, д1
                 # идентификатор для пациента Врача
                 num = 0
                 cursor.execute(sql_doc, (sname, num,))
             if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
                 # идентификатор для пациента Доктора
-                num = 1 
-                cursor.execute(sql_doc, (sname, num,))   
-            if session['user_role_id'] == 2: # фармацевты 
-                cursor.execute(sql_pharm, (sname,))               
+                num = 1
+                cursor.execute(sql_doc, (sname, num,))
+            if session['user_role_id'] == 2: # фармацевты
+                cursor.execute(sql_pharm, (sname,))
             mysql.connection.commit()
             patients = cursor.fetchall() # сохраняем полученные данные в переменной patients
             if len(patients) == 0:
@@ -202,12 +200,12 @@ def search_recipe():
             rec = request.form['rec'] # код рецепта, полученная из поля формы на странице
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             # поиск по коду рецепта
-            sql_doc = """SELECT pacient.id as pacient_id, pacient.sName, 
+            sql_doc = """SELECT pacient.id as pacient_id, pacient.sName,
             pacient.fName, pacient.patr, recipe.id
             FROM recipe JOIN pacient
             on recipe.pacient_id=pacient.id
             WHERE recipe.id=%s and pacient.flagReg=%s"""
-            sql_pharm = """SELECT pacient.id as pacient_id, pacient.sName, 
+            sql_pharm = """SELECT pacient.id as pacient_id, pacient.sName,
             pacient.fName, pacient.patr, recipe.id
             FROM recipe JOIN pacient
             on recipe.pacient_id=pacient.id
@@ -219,9 +217,9 @@ def search_recipe():
                 cursor.execute(sql_doc, (rec, num,))
             if session['user_role_id'] in [7,8]: # Доктор, д2
                 # идентификатор для пациента Доктора
-                num = 1 
-                cursor.execute(sql_doc, (rec, num,))   
-            if session['user_role_id'] in [2, 3, 4]: # фармацевты, Оператор_P, Оператор_U 
+                num = 1
+                cursor.execute(sql_doc, (rec, num,))
+            if session['user_role_id'] in [2, 3, 4]: # фармацевты, Оператор_P, Оператор_U
                 cursor.execute(sql_pharm, (rec,))
             mysql.connection.commit()
             recipes = cursor.fetchall() # сохранить полученные данные в переменной
@@ -259,7 +257,7 @@ def patientreg():
             num = 0
         if session['user_role_id'] in [7,4,8]: # Доктор, Оператор_U, д2
             # идентификатор для  регистрируемого пациента Доктором
-            num = 1     
+            num = 1
         patient = cursor.fetchall()
         if patient:
             flash('Пациент с таким ФИО уже существует. Воспользуйтесь вкладкой "Поиск пациента".', 'warning')
@@ -323,8 +321,9 @@ def patient_data(pat_id):
                         JOIN recipe_status ON recipe.status_id = recipe_status.id
                     WHERE recipe.pacient_id = %s
                     ORDER BY recipe.id """, (pat_id,))
-    mysql.connection.commit() 
+    mysql.connection.commit()
     recipes = cursor.fetchall()
+    session['pat_id'] = pat_id
     return render_template('patient_data.html',
             patient=patient, recipes=recipes, userroleid=session['user_role_id'])
 
@@ -364,8 +363,9 @@ def getdata(pat_id):
         num = 1
         # идентификатор для пациента Доктора
         cursor.execute('SELECT id, title as diagnos FROM diagnos WHERE id != 12 ORDER BY title ASC')
+
     diagnosList = cursor.fetchall()
-    cursor.execute('SELECT id as rec_id, title as rec_cat FROM recipe_category WHERE flagCat=%s AND rel_ind=1 ORDER BY title ASC', (num,))
+    cursor.execute('SELECT id as rec_id, title as rec_cat, rel_ind FROM recipe_category WHERE flagCat=%s AND rel_ind=1 ORDER BY title ASC', (num,))
     recCat = cursor.fetchall()
     if session['user_role_id'] in [1,3]:
         cursor.execute(""" SELECT id, title as drug_cat
@@ -458,7 +458,7 @@ def get_pat_balance():
             cursor.execute('SELECT id FROM recipe WHERE pacient_id=%s AND category_id IN(3,4,5,7,9,10)', (pt_id,))
             nabor = cursor.fetchall()
         else:
-            nabor = ""    
+            nabor = ""
         cursor.execute("select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s", (pt_id, ct_id,))
         patBal = cursor.fetchall()
         pat_int = ""
@@ -471,7 +471,7 @@ def get_pat_balance():
             if len(nabor) != 0:
                 pat_int = -1
             else:
-                pat_int = patb_diff    
+                pat_int = patb_diff
     return jsonify({'htmlresponse': pat_int})
 
 
@@ -485,7 +485,7 @@ def get_drug_cat():
         status = ""
 
         if dr_ct_id in arr:
-            status = "Y";
+            status = "Y"
         drug_cat = ""
         if status != "":
             drug_cat = status
@@ -506,7 +506,7 @@ def get_user_limit():
         status = ""
 
         if limit[0]['indicator_used'] == limit[0]['indicator_limit']:
-            status = "Y";
+            status = "Y"
         userLimit = ""
         if status != "":
             userLimit = status
@@ -843,31 +843,20 @@ def recipe_info(recID):
                 FROM drug
                 JOIN crosstrecdrug ON drug.id = crosstrecdrug.drug_id WHERE crosstrecdrug.rec_id=%s""", (recID,))
     recDrugs = cursor.fetchall()
-    # баланс пацента при просмотре информации о рецепте
-    # если рецепт еще не отпущен фармацевтом
     if int(recipeinfo['status_id']) == 1:
-        # если посещение первое, то получаем цену выписанного рецепта,
-        # где передаем айди пациента, категорию рецепта, и выбранного рецепта
         if recipeinfo['visit'] == 1:
-            # если посещение первое, получаем цену выписанного рецепта
             check_bal = "select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s and id=%s"
         else:
-            # если посещение второе и рецепт уже выдан, получаем общую сумму, включая данный рецепт
             check_bal = "select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s and id<%s"
     if int(recipeinfo['status_id'] == 2):
-        # если рецепт уже отпущен, суммируем 
         check_bal = "select sum(price) AS sum_rec from recipe where pacient_id=%s and recipe.category_id=%s and id <=%s"
-    # получаем начальный баланс пациента по его айди, категории рецепта и первом посещении
     get_fst_bal = "select balance from recipe where pacient_id=%s and category_id=%s and visit=1"
     cursor.execute(get_fst_bal, (recipeinfo['pacient_id'], recipeinfo['rec_cat_id']))
     default_balance = cursor.fetchall()
     cursor.execute(check_bal, (recipeinfo['pacient_id'], recipeinfo['rec_cat_id'], recID,))
     pat_bal = cursor.fetchall()
-
-    # вычитаем из начального баланса ту сумму, на кооторую выдан рецепт
     diff = int(default_balance[0]['balance']) - int(pat_bal[0]['sum_rec'])
-    # обновляем отображение баланса на странице
-    update_balance = diff   
+    update_balance = diff
 
     if request.method == 'POST':
         pharm_id = session['id']
@@ -875,18 +864,18 @@ def recipe_info(recID):
         endDate = datetime.datetime.today()
         pharm_sum = int(request.form['price'])
         status = 2
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)       
-        # если рецепт не отпущен фармацевтом, 
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        # если рецепт не отпущен фармацевтом,
         # то вносим изменения в базу  по айди выбранныго рецепта
-        cursor.execute("""UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s, 
-            price=%s, pharm_city=%s WHERE id=%s""", 
+        cursor.execute("""UPDATE recipe SET pharm_id=%s, endDate=%s, status_id=%s,
+            price=%s, pharm_city=%s WHERE id=%s""",
             (pharm_id, endDate, status, pharm_sum, pharm_city, recID,))
         cursor.execute('insert into logs(user_id, time, ip_address, pacient_id, recipe_id, action) values(%s, %s, %s, %s, %s, "Отпустил рецепт")',
                         (session['id'], datetime.datetime.today(), '127.0.0.1', recipeinfo['pacient_id'], recID,))
         mysql.connection.commit()
         flash('Рецепт отпущен. Код рецепта: ' + str(recID), 'success')
         return redirect(url_for('recipe_info', recID=recID))
-    return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs, 
+    return render_template('releaserecipe.html', recipes=recipes, recipeinfo=recipeinfo, pharminfo=pharminfo, recDrugs=recDrugs,
         new_balance=update_balance, userroleid=session['user_role_id'], userfio=session['user_fio'])
 
 
@@ -931,26 +920,30 @@ def get_user_limits(limitID):
 
 @app.route('/limits', methods = ['GET', 'POST'])
 def limits():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    if session['user_role_id'] == 3: # Оператор_P
-        # идентификатор Врача
-        num1 = 1 
-        num2 = 3
-    if session['user_role_id'] == 4: # Оператор_U
-        # идентификатор Доктора
-        num1 = 7 
-        num2 = 4
-    cursor.execute(""" SELECT limits.id,
-                        limits.indicator_limit, limits.indicator_used, limits.indicator_sum,
-                        user.sName, user.fName, user.patr, user.phone_number as phone,
-                        recipe_category.title as rec_category,
-                        user_post.title as user_post
-                        FROM limits
-                        JOIN user on limits.doctor_id=user.id
-                        JOIN recipe_category on limits.category_id=recipe_category.id
-                        JOIN user_post on user.post_id=user_post.id
-                        WHERE user.role_id=%s OR user.role_id=%s ORDER BY user.sName """, (num1, num2,))
-    limits = cursor.fetchall()
+    if 'loggedin' in session:
+        user_id = session['user_role_id']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        if user_id == 3: # Оператор_P
+            # идентификатор Врача
+            num1 = 1
+            num2 = 3
+        if user_id == 4: # Оператор_U
+            # идентификатор Доктора
+            num1 = 7
+            num2 = 4
+        cursor.execute(""" SELECT limits.id,
+                            limits.indicator_limit, limits.indicator_used, limits.indicator_sum,
+                            user.sName, user.fName, user.patr, user.phone_number as phone,
+                            recipe_category.title as rec_category,
+                            user_post.title as user_post
+                            FROM limits
+                            JOIN user on limits.doctor_id=user.id
+                            JOIN recipe_category on limits.category_id=recipe_category.id
+                            JOIN user_post on user.post_id=user_post.id
+                            WHERE user.role_id=%s OR user.role_id=%s ORDER BY user.sName ASC """, (num1, num2,))
+        limits = cursor.fetchall()
+    else:
+        return redirect(url_for('login'))
     return render_template('limits.html', limits=limits, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
@@ -987,8 +980,9 @@ def edit_limit(limitID):
 def drugs():
     """ Возвращает данные о всех имеющихся препаратах """
     if 'loggedin' in session:
+        user_id = session['user_role_id']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        if session['user_role_id'] == 3:    # Оператор_P
+        if user_id == 3:    # Оператор_P
             # вывести все препараты для врачей из базы
             cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
                 drug.manufacturer, drug_category.id as drCatid,
@@ -998,8 +992,8 @@ def drugs():
                 ON drug.category_id=drug_category.id
                 WHERE drug.flagDrug=0
                 order by drug.id""")
-        if session['user_role_id'] == 4:    # Оператор_U  
-            # вывести все препараты для докторов из базы 
+        if user_id == 4:    # Оператор_U
+            # вывести все препараты для докторов из базы
             cursor.execute(""" SELECT drug.id, drug.ingridient, drug.title as drug_title, drug.country,
                 drug.manufacturer, drug_category.id as drCatid,
                 drug_category.title as Drug_category,
@@ -1008,7 +1002,7 @@ def drugs():
                 ON drug.category_id=drug_category.id
                 order by drug.id""")
         mysql.connection.commit()
-        # передать полученный словарь словарей 
+        # передать полученный словарь словарей
         # в переменную и вернуть на страницу
         drugs=cursor.fetchall()
         return render_template('patient_drugs.html', drugs=drugs, userrole=session['user_post'], userfio=session['user_fio'], userroleid=session['user_role_id']) #вернуть полученные данные в шаблон страницы препаратов
@@ -1018,16 +1012,17 @@ def drugs():
 def select2():
     """Возвращает данные для выпадающих списков на форме patient_add_drug.html """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    if session['user_role_id'] == 3:
+    user_id = session['user_role_id']
+    if user_id == 3:
         cursor.execute(""" SELECT id, title as drug_cat
                             from drug_category
-                            where drug_category.title not like '%набор%' and flagCat=0 
+                            where drug_category.title not like '%набор%' and flagCat=0
                             ORDER BY title """)
-    if session['user_role_id'] == 4:
+    if user_id == 4:
        cursor.execute(""" SELECT id, title as drug_cat
                             from drug_category
                             where drug_category.title not like '%набор%' and flagCat=1
-                            ORDER BY title """)        
+                            ORDER BY title """)
     drugCat = cursor.fetchall()
     return render_template('patient_add_drug.html', drugCat=drugCat)
 
@@ -1044,12 +1039,13 @@ def add_drug():
         drugCat = reg.get('drugCat')
         price = reg.get('price')
         status = reg.get('drug_status')
-        if session['user_role_id'] == 3:    # Оператор_P
+        user_id = session['user_role_id']
+        if user_id == 3:    # Оператор_P
             # индекс препарата для Врачей
             flagDrug = 0
-        if session['user_role_id'] == 4:    # Оператор_P
+        if user_id == 4:    # Оператор_P
             # индекс препарата для Докторов
-            flagDrug = 1    
+            flagDrug = 1
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute(""" INSERT INTO drug(ingridient, title, country,
                                 manufacturer, category_id, flagDrug, price, status_id)
@@ -1110,33 +1106,32 @@ def delete_drug(drugID):
 @app.route('/rel-recipes', methods=['GET','POST'])
 def rel_recipes():
     """ Возвращает данные о всех выданных рецептах """
-    if 'loggedin' in session:
-        if session['user_role_id'] in [3,9]: # Оператор_P, д1
-            # индекс пациента Врача
-            flag = 0
-        if session['user_role_id'] in [4,8]:# Оператор_U, д2
-            # индекс пациента Доктора
-            flag = 1    
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute(""" SELECT recipe.id, recipe.pacient_id,
-                            recipe.endDate, recipe.price,
-                            pacient.sName as pat_sname, pacient.fName as pat_fname,
-                            pacient.patr as pat_patr,
-                            user.sName as pharm_sname, user.fName as pharm_fname,
-                            user.patr as pharm_patr, user.city_id,
-                            recipe_category.title as rec_cat,
-                            recipe_status.title as rec_stat,
-                            city.title as city
-                            FROM recipe
-                            JOIN pacient ON recipe.pacient_id=pacient.id
-                            JOIN user ON recipe.pharm_id=user.id
-                            JOIN recipe_category ON recipe.category_id=recipe_category.id
-                            JOIN recipe_status ON recipe.status_id=recipe_status.id
-                            JOIN city ON recipe.pharm_city=city.id
-                            WHERE pacient.flagReg=%s and recipe.status_id=2
-                            ORDER by recipe.endDate ASC """, (flag,))
-        mysql.connection.commit()
-        relRecipes = cursor.fetchall()
+    if session['user_role_id'] in [3,9]: # Оператор_P, д1
+        # индекс пациента Врача
+        flag = 0
+    if session['user_role_id'] in [4,8]:# Оператор_U, д2
+        # индекс пациента Доктора
+        flag = 1
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(""" SELECT recipe.id, recipe.pacient_id,
+                        recipe.endDate, recipe.price,
+                        pacient.sName as pat_sname, pacient.fName as pat_fname,
+                        pacient.patr as pat_patr,
+                        user.sName as pharm_sname, user.fName as pharm_fname,
+                        user.patr as pharm_patr, user.city_id,
+                        recipe_category.title as rec_cat,
+                        recipe_status.title as rec_stat,
+                        city.title as city
+                        FROM recipe
+                        JOIN pacient ON recipe.pacient_id=pacient.id
+                        JOIN user ON recipe.pharm_id=user.id
+                        JOIN recipe_category ON recipe.category_id=recipe_category.id
+                        JOIN recipe_status ON recipe.status_id=recipe_status.id
+                        JOIN city ON recipe.pharm_city=city.id
+                        WHERE pacient.flagReg=%s and recipe.status_id=2
+                        ORDER by recipe.endDate ASC """, (flag,))
+    mysql.connection.commit()
+    relRecipes = cursor.fetchall()
     return render_template('release_recipes.html', relRecipes=relRecipes, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
@@ -1145,33 +1140,32 @@ def rel_recipes():
 @app.route('/written-recipes', methods=['GET','POST'])
 def written_recipes():
     """ Возвращает данные о всех выписанных рецептах """
-    if 'loggedin' in session:
-        if session['user_role_id'] in [3,9]: # Оператор_P, д1
-            # идентификатор  для пациента Врача
-            num = 0
-        if session['user_role_id'] in [4,8]:# Оператор_U, д2
-            # идентификатор для пациента Доктора
-            num = 1    
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute(""" SELECT recipe.id, recipe.pacient_id, recipe.category_id, recipe.pharm_id,
-                            recipe.createDate, recipe.price, recipe.status_id,
-                            pacient.sName as pat_sname, pacient.fName as pat_fname,
-                            pacient.patr as pat_patr,
-                            user.sName as doctor_sname, user.fName as doctor_fname,
-                            user.patr as doctor_patr, user.city_id,
-                            recipe_category.title as rec_cat,
-                            recipe_status.title as rec_stat,
-                            city.title as city
-                            FROM recipe
-                            JOIN pacient ON recipe.pacient_id=pacient.id
-                            JOIN user ON recipe.doctor_id=user.id
-                            JOIN recipe_category ON recipe.category_id=recipe_category.id
-                            JOIN recipe_status ON recipe.status_id=recipe_status.id
-                            JOIN city ON recipe.city_id=city.id
-                            WHERE recipe.price > 0 and pacient.flagReg=%s
-                            order by recipe.createDate ASC """, (num,))
-        mysql.connection.commit()
-        wrtRecipes = cursor.fetchall()
+    if session['user_role_id'] in [3,9]: # Оператор_P, д1
+        # идентификатор  для пациента Врача
+        num = 0
+    if session['user_role_id'] in [4,8]:# Оператор_U, д2
+        # идентификатор для пациента Доктора
+        num = 1
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(""" SELECT recipe.id, recipe.pacient_id, recipe.category_id, recipe.pharm_id,
+                        recipe.createDate, recipe.price, recipe.status_id,
+                        pacient.sName as pat_sname, pacient.fName as pat_fname,
+                        pacient.patr as pat_patr,
+                        user.sName as doctor_sname, user.fName as doctor_fname,
+                        user.patr as doctor_patr, user.city_id,
+                        recipe_category.title as rec_cat,
+                        recipe_status.title as rec_stat,
+                        city.title as city
+                        FROM recipe
+                        JOIN pacient ON recipe.pacient_id=pacient.id
+                        JOIN user ON recipe.doctor_id=user.id
+                        JOIN recipe_category ON recipe.category_id=recipe_category.id
+                        JOIN recipe_status ON recipe.status_id=recipe_status.id
+                        JOIN city ON recipe.city_id=city.id
+                        WHERE recipe.price > 0 and pacient.flagReg=%s
+                        order by recipe.createDate ASC """, (num,))
+    mysql.connection.commit()
+    wrtRecipes = cursor.fetchall()
     return render_template('written_recipes.html', wrtRecipes=wrtRecipes, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
@@ -1180,27 +1174,28 @@ def written_recipes():
 def get_data_for_report_form():
     """ Возвращает данные для выпадающих списков на форме составления отчета form_for_report.html """
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    if session['user_role_id'] in [3,9]:
-        num = 0
-    if session['user_role_id'] in [4, 8]:
-        num = 1
-    cursor.execute("""SELECT id, title as recCat
-        FROM recipe_category WHERE flagCat=%s""", (num,))
-    rec_cat = cursor.fetchall()
-    cursor.execute('SELECT id, title as gender FROM gender')
-    gender = cursor.fetchall()
-    if session['user_role_id'] in [3, 9]:
-        cursor.execute("""SELECT id, title as diagnos
-            FROM diagnos WHERE flagDiag=%s ORDER BY title ASC""", (num,))
+    if 'loggedin' in session:
+        if session['user_role_id'] in [3,9]:
+            num = 0
+        if session['user_role_id'] in [4, 8]:
+            num = 1
+        cursor.execute("""SELECT id, title as recCat
+            FROM recipe_category WHERE flagCat=%s""", (num,))
+        rec_cat = cursor.fetchall()
+        cursor.execute('SELECT id, title as gender FROM gender')
+        gender = cursor.fetchall()
+        if session['user_role_id'] in [3, 9]:
+            cursor.execute("""SELECT id, title as diagnos
+                FROM diagnos WHERE flagDiag=%s ORDER BY title ASC""", (num,))
 
-    if session['user_role_id'] in [4, 8]:
-        cursor.execute("""SELECT id, title as diagnos
-            FROM diagnos ORDER BY title ASC""")
-    diagnos = cursor.fetchall()
-    cursor.execute('SELECT id, title as city FROM city ORDER BY title ASC')
-    cities = cursor.fetchall()
-    cursor.execute('SELECT id, title as status from recipe_status')
-    rec_status = cursor.fetchall()
+        if session['user_role_id'] in [4, 8]:
+            cursor.execute("""SELECT id, title as diagnos
+                FROM diagnos ORDER BY title ASC""")
+        diagnos = cursor.fetchall()
+        cursor.execute('SELECT id, title as city FROM city ORDER BY title ASC')
+        cities = cursor.fetchall()
+        cursor.execute('SELECT id, title as status from recipe_status')
+        rec_status = cursor.fetchall()
     return render_template('form_for_reports.html', rec_cat=rec_cat, diagnos=diagnos, gender=gender, cities=cities, drugs=drugs, rec_status=rec_status, userrole=session['user_post'],
             userroleid=session['user_role_id'], userfio=session['user_fio'])
 
@@ -1236,27 +1231,41 @@ def get_report():
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and status_id=1
                     and flagCat=%s and flagDiag=%s""", (date1, date2, age1, age2, num, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
                     and (age between %s and %s)
-                    and rec_stat='Выдан фармацевтом'
+                    and status_id=2
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, num, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and status_id=1
                     and city_id=%s
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
+
+            elif gender != 0 and cities == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and status_id=1
+                    and gender_id=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, gender, num, num,))
+
+            elif gender != 0 and cities == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and status_id=2
+                    and gender_id=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, gender, num, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
-                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and (age between %s and %s) and status_id=2
                     and city_id=%s
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, cities, num, num,))
 
@@ -1264,40 +1273,40 @@ def get_report():
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
                     and (age between %s and %s) and category_id=%s
-                    and rec_stat='Назначен врачом'
+                    and status_id=1
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
 
             elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
                     and (age between %s and %s) and category_id=%s
-                    and rec_stat='Выдан фармацевтом'
+                    and status_id=2
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, rec_cat, num, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and status_id=1
                     and visit=%s
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
-                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and (age between %s and %s) and status_id=2
                     and visit=%s
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, visit, num, num,))
 
             elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 WHERE (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and diag_id=%s and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and diag_id=%s and status_id=1
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
 
             elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
-                    and (age between %s and %s) and diag_id=%s and rec_stat='Выдан фармацевтом'
+                    and (age between %s and %s) and diag_id=%s and status_id=2
                     and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, diagnos, num, num,))
 
             elif gender != 0 and rec_cat != 0 and diagnos != 0 and cities != 0 and visit != 0 and rec_status == 1:
@@ -1305,7 +1314,7 @@ def get_report():
                     where (createDate >= %s and createDate <=%s) and
                         price > 0 and gender_id=%s
                         and category_id=%s
-                        and city_id=%s and rec_stat='Назначен врачом'
+                        and city_id=%s and status_id=1
                         and visit=%s and (age between %s and %s)
                         and diag_id=%s
                         and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
@@ -1315,7 +1324,7 @@ def get_report():
                     where (endDate >= %s and endDate <=%s) and
                         price > 0 and gender_id=%s
                         and category_id=%s
-                        and city_id=%s and rec_stat='Выдан фармацевтом'
+                        and city_id=%s and status_id=2
                         and visit=%s and (age between %s and %s)
                         and diag_id=%s
                         and flagCat=%s and flagDiag=%s """, (date1, date2, gender, rec_cat,
@@ -1332,68 +1341,82 @@ def get_report():
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and status_id=1
                     and flagCat=%s """, (date1, date2, age1, age2, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
                     and (age between %s and %s)
-                    and rec_stat='Выдан фармацевтом'
+                    and status_id=2
                     and flagCat=%s """, (date1, date2, age1, age2, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and status_id=1
                     and city_id=%s
                     and flagCat=%s""", (date1, date2, age1, age2, cities, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
-                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and (age between %s and %s) and status_id=2
                     and city_id=%s
                     and flagCat=%s""", (date1, date2, age1, age2, cities, num,))
+
+            elif gender != 0 and cities == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 1:
+                cursor.execute(""" SELECT * FROM report_data
+                where (createDate >= %s and createDate <=%s)
+                    and (age between %s and %s) and status_id=1
+                    and gender_id=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, gender, num, num,))
+
+            elif gender != 0 and cities == 0 and rec_cat == 0 and diagnos == 0 and visit == 0 and rec_status == 2:
+                cursor.execute(""" SELECT * FROM report_data
+                where (endDate >= %s and endDate <=%s)
+                    and (age between %s and %s) and status_id=1
+                    and gender_id=%s
+                    and flagCat=%s and flagDiag=%s """, (date1, date2, age1, age2, gender, num, num,))
 
             elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
                     and (age between %s and %s) and category_id=%s
-                    and rec_stat='Назначен врачом'
+                    and status_id=1
                     and flagCat=%s""", (date1, date2, age1, age2, rec_cat, num,))
 
             elif gender == 0 and diagnos == 0 and cities == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
                     and (age between %s and %s) and category_id=%s
-                    and rec_stat='Выдан фармацевтом'
+                    and status_id=2
                     and flagCat=%s """, (date1, date2, age1, age2, rec_cat, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 where (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and status_id=1
                     and visit=%s
                     and flagCat=%s """, (date1, date2, age1, age2, visit, num,))
 
             elif gender == 0 and rec_cat == 0 and diagnos == 0 and cities == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
-                    and (age between %s and %s) and rec_stat='Выдан фармацевтом'
+                    and (age between %s and %s) and status_id=2
                     and visit=%s
                     and flagCat=%s""", (date1, date2, age1, age2, visit, num,))
 
             elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 1:
                 cursor.execute(""" SELECT * FROM report_data
                 WHERE (createDate >= %s and createDate <=%s)
-                    and (age between %s and %s) and diag_id=%s and rec_stat='Назначен врачом'
+                    and (age between %s and %s) and diag_id=%s and status_id=1
                     and flagCat=%s""", (date1, date2, age1, age2, diagnos, num,))
 
             elif gender == 0 and rec_cat == 0 and cities == 0 and visit == 0 and rec_status == 2:
                 cursor.execute(""" SELECT * FROM report_data
                 where (endDate >= %s and endDate <=%s)
-                    and (age between %s and %s) and diag_id=%s and rec_stat='Выдан фармацевтом'
+                    and (age between %s and %s) and diag_id=%s and status_id=2
                     and flagCat=%s """, (date1, date2, age1, age2, diagnos, num,))
 
             elif gender != 0 and rec_cat != 0 and diagnos != 0 and cities != 0 and visit != 0 and rec_status == 1:
@@ -1401,7 +1424,7 @@ def get_report():
                     where (createDate >= %s and createDate <=%s) and
                         price > 0 and gender_id=%s
                         and category_id=%s
-                        and city_id=%s and rec_stat='Назначен врачом'
+                        and city_id=%s and status_id=1
                         and visit=%s and (age between %s and %s)
                         and diag_id=%s
                         and flagCat=%s """, (date1, date2, gender, rec_cat,
@@ -1411,7 +1434,7 @@ def get_report():
                     where (endDate >= %s and endDate <=%s) and
                         price > 0 and gender_id=%s
                         and category_id=%s
-                        and city_id=%s and rec_stat='Выдан фармацевтом'
+                        and city_id=%s and status_id=2
                         and visit=%s and (age between %s and %s)
                         and diag_id=%s
                         and flagCat=%s """, (date1, date2, gender, rec_cat,
