@@ -5,7 +5,7 @@ import MySQLdb.cursors
 import re
 import datetime
 import os
-import time
+# import time
 
 
 
